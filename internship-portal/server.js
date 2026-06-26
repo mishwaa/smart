@@ -19,6 +19,8 @@ const { isCodespaces } = require('./config/helpers');
 const { notFoundHandler, globalErrorHandler } = require('./middleware/errorHandler');
 const { sanitizeInput } = require('./middleware/validators');
 
+const User = require('./models/User');
+
 // Import routes
 const indexRoutes = require('./routes/index');
 const dashboardRoutes = require('./routes/dashboard');
@@ -82,6 +84,9 @@ async function startServer() {
 
   // Test database connection
   await testConnection();
+
+  // Seed default admin if missing
+  await User.seedDefaultAdmin();
 
   // Start listening
   app.listen(PORT, '0.0.0.0', () => {

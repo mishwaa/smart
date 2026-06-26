@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship & Placement Portal - Login">
+    <title>Login - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .login-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            background: white;
+            max-width: 450px;
+            width: 100%;
+        }
+        .login-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .login-body {
+            padding: 40px 30px;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            border-color: var(--primary);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .btn-login:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        .password-toggle {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container d-flex justify-content-center px-3">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="bi bi-mortarboard-fill mb-2" style="font-size: 48px; display: inline-block;"></i>
+                <h2 class="fw-bold mb-0">Smart University</h2>
+                <p class="mb-0 opacity-75 mt-1">Internship & Placement Portal</p>
+            </div>
+            <div class="login-body">
+                <h4 class="fw-bold text-dark mb-4">Welcome Back</h4>
+                
+                <!-- Validation Messages -->
+                <div id="alertContainer"></div>
+
+                <form id="loginForm" novalidate>
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label text-muted small fw-semibold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control bg-light border-start-0" id="email" name="email" placeholder="name@university.com" required>
+                        </div>
+                        <div class="invalid-feedback" id="emailFeedback">Please enter a valid email address.</div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label text-muted small fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control bg-light border-start-0 border-end-0" id="password" name="password" placeholder="••••••••" required>
+                            <span class="input-group-text bg-light border-start-0 password-toggle text-muted" id="togglePassword"><i class="bi bi-eye"></i></span>
+                        </div>
+                        <div class="invalid-feedback">Please enter your password.</div>
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember" value="true">
+                            <label class="form-check-label text-muted small" for="remember">Remember Session</label>
+                        </div>
+                        <a href="#" class="text-primary small text-decoration-none">Forgot Password?</a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-login w-100 d-flex align-items-center justify-content-center gap-2" id="submitBtn">
+                        <span>Sign In</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Login Client-side Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const togglePassword = document.getElementById('togglePassword');
+            const submitBtn = document.getElementById('submitBtn');
+            const alertContainer = document.getElementById('alertContainer');
+
+            // Show/Hide Password Toggle
+            togglePassword.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                const icon = togglePassword.querySelector('i');
+                if (type === 'text') {
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                } else {
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                }
+            });
+
+            // Display Alert Helper
+            function displayAlert(message, type = 'danger') {
+                alertContainer.innerHTML = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi ${type === 'danger' ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill'}"></i>
+                            <div>${message}</div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+            }
+
+            // Handle Form Submit
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                alertContainer.innerHTML = '';
+
+                let isValid = true;
+
+                // Simple Client-side validation
+                if (!emailInput.value.trim()) {
+                    emailInput.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    emailInput.classList.remove('is-invalid');
+                }
+
+                if (!passwordInput.value) {
+                    passwordInput.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    passwordInput.classList.remove('is-invalid');
+                }
+
+                if (!isValid) return;
+
+                // Set Loading State
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Signing In...</span>
+                `;
+
+                try {
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: emailInput.value.trim(),
+                            password: passwordInput.value,
+                            remember: document.getElementById('remember').checked
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        displayAlert(data.message || 'Authentication failed. Please try again.');
+                        // Reset Loading State
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Sign In';
+                    } else {
+                        displayAlert('Login successful. Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = data.redirectUrl || '/dashboard';
+                        }, 1000);
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    displayAlert('A network error occurred. Please check your connection and try again.');
+                    // Reset Loading State
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Sign In';
+                }
+            });
+
+            // Clear validation styles on input
+            emailInput.addEventListener('input', () => emailInput.classList.remove('is-invalid'));
+            passwordInput.addEventListener('input', () => passwordInput.classList.remove('is-invalid'));
+        });
+    </script>
+</body>
+</html>

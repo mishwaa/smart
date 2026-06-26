@@ -158,6 +158,54 @@ This project includes a `.devcontainer` configuration. When opened in GitHub Cod
 - Routes are role-protected via middleware
 - Secrets are stored in `.env` (never committed to git)
 
+## Authentication & Identity Management (Phase 2)
+
+### Authentication Setup
+The authentication system is built using `express-session` and `bcrypt` for secure session management and password hashing.
+When the application starts, it automatically verifies the database connection and runs a seeding routine to ensure a default administrator account exists.
+
+### Default Admin Account
+- **Email:** `admin@university.com`
+- **Password:** `Admin@123`
+- **Role:** `admin`
+- **Verification Flag:** `must_change_password = true`
+
+*Note: On the very first login, the default admin is forced to change their password to one that meets the system's security requirements.*
+
+### Login Process
+1. The user visits `/login` and submits their email and password.
+2. The server validates that all fields are filled, searches for the user, and compares the password using `bcrypt.compare()`.
+3. Upon validation, the session is regenerated (to prevent session fixation) and session details (`id`, `name`, `email`, `role`) are stored.
+4. If "Remember Session" is checked, the session cookie's `maxAge` is extended to 30 days.
+5. The user is redirected:
+   - If `must_change_password` is true: redirected to `/change-password`.
+   - Otherwise: redirected by role to their respective dashboard.
+
+### Role-Based Access Control
+The portal supports four primary user roles:
+1. **Admin** — Redirects to `/admin/dashboard` (protected by `requireAuth` & `requireAdmin`).
+2. **Faculty** — Redirects to `/faculty/dashboard` (protected by `requireAuth` & `requireFaculty`).
+3. **Student** — Redirects to `/student/dashboard` (protected by `requireAuth` & `requireStudent`).
+4. **Company** — Redirects to `/company/dashboard` (protected by `requireAuth` & `requireCompany`).
+
+If an authenticated user attempts to access a route restricted to another role, the server blocks access and renders a professional `403 Access Denied` error page.
+
+### Testing Instructions
+We use **Playwright** for complete end-to-end integration testing.
+To execute the tests:
+1. Ensure the MySQL server is started:
+   ```bash
+   sudo service mysql start
+   ```
+2. Run the test suite:
+   ```bash
+   # Run all tests (Phase 1 + Phase 2)
+   npx playwright test
+
+   # Run only authentication tests
+   npx playwright test tests/auth.spec.js
+   ```
+
 ## License
 
 ISC

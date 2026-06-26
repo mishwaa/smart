@@ -5,16 +5,16 @@
 
 'use strict';
 
-const path = require('path');
-
 const dashboardController = {
   /**
-   * Render the main dashboard
+   * Render the main dashboard (redirects to the role-specific dashboard)
    */
   getDashboard(req, res) {
-    // In Phase 2+, this will render role-specific dashboards
-    // For now, serve the layout template
-    res.sendFile(path.join(__dirname, '..', 'views', 'layout.html'));
+    if (req.session && req.session.user) {
+      const role = req.session.user.role;
+      return res.redirect(`/${role}/dashboard`);
+    }
+    return res.redirect('/login');
   }
 };
 

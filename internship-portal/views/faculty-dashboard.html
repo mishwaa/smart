@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Faculty Dashboard">
+    <title>Faculty Dashboard - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/faculty/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/faculty/dashboard">
+                            <i class="bi bi-speedometer2"></i> Faculty Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-people"></i> My Assigned Students
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-journal-text"></i> Review Weekly Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-calendar-check"></i> Monitor Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="bi bi-chat-dots"></i> Submit Feedbacks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle text-success"></i> <span id="navUserName">Loading...</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 mb-0 fw-bold text-dark">Faculty Dashboard</h1>
+                    <span class="badge bg-success px-3 py-2 rounded-pill">Faculty Advisor</span>
+                </div>
+
+                <!-- Welcome Card -->
+                <div class="card mb-4 bg-white shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-success bg-opacity-10 p-3 rounded-3 text-success">
+                                <i class="bi bi-person-workspace" style="font-size: 32px;"></i>
+                            </div>
+                            <div>
+                                <h4 class="fw-bold mb-1">Welcome, Professor <span id="welcomeUserName">Faculty</span>!</h4>
+                                <p class="text-muted mb-0">This is the secure Faculty module placeholder. In Phase 4, you will review weekly reports, approve internship logs, and evaluate student progress.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faculty Quick Stats Placeholder -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="card bg-white border-0 shadow-sm rounded-3 p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="text-muted small fw-semibold">Assigned Students</div>
+                                    <h3 class="fw-bold mt-1 mb-0">18</h3>
+                                </div>
+                                <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary"><i class="bi bi-people"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-white border-0 shadow-sm rounded-3 p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="text-muted small fw-semibold">Pending Weekly Reports</div>
+                                    <h3 class="fw-bold mt-1 mb-0">5</h3>
+                                </div>
+                                <div class="bg-warning bg-opacity-10 p-2 rounded-3 text-warning"><i class="bi bi-hourglass-split"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-white border-0 shadow-sm rounded-3 p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <div class="text-muted small fw-semibold">Evaluations Completed</div>
+                                    <h3 class="fw-bold mt-1 mb-0">12</h3>
+                                </div>
+                                <div class="bg-success bg-opacity-10 p-2 rounded-3 text-success"><i class="bi bi-check-circle"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer">
+                &copy; 2024 Smart University Internship Portal. All rights reserved.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+    
+    <!-- Dynamic User Fetch Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/auth/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        document.getElementById('navUserName').innerText = data.user.name;
+                        document.getElementById('welcomeUserName').innerText = data.user.name;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+            }
+        });
+    </script>
+</body>
+</html>
