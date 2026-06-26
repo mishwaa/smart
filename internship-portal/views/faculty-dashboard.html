@@ -9,8 +9,61 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons 1.11 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .stat-card-custom {
+            border-radius: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #e2e8f0;
+        }
+        .stat-card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+        .icon-shape {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+        .recent-activity-list {
+            position: relative;
+            padding-left: 20px;
+        }
+        .recent-activity-list::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        .activity-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: -19px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #2563eb;
+            border: 2px solid #fff;
+        }
+        .activity-item.weekly_reports::before { background: #f59e0b; }
+        .activity-item.attendance::before { background: #ef4444; }
+        .activity-item.mentor_feedback::before { background: #10b981; }
+        .activity-item.completion::before { background: #6366f1; }
+    </style>
 </head>
 <body>
 
@@ -29,23 +82,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-people"></i> My Assigned Students
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-journal-text"></i> Review Weekly Reports
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-calendar-check"></i> Monitor Attendance
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-chat-dots"></i> Submit Feedbacks
+                        <a class="nav-link" href="/faculty/students">
+                            <i class="bi bi-people"></i> Assigned Students
                         </a>
                     </li>
                     <li class="nav-item">
@@ -72,11 +110,10 @@
                 </div>
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle text-success"></i> <span id="navUserName">Loading...</span>
+                        <i class="bi bi-person-circle text-primary"></i> <span id="navUserName">Loading Prof...</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                        <li><a class="dropdown-item" href="/change-password"><i class="bi bi-key me-2"></i>Change Password</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                     </ul>
@@ -86,94 +123,501 @@
             <!-- Content Area -->
             <main class="content-area">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h1 class="h3 mb-0 fw-bold text-dark">Faculty Dashboard</h1>
-                    <span class="badge bg-success px-3 py-2 rounded-pill">Faculty Advisor</span>
+                    <div>
+                        <h1 class="h3 mb-0 fw-bold text-dark">Faculty Coordinator ERP</h1>
+                        <p class="text-muted mb-0">Supervise placements, approve compliance reports, and track learning lifecycle metrics.</p>
+                    </div>
+                    <a href="/faculty/students" class="btn btn-primary d-flex align-items-center gap-2 rounded-3 shadow-sm px-3 py-2">
+                        <i class="bi bi-people"></i> View Students Directory
+                    </a>
                 </div>
 
                 <!-- Welcome Card -->
                 <div class="card mb-4 bg-white shadow-sm border-0 rounded-4">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="bg-success bg-opacity-10 p-3 rounded-3 text-success">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-3 text-primary">
                                 <i class="bi bi-person-workspace" style="font-size: 32px;"></i>
                             </div>
                             <div>
                                 <h4 class="fw-bold mb-1">Welcome, Professor <span id="welcomeUserName">Faculty</span>!</h4>
-                                <p class="text-muted mb-0">This is the secure Faculty module placeholder. In Phase 4, you will review weekly reports, approve internship logs, and evaluate student progress.</p>
+                                <p class="text-muted mb-0">This is your secure coordinator portal. You can review weekly reports, approve internship logs, and evaluate student progress.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Faculty Quick Stats Placeholder -->
+                <!-- Stats Counters -->
                 <div class="row g-4 mb-4">
-                    <div class="col-md-4">
-                        <div class="card bg-white border-0 shadow-sm rounded-3 p-3">
+                    <div class="col-md-3">
+                        <div class="card stat-card-custom bg-white p-3 shadow-sm">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
-                                    <div class="text-muted small fw-semibold">Assigned Students</div>
-                                    <h3 class="fw-bold mt-1 mb-0">18</h3>
+                                    <span class="text-muted small fw-semibold text-uppercase">Supervised Students</span>
+                                    <h2 class="fw-bold mt-2 mb-0 text-dark" id="statSupervised">0</h2>
                                 </div>
-                                <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary"><i class="bi bi-people"></i></div>
+                                <div class="icon-shape bg-primary bg-opacity-10 text-primary">
+                                    <i class="bi bi-people-fill fs-4"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card bg-white border-0 shadow-sm rounded-3 p-3">
+                    <div class="col-md-3">
+                        <div class="card stat-card-custom bg-white p-3 shadow-sm">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
-                                    <div class="text-muted small fw-semibold">Pending Weekly Reports</div>
-                                    <h3 class="fw-bold mt-1 mb-0">5</h3>
+                                    <span class="text-muted small fw-semibold text-uppercase">Active Internships</span>
+                                    <h2 class="fw-bold mt-2 mb-0 text-dark" id="statActive">0</h2>
                                 </div>
-                                <div class="bg-warning bg-opacity-10 p-2 rounded-3 text-warning"><i class="bi bi-hourglass-split"></i></div>
+                                <div class="icon-shape bg-success bg-opacity-10 text-success">
+                                    <i class="bi bi-briefcase-fill fs-4"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card bg-white border-0 shadow-sm rounded-3 p-3">
+                    <div class="col-md-3">
+                        <div class="card stat-card-custom bg-white p-3 shadow-sm">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
-                                    <div class="text-muted small fw-semibold">Evaluations Completed</div>
-                                    <h3 class="fw-bold mt-1 mb-0">12</h3>
+                                    <span class="text-muted small fw-semibold text-uppercase">Average Attendance</span>
+                                    <h2 class="fw-bold mt-2 mb-0 text-dark" id="statAttendance">0.0%</h2>
                                 </div>
-                                <div class="bg-success bg-opacity-10 p-2 rounded-3 text-success"><i class="bi bi-check-circle"></i></div>
+                                <div class="icon-shape bg-info bg-opacity-10 text-info">
+                                    <i class="bi bi-calendar-check-fill fs-4"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card-custom bg-white p-3 shadow-sm">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted small fw-semibold text-uppercase">Pending Tasks</span>
+                                    <h2 class="fw-bold mt-2 mb-0 text-danger" id="statPendingTasks">0</h2>
+                                </div>
+                                <div class="icon-shape bg-danger bg-opacity-10 text-danger">
+                                    <i class="bi bi-exclamation-octagon-fill fs-4"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Charts Section -->
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-4">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+                            <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-journal-check me-2 text-warning"></i>Weekly Report Status</h5>
+                            <div style="position: relative; height: 260px;">
+                                <canvas id="reportsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+                            <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-building me-2 text-primary"></i>Company Distribution</h5>
+                            <div style="position: relative; height: 260px;">
+                                <canvas id="companyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+                            <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-tags me-2 text-info"></i>Department Distribution</h5>
+                            <div style="position: relative; height: 260px;">
+                                <canvas id="deptChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Operations Row -->
+                <div class="row g-4">
+                    <!-- Action Queue -->
+                    <div class="col-lg-7">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+                            <h5 class="fw-bold mb-3 text-dark d-flex align-items-center justify-content-between">
+                                <span><i class="bi bi-lightning-charge me-2 text-primary"></i>Pending Approvals Queue</span>
+                                <span class="badge bg-danger rounded-pill fs-7" id="pendingBadge">0 Pending</span>
+                            </h5>
+                            <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th>Student</th>
+                                            <th>Action Item</th>
+                                            <th>Submitted Date</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pendingTableBody">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">
+                                                <i class="bi bi-check2-circle fs-3 text-success d-block mb-2"></i>
+                                                All compliance items reviewed! Nice job.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="col-lg-5">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+                            <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Student Logs</h5>
+                            <div class="recent-activity-list" id="activityList">
+                                <div class="text-center text-muted py-4">No recent activity logs available.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
 
             <!-- Footer -->
-            <footer class="footer">
-                &copy; 2024 Smart University Internship Portal. All rights reserved.
+            <footer class="footer mt-auto">
+                &copy; 2026 Smart University Internship Portal. Confidential ERP.
             </footer>
 
         </div>
 
     </div>
 
+    <!-- Review Modal (Handles all approval workflows dynamically) -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="reviewModalLabel">Review Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="reviewDetailsContainer" class="mb-4">
+                        <!-- Details injected here -->
+                    </div>
+                    <form id="reviewForm">
+                        <input type="hidden" id="reviewItemId">
+                        <input type="hidden" id="reviewItemType">
+                        <div class="mb-3">
+                            <label for="reviewRemarks" class="form-label fw-semibold text-dark">Faculty Review Remarks / Feedback</label>
+                            <textarea class="form-control rounded-3" id="reviewRemarks" rows="4" placeholder="Provide constructive feedback, required corrections, or approval remarks..." required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-danger px-4 py-2 rounded-3" onclick="processReview('rejected')">Reject / Request Fix</button>
+                            <button type="button" class="btn btn-success px-4 py-2 rounded-3" onclick="processReview('approved')">Approve / Validate</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap 5.3 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script src="/js/main.js"></script>
     
-    <!-- Dynamic User Fetch Script -->
     <script>
+        let charts = {};
+
         document.addEventListener('DOMContentLoaded', async () => {
+            // Load Profile Name
             try {
-                const response = await fetch('/api/auth/me');
+                const response = await fetch('/api/faculty/profile');
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.success && data.user) {
-                        document.getElementById('navUserName').innerText = data.user.name;
-                        document.getElementById('welcomeUserName').innerText = data.user.name;
+                    if (data.success && data.faculty) {
+                        const fullName = `${data.faculty.first_name} ${data.faculty.last_name}`;
+                        document.getElementById('navUserName').innerText = `Prof. ${fullName}`;
+                        const welcomeEl = document.getElementById('welcomeUserName');
+                        if (welcomeEl) {
+                            welcomeEl.innerText = fullName;
+                        }
                     }
                 }
-            } catch (error) {
-                console.error('Error fetching user info:', error);
+            } catch (err) {
+                console.error('Error fetching profile:', err);
+            }
+
+            // Load Stats, Approvals, and Activities
+            await loadDashboardStats();
+            await loadDashboardCharts();
+
+            // Setup Mobile Sidebar Toggle
+            const sidebarToggle = document.querySelector('.btn-sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebarToggle && sidebar && overlay) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.add('show');
+                    overlay.classList.add('show');
+                });
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                });
             }
         });
+
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/faculty/stats');
+                if (!response.ok) throw new Error('Failed to load stats.');
+                const data = await response.json();
+                if (data.success) {
+                    const { stats, recentActivities, pendingApprovals } = data;
+                    
+                    // Set Stat values
+                    document.getElementById('statSupervised').innerText = stats.totalSupervised || stats.totalStudents || 0;
+                    document.getElementById('statActive').innerText = stats.activeInternships || 0;
+                    document.getElementById('statAttendance').innerText = `${stats.avgAttendance || 100.0}%`;
+                    
+                    const pendingTotal = (stats.pendingReports || 0) + (stats.pendingLeaves || 0) + (stats.pendingDocs || 0);
+                    document.getElementById('statPendingTasks').innerText = pendingTotal;
+                    document.getElementById('pendingBadge').innerText = `${pendingTotal} Pending`;
+
+                    // Populate Activity List
+                    const activityList = document.getElementById('activityList');
+                    if (recentActivities && recentActivities.length > 0) {
+                        activityList.innerHTML = recentActivities.map(act => {
+                            const date = new Date(act.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                            return `
+                                <div class="activity-item ${act.event_type}">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-bold text-dark small">${act.student_name} (${act.roll_number})</span>
+                                        <span class="text-muted" style="font-size: 0.75rem;">${date}</span>
+                                    </div>
+                                    <p class="text-muted mb-0 small">${act.description}</p>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        activityList.innerHTML = '<div class="text-center text-muted py-4">No recent activity logs.</div>';
+                    }
+
+                    // Populate Pending Table
+                    const pendingTableBody = document.getElementById('pendingTableBody');
+                    if (pendingApprovals && pendingApprovals.length > 0) {
+                        pendingTableBody.innerHTML = pendingApprovals.map(item => {
+                            const date = new Date(item.submitted_at || item.date || new Date()).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                            let label = '';
+                            let badgeClass = '';
+                            if (item.type === 'report') {
+                                label = `Week ${item.week_number} Report`;
+                                badgeClass = 'bg-warning text-dark';
+                            } else if (item.type === 'leave') {
+                                label = `Leave Request (${item.leave_reason || 'Personal'})`;
+                                badgeClass = 'bg-danger';
+                            } else if (item.type === 'document') {
+                                label = `Compliance: ${item.document_type.replace('_', ' ').toUpperCase()}`;
+                                badgeClass = 'bg-info text-dark';
+                            }
+
+                            return `
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark">${item.student_name}</div>
+                                        <div class="text-muted small">${item.roll_number}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge ${badgeClass} mb-1">${item.type.toUpperCase()}</span>
+                                        <div class="small text-secondary">${label}</div>
+                                    </td>
+                                    <td class="text-muted small">${date}</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-primary btn-sm rounded-3" onclick="openReviewModal('${item.type}', ${item.id}, '${escapeHtml(item.student_name)}', '${escapeHtml(label)}')">
+                                            Review
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        pendingTableBody.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    <i class="bi bi-check2-circle fs-3 text-success d-block mb-2"></i>
+                                    All compliance items reviewed! Nice job.
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading dashboard stats:', err);
+            }
+        }
+
+        async function loadDashboardCharts() {
+            try {
+                const response = await fetch('/api/faculty/charts');
+                if (!response.ok) throw new Error('Failed to load charts.');
+                const data = await response.json();
+                if (data.success) {
+                    const { reports, departments, companies } = data.charts;
+
+                    // 1. Reports Chart (Doughnut)
+                    const reportLabels = reports.map(r => r.status.toUpperCase());
+                    const reportCounts = reports.map(r => r.count);
+                    const reportColors = reports.map(r => {
+                        if (r.status === 'approved') return '#10b981';
+                        if (r.status === 'rejected') return '#ef4444';
+                        if (r.status === 'submitted') return '#f59e0b';
+                        return '#64748b';
+                    });
+
+                    if (charts.reports) charts.reports.destroy();
+                    charts.reports = new Chart(document.getElementById('reportsChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: reportLabels.length > 0 ? reportLabels : ['NO DATA'],
+                            datasets: [{
+                                data: reportCounts.length > 0 ? reportCounts : [1],
+                                backgroundColor: reportColors.length > 0 ? reportColors : ['#e2e8f0']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'bottom' } }
+                        }
+                    });
+
+                    // 2. Company Chart (Pie/Doughnut)
+                    const companyLabels = companies.map(c => c.company_name);
+                    const companyCounts = companies.map(c => c.count);
+
+                    if (charts.companies) charts.companies.destroy();
+                    charts.companies = new Chart(document.getElementById('companyChart'), {
+                        type: 'pie',
+                        data: {
+                            labels: companyLabels.length > 0 ? companyLabels : ['NO PLACEMENTS'],
+                            datasets: [{
+                                data: companyCounts.length > 0 ? companyCounts : [1],
+                                backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#14b8a6', '#e2e8f0']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'bottom' } }
+                        }
+                    });
+
+                    // 3. Department Chart (Bar)
+                    const deptLabels = departments.map(d => d.department);
+                    const deptCounts = departments.map(d => d.count);
+
+                    if (charts.depts) charts.depts.destroy();
+                    charts.depts = new Chart(document.getElementById('deptChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: deptLabels.length > 0 ? deptLabels : ['NO DATA'],
+                            datasets: [{
+                                label: 'Students',
+                                data: deptCounts.length > 0 ? deptCounts : [0],
+                                backgroundColor: '#0ea5e9',
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('Error loading dashboard charts:', err);
+            }
+        }
+
+        function openReviewModal(type, id, studentName, itemLabel) {
+            document.getElementById('reviewItemId').value = id;
+            document.getElementById('reviewItemType').value = type;
+            document.getElementById('reviewRemarks').value = '';
+
+            const title = `Review Student Compliance Item`;
+            document.getElementById('reviewModalLabel').innerText = title;
+
+            let detailsHtml = `
+                <div class="p-3 bg-light rounded-3">
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Student Name</span>
+                            <strong class="text-dark">${studentName}</strong>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Review Category</span>
+                            <strong class="text-dark text-uppercase">${type}</strong>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <span class="text-muted small d-block">Submission Detail</span>
+                            <strong class="text-primary">${itemLabel}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('reviewDetailsContainer').innerHTML = detailsHtml;
+
+            const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+            modal.show();
+        }
+
+        async function processReview(status) {
+            const id = document.getElementById('reviewItemId').value;
+            const type = document.getElementById('reviewItemType').value;
+            const remarks = document.getElementById('reviewRemarks').value;
+
+            if (!remarks || remarks.trim() === '') {
+                alert('Please write comments or remarks for this review.');
+                return;
+            }
+
+            let endpoint = '';
+            if (type === 'report') {
+                endpoint = `/api/faculty/reports/${id}/review`;
+            } else if (type === 'leave') {
+                endpoint = `/api/faculty/leaves/${id}/review`;
+            } else if (type === 'document') {
+                endpoint = `/api/faculty/documents/${id}/review`;
+            }
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status, remarks })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    // Hide Modal
+                    const modalEl = document.getElementById('reviewModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    // Refresh Dashboard
+                    await loadDashboardStats();
+                    await loadDashboardCharts();
+                } else {
+                    alert(data.message || 'Error processing review.');
+                }
+            } catch (err) {
+                console.error('Error processing review:', err);
+                alert('Internal server error occurred.');
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
     </script>
 </body>
 </html>

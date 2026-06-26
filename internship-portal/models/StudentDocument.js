@@ -37,6 +37,36 @@ const StudentDocument = {
   },
 
   /**
+   * Update a document record
+   * @param {number} id
+   * @param {Object} fields
+   * @returns {Promise<Object>}
+   */
+  async update(id, fields) {
+    const allowedFields = ['status', 'remarks'];
+    const updates = [];
+    const values = [];
+
+    for (const [key, value] of Object.entries(fields)) {
+      if (allowedFields.includes(key)) {
+        updates.push(`${key} = ?`);
+        values.push(value);
+      }
+    }
+
+    if (updates.length === 0) {
+      throw new Error('No valid fields to update');
+    }
+
+    values.push(id);
+    const [result] = await pool.execute(
+      `UPDATE student_documents SET ${updates.join(', ')} WHERE id = ?`,
+      values
+    );
+    return result;
+  },
+
+  /**
    * Delete a document record
    * @param {number} id
    * @returns {Promise<Object>}

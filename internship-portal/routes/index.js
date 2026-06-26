@@ -11,6 +11,7 @@ const path = require('path');
 const indexController = require('../controllers/indexController');
 const authController = require('../controllers/authController');
 const studentController = require('../controllers/studentController');
+const facultyController = require('../controllers/facultyController');
 const { requireAuth, requireAdmin, requireFaculty, requireCompany, requireStudent, isGuest } = require('../middleware/auth');
 const { uploadProfilePhoto, uploadStudentDocument } = require('../config/upload');
 
@@ -34,9 +35,10 @@ router.get('/admin/dashboard', requireAuth, requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, '../views/admin-dashboard.html'));
 });
 
-router.get('/faculty/dashboard', requireAuth, requireFaculty, (req, res) => {
-  res.sendFile(path.join(__dirname, '../views/faculty-dashboard.html'));
-});
+// Faculty Portal Views
+router.get('/faculty/dashboard', requireAuth, requireFaculty, facultyController.getDashboard);
+router.get('/faculty/students', requireAuth, requireFaculty, facultyController.getStudentsPage);
+router.get('/faculty/students/:id/review', requireAuth, requireFaculty, facultyController.getStudentReviewPage);
 
 // Student Portal Routes
 router.get('/student/dashboard', requireAuth, requireStudent, studentController.getDashboard);
@@ -107,5 +109,23 @@ router.post('/api/student/notifications/read', requireAuth, requireStudent, stud
 
 // Export System API
 router.get('/api/student/export/:type', requireAuth, requireStudent, studentController.exportData);
+
+// ─── Faculty Portal API Endpoints ───────────────────────────────────────────
+router.get('/api/faculty/profile', requireAuth, requireFaculty, facultyController.getProfileData);
+router.get('/api/faculty/stats', requireAuth, requireFaculty, facultyController.getDashboardStats);
+router.get('/api/faculty/charts', requireAuth, requireFaculty, facultyController.getDashboardCharts);
+router.get('/api/faculty/students', requireAuth, requireFaculty, facultyController.getAssignedStudents);
+router.get('/api/faculty/students/:id', requireAuth, requireFaculty, facultyController.getStudentReviewData);
+
+// Reviews & Approvals Workflow API
+router.post('/api/faculty/reports/:reportId/review', requireAuth, requireFaculty, facultyController.reviewWeeklyReport);
+router.post('/api/faculty/leaves/:attendanceId/review', requireAuth, requireFaculty, facultyController.reviewLeaveRequest);
+router.post('/api/faculty/documents/:documentId/review', requireAuth, requireFaculty, facultyController.reviewDocument);
+
+// Feedback & Evaluation API
+router.post('/api/faculty/students/:id/feedback', requireAuth, requireFaculty, facultyController.submitFeedback);
+
+// Secure Exports API
+router.get('/api/faculty/students/:id/export/:type', requireAuth, requireFaculty, facultyController.exportStudentData);
 
 module.exports = router;

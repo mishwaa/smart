@@ -64,7 +64,7 @@ const WeeklyReport = {
   },
 
   /**
-   * Update a draft weekly report
+   * Update a draft or rejected weekly report
    * @param {number} id
    * @param {Object} fields
    * @returns {Promise<Object>}
@@ -90,20 +90,20 @@ const WeeklyReport = {
 
     values.push(id);
     const [result] = await pool.execute(
-      `UPDATE weekly_reports SET ${updates.join(', ')} WHERE id = ? AND status = 'draft'`,
+      `UPDATE weekly_reports SET ${updates.join(', ')} WHERE id = ? AND (status = 'draft' OR status = 'rejected')`,
       values
     );
     return result;
   },
 
   /**
-   * Delete a draft weekly report
+   * Delete a draft or rejected weekly report
    * @param {number} id
    * @returns {Promise<Object>}
    */
   async delete(id) {
     const [result] = await pool.execute(
-      `DELETE FROM weekly_reports WHERE id = ? AND status = 'draft'`,
+      `DELETE FROM weekly_reports WHERE id = ? AND (status = 'draft' OR status = 'rejected')`,
       [id]
     );
     return result;
@@ -118,7 +118,7 @@ const WeeklyReport = {
     const [result] = await pool.execute(
       `UPDATE weekly_reports
        SET status = 'submitted', submitted_at = CURRENT_TIMESTAMP
-       WHERE id = ? AND status = 'draft'`,
+       WHERE id = ? AND (status = 'draft' OR status = 'rejected')`,
       [id]
     );
     return result;

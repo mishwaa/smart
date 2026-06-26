@@ -852,7 +852,7 @@ const studentController = {
         return res.status(403).json({ success: false, message: 'Unauthorized. You do not own this report.' });
       }
 
-      if (report.status !== 'draft') {
+      if (report.status !== 'draft' && report.status !== 'rejected') {
         return res.status(400).json({ success: false, message: 'Cannot edit an already submitted or reviewed report.' });
       }
 
@@ -888,7 +888,7 @@ const studentController = {
         return res.status(403).json({ success: false, message: 'Unauthorized. You do not own this report.' });
       }
 
-      if (report.status !== 'draft') {
+      if (report.status !== 'draft' && report.status !== 'rejected') {
         return res.status(400).json({ success: false, message: 'Cannot delete an already submitted or reviewed report.' });
       }
 
@@ -920,7 +920,7 @@ const studentController = {
         return res.status(403).json({ success: false, message: 'Unauthorized. You do not own this report.' });
       }
 
-      if (report.status !== 'draft') {
+      if (report.status !== 'draft' && report.status !== 'rejected') {
         return res.status(400).json({ success: false, message: 'Report has already been submitted.' });
       }
 

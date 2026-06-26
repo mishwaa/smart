@@ -344,6 +344,68 @@ All tests automatically run a database cleaning routine in `beforeAll` using the
 
 ---
 
+## Faculty Management System (Faculty ERP) — (Phase 4)
+
+The Faculty Management System (Faculty ERP) provides a complete, production-grade supervision portal integrated seamlessly with the Student ERP. Faculty coordinators have absolute visibility, analytics, and compliance approval controls over their assigned student cohorts.
+
+### 1. Faculty Dashboard (`/faculty/dashboard`)
+A modern, real-time command center for student supervision:
+- **Welcome Professor Banner**: Dynamic professor greeting showing their full name.
+- **Supervision Statistics**: High-fidelity cards displaying real-time metrics (Total Supervised Students, Active Internships, Average Attendance Rate, and Pending Tasks Count).
+- **Dynamic Chart.js Visualizations**: 
+  1. *Weekly Report Status*: Doughnut chart analyzing the review status (Approved, Rejected, Submitted, Draft) of weekly reports.
+  2. *Company Placement Distribution*: Pie chart illustrating the company placements of the cohort.
+  3. *Department Distribution*: Bar chart illustrating department counts of supervised students.
+- **Pending Approvals Queue**: A unified table gathering all action-required items (Weekly Reports, Leave Requests, and compliance Documents). Includes direct **Review Modals** allowing professors to approve/reject with constructive feedback in a single click.
+- **Recent Student Logs Feed**: A chronological stream showing the latest activities, milestone updates, and check-ins of assigned students.
+
+### 2. Supervised Cohort Catalog (`/faculty/students`)
+A powerful student directory with comprehensive server-side searching, filtering, and paging:
+- **Search**: Real-time search across student names and roll numbers.
+- **Filters**: Filter cohort by Department, Semester, Company Name, Placement Status (Active, Completed, Has Pending Reports), and Attendance Rate (e.g. Critically Low <75% to identify students requiring immediate academic attention).
+- **Visual indicators**: Color-coded attendance percentages (green for compliant, red for low-attendance warning) and pending report alerts.
+
+### 3. Student Dossier Detail Review (`/faculty/students/:id/review`)
+A detailed, tabbed student dossier providing absolute read-only visibility over their internship portfolio:
+1.  **Profile Details**: View student demographics, academic scores (CGPA, roll number, department, semester), technical skills, and social profiles.
+2.  **Attendance & Leaves**: View present/absent counts, total hours worked, approve/reject pending leave requests with remarks, and inspect the full chronological punch-card history.
+3.  **Daily Work Logs**: Inspect daily logs containing dates, hours, technologies, tasks, problems, and learning outcomes.
+4.  **Weekly Reports**: Review weekly progress reports, approve or reject them with remarks, and inspect historical coordinator feedback.
+5.  **Compliance Documents**: Download uploaded compliance documents securely and review/approve/reject them (Offer Letter, NOC, Resume, Final Report).
+6.  **Milestones Timeline**: View chronological internship progress milestones.
+7.  **Evaluations & Advisor Feedback**: An official coordinator evaluation widget where professors can submit performance star ratings (1-5 stars) and long-form advisory recommendations, which are saved in the database and visible to the student.
+
+### 4. Resubmission & Correction Loop
+To support realistic university workflows, the system implements a robust correction loop:
+- Students submit weekly reports (status becomes `'submitted'`).
+- The coordinator reviews and can either approve (`'approved'`, report locks) or reject (`'rejected'`, attaches remarks).
+- If rejected, the student is unlocked and permitted to edit, update, delete, and resubmit the report, keeping the academic workflow fluid and realistic.
+
+### 5. Security & Privilege Escalation Boundary
+- **Role-Based Access**: Restricted exclusively to authenticated users with the `faculty` role.
+- **Strict Cohort Validation**: Every single query, detail review, document download, export compilation, and approval action verifies ownership. If a professor attempts to access a student not assigned to their cohort, the server blocks the action and returns a `403 Forbidden` response.
+- **Secure Exports**: Faculty can export complete, professional PDF/CSV reports for attendance, daily logs, reports, and documents, fully protected by the same cohort ownership rules.
+
+### 6. Playwright E2E Test Suite (Faculty ERP)
+An extensive automated E2E test suite in `tests/faculty.spec.js` covering **9 release-quality tests**:
+1.  *Faculty Login*: Verifies successful login and redirection.
+2.  *Dashboard Loads*: Checks stats counters, Chart.js elements, and queues.
+3.  *Directory Search & Filters*: Validates cohort filtering by query and criteria.
+4.  *Dossier Tabs Loads*: Verifies read-only tabs rendering for student details.
+5.  *Weekly Report Approvals*: Validates report reviews, remarks, and status transitions.
+6.  *Leave Request Reviews*: Tests leave approvals and attendance record updates.
+7.  *Compliance Document Reviews*: Tests document rejections and correction requests.
+8.  *Performance Evaluations*: Tests star ratings, advisor comments, and history logs.
+9.  *Cross-Faculty Security boundaries*: Asserts that an unauthorized advisor attempting to access a student not assigned to their cohort is blocked with a `403 Forbidden` response.
+
+To run the complete test suite (all 80 tests passing successfully):
+```bash
+# Run the entire test suite (Authentication + Student + Faculty)
+npx playwright test
+```
+
+---
+
 ## License
 
 ISC
