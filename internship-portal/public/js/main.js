@@ -26,11 +26,19 @@
         }
 
         var alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show';
+        alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show d-flex align-items-center justify-content-between';
         alertDiv.setAttribute('role', 'alert');
-        alertDiv.innerHTML =
-            message +
-            '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+
+        var textSpan = document.createElement('span');
+        textSpan.textContent = message;
+        alertDiv.appendChild(textSpan);
+
+        var closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'btn-close';
+        closeBtn.setAttribute('data-bs-dismiss', 'alert');
+        closeBtn.setAttribute('aria-label', 'Close');
+        alertDiv.appendChild(closeBtn);
 
         var container = document.querySelector('.content-area') || document.querySelector('.main-content');
         if (container) {
