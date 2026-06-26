@@ -57,7 +57,7 @@ const DailyLog = {
   },
 
   /**
-   * Get all daily logs for a student with search and filtering
+   * Get all daily logs for a student with search, filtering, sorting, and pagination
    * @param {number} studentId
    * @param {Object} [filters]
    * @returns {Promise<Array>}
@@ -80,7 +80,21 @@ const DailyLog = {
       params.push(searchWildcard, searchWildcard, searchWildcard);
     }
 
-    query += ` ORDER BY date DESC`;
+    // Sorting
+    let sortClause = 'ORDER BY date DESC';
+    if (filters.sortBy === 'oldest') {
+      sortClause = 'ORDER BY date ASC';
+    } else if (filters.sortBy === 'hours') {
+      sortClause = 'ORDER BY hours_worked DESC';
+    }
+    query += ` ${sortClause}`;
+
+    // Pagination
+    if (filters.limit) {
+      const offset = (parseInt(filters.page || 1, 10) - 1) * parseInt(filters.limit, 10);
+      query += ` LIMIT ? OFFSET ?`;
+      params.push(String(filters.limit), String(offset));
+    }
 
     const [rows] = await pool.execute(query, params);
     return rows;

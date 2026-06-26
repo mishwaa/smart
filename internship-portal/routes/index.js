@@ -98,4 +98,14 @@ router.get('/api/student/timeline', requireAuth, requireStudent, studentControll
 router.get('/api/student/history', requireAuth, requireStudent, studentController.getActivityHistory);
 router.get('/api/student/progress', requireAuth, requireStudent, studentController.getProgressData);
 
+// Global Search API
+router.get('/api/student/search', requireAuth, requireStudent, studentController.getGlobalSearch);
+
+// Notification Center API
+router.get('/api/student/notifications', requireAuth, requireStudent, studentController.getNotifications);
+router.post('/api/student/notifications/read', requireAuth, requireStudent, studentController.markNotificationsRead);
+
+// Export System API
+router.get('/api/student/export/:type', requireAuth, requireStudent, studentController.exportData);
+
 module.exports = router;

@@ -243,7 +243,13 @@
                                 </div>
                             </div>
 
-                            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-files me-2"></i>My File Repository</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-files me-2"></i>My File Repository</h5>
+                                <div class="d-flex gap-2">
+                                    <a href="/api/student/export/documents?format=csv" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-1" style="font-size: 11px;"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+                                    <a href="/api/student/export/documents?format=pdf" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-1" style="font-size: 11px;"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+                                </div>
+                            </div>
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle small text-start">
                                     <thead class="table-light">

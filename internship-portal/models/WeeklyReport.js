@@ -125,7 +125,7 @@ const WeeklyReport = {
   },
 
   /**
-   * Get all weekly reports for a student with optional status and search filters
+   * Get all weekly reports for a student with optional status, search, sorting, and pagination filters
    * @param {number} studentId
    * @param {Object} [filters]
    * @returns {Promise<Array>}
@@ -145,7 +145,16 @@ const WeeklyReport = {
       params.push(searchWildcard, searchWildcard, searchWildcard);
     }
 
-    query += ` ORDER BY week_number DESC`;
+    // Sorting
+    const direction = filters.sortBy === 'oldest' ? 'ASC' : 'DESC';
+    query += ` ORDER BY week_number ${direction}`;
+
+    // Pagination
+    if (filters.limit) {
+      const offset = (parseInt(filters.page || 1, 10) - 1) * parseInt(filters.limit, 10);
+      query += ` LIMIT ? OFFSET ?`;
+      params.push(String(filters.limit), String(offset));
+    }
 
     const [rows] = await pool.execute(query, params);
     return rows;

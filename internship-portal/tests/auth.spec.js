@@ -53,8 +53,7 @@ test.beforeAll(async () => {
 });
 
 test.afterAll(async () => {
-  // Close database pool when done to prevent process hang
-  await pool.end();
+  // Database pool is managed by the worker process lifecycle
 });
 
 test.describe('Authentication and Session Tests', () => {

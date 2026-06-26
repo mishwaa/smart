@@ -212,11 +212,13 @@ The Student Portal provides a comprehensive, responsive, and secure Enterprise R
 
 ### 1. Student Dashboard (`/student/dashboard`)
 A unified, real-time center for student activities:
+- **Welcome Banner**: Dynamic greeting displaying the student's name and profile photo.
 - **8 Statistics Cards**: High-fidelity cards displaying dynamic values from the database (Attendance Rate, Internship Progress, Reports Submitted, Pending Reports, Documents Uploaded, Mentor Feedbacks, Days Completed, and Certificate Status).
 - **Compliance Visualizer**: Evaluates the overall student status and automatically unlocks the certificate when completion hits 100%.
 - **Milestones Timeline**: Renders a vertical roadmap of student placements (Application, Offer Letter, Coordinator Approval, Internship Started, etc.).
 - **Recent Activity Logs**: Tracks the student's actions (check-ins, report submissions, document uploads) in reverse chronological order.
-- **Dynamic Charts**: Two interactive Chart.js charts visualizing weekly report progress trends and document submission benchmarks.
+- **Dynamic Charts**: Dynamic Chart.js visualizations powered by real-time database values.
+- **Quick Actions Panel**: Punch In / Check Out forms and quick links to submit daily work logs, weekly reports, or upload compliance documents directly.
 
 ### 2. Student Profile (`/student/profile`)
 Provides self-service profile settings with robust validation and security:
@@ -259,17 +261,86 @@ A secure file repository for academic and compliance documents:
 - **Secure Downloads**: Files are stored in a top-level `uploads/documents/` folder outside the public web root. The server streams files securely via `/api/student/documents/:id/download` after verifying student ownership, completely preventing directory traversal, executable uploads, and direct access bypasses.
 - **Actions**: Supports upload, delete, replace, and secure download.
 
-### 8. Protected Endpoints
-The following endpoints are protected under `requireAuth` and `requireStudent` middlewares:
-- **Pages**: `/student/dashboard`, `/student/profile`, `/student/internship`, `/student/attendance`, `/student/reports`, `/student/documents`.
-- **APIs**:
-  - Profile: `GET /api/student/profile`, `POST /api/student/profile`, `POST /api/student/profile/photo`.
-  - Placement: `GET /api/student/internship`.
-  - Attendance: `GET /api/student/attendance`, `POST /api/student/attendance/check-in`, `POST /api/student/attendance/check-out`, `POST /api/student/attendance/leave`.
-  - Logs: `GET /api/student/logs`, `POST /api/student/logs`.
-  - Reports: `GET /api/student/reports`, `POST /api/student/reports`, `PUT /api/student/reports/:id`, `DELETE /api/student/reports/:id`, `POST /api/student/reports/:id/submit`.
-  - Documents: `GET /api/student/documents`, `POST /api/student/documents`, `GET /api/student/documents/:id/download`, `DELETE /api/student/documents/:id`, `POST /api/student/documents/:id/replace`.
-  - Timeline & Progress: `GET /api/student/timeline`, `GET /api/student/history`, `GET /api/student/progress`.
+### 8. Student Intelligence, Analytics & Features (Phase 3 Part 3)
+A major intelligence upgrade extending the student module with advanced reporting, dashboards, exports, and notifications:
+
+#### A. Analytics Dashboard
+A dedicated dashboard interface showing detailed program analytics:
+- **Program Performance Indicators**: Visual grid tracking Attendance %, Internship Progress %, Completed/Pending/Rejected/Approved Reports, Leaves Count, Daily/Weekly/Monthly Hours, and compliance checklist completion.
+- **7 Dynamic Chart.js Visualizations**: Powered entirely by dynamic database metrics (no static or dummy placeholders):
+  1. *Attendance Trend*: Line chart showing daily hours logged over the last 15 active days.
+  2. *Weekly Hours*: Bar chart showing total hours worked each week.
+  3. *Monthly Hours*: Bar/Line chart summarizing total hours logged per month.
+  4. *Internship Progress*: Doughnut chart showing completed vs remaining internship days.
+  5. *Reports Submitted*: Doughnut chart analyzing weekly report statuses (Draft, Submitted, Approved, Rejected).
+  6. *Documents Uploaded*: Bar chart showing compliance documents uploaded by category.
+  7. *Timeline Activity*: Line chart displaying milestone log intensity over months.
+
+#### B. Student Insights Engine
+An automated intelligence widget that evaluates student data to calculate:
+- **Attendance Streak**: Longest consecutive present days, with a weekend-aware algorithm that bridges Friday-to-Monday gaps (3 calendar days).
+- **Average Hours**: Calculates average daily hours and cumulative hours logged from daily logs.
+- **Compliance Deficits**: Automatically scans and lists missing weekly reports (based on elapsed weeks) and missing core compliance documents (Resume, Offer Letter, NOC, Final Report).
+- **Deadlines & Approvals**: Identifies next-Friday deadlines, pending approvals, and generates actionable, dynamic suggestions to keep the student in perfect academic compliance.
+
+#### C. Global Cross-Module Search
+A comprehensive search feature integrated into the top navbar on every student page:
+- **SQL Prepared Statements**: Direct, secure database querying using prepared `LIKE` statements across Attendance, Daily Logs, Weekly Reports, Compliance Documents, and Timeline.
+- **Interactive Search Modal**: Dynamic search input with real-time debouncing, rendering results categorized by module, highlighting matches, showing status badges, and linking directly to corresponding pages.
+
+#### D. Advanced Filters & Sorting
+All student module listing tables and cards support robust server-side query manipulation:
+- **Filters**: Filter by Week, Month, Year, Status (Draft/Submitted/Approved/Rejected), Date Range, Document Category, and Leave Status.
+- **Sorting**: Sort records dynamically by Newest, Oldest, Alphabetical (filenames), and Hours Worked.
+- **Pagination**: Consistent pagination (`page`, `limit`) across all listing endpoints.
+
+#### E. Export System
+A high-fidelity export engine that generates professional reports in multiple formats:
+- **PDF Export**: Generates professional, grid-aligned, multi-page PDF documents using `pdfkit`. Includes custom page headers, student metadata blocks (name, roll, enrollment, department), alternating row backgrounds, and custom column configurations depending on the export type.
+- **CSV Export**: Compiles clean, comma-separated values with strict field escaping to prevent injection.
+- **Supported Ledgers**: Export complete ledgers for Attendance, Weekly Reports, Daily Logs, Placement Timeline, and compliance Documents.
+
+#### F. Local Notification Center
+A real-time notification hub in the top navbar on all student pages:
+- **Unread Counter Badge**: Displays the count of unread timeline events.
+- **Dropdown Feed**: Shows the 10 most recent timeline events (Profile Updated, Attendance Recorded, Report Submitted, Document Uploaded, Coordinator Feedback, Leave Status, etc.).
+- **Read/Unread Tracking**: Visual indicator dots for unread notifications and a "Mark all read" button that updates all events to `is_read = TRUE` in the database.
+
+#### G. Accessibility & UI Polish
+Enhanced user experience designed for maximum accessibility and visual excellence:
+- **Keyboard Navigation**: Focus states and tab-index support on all interactive components.
+- **Semantic HTML**: Proper heading structures and ARIA labels.
+- **Dynamic Feedback**: Loading spinners during data fetching, clean and illustrated empty states, and descriptive error banners.
+- **Responsive Design**: Elegant mobile-first layouts with responsive navigation collapsing into toggleable sidebars.
+
+### 9. REST API Specifications
+All student portal endpoints have been refactored to support consistent JSON responses, standard HTTP status codes, pagination, and sorting:
+- `GET /api/student/search?q=query` — Global cross-module search
+- `GET /api/student/notifications` — Fetch unread count and latest notifications
+- `POST /api/student/notifications/read` — Mark all notifications as read
+- `GET /api/student/export/:type?format=pdf|csv` — Export complete data ledgers
+- `GET /api/student/attendance?month=&year=&status=&sortBy=&page=&limit=` — Paginated and sorted attendance ledger
+- `GET /api/student/logs?startDate=&endDate=&search=&sortBy=&page=&limit=` — Paginated and sorted daily logs
+- `GET /api/student/reports?status=&search=&sortBy=&page=&limit=` — Paginated and sorted weekly reports
+- `GET /api/student/documents?documentType=&search=&sortBy=&page=&limit=` — Paginated and sorted documents list
+
+### 10. Playwright E2E Test Suite
+A complete, release-quality E2E test suite consisting of **43 comprehensive tests** in `tests/student.spec.js` checking:
+- Dashboard metrics and Chart.js initialization
+- Profile updates, size limits, and security ownership
+- Internship dates, duration, progress bar, and status badges
+- Attendance punch-in, double-punch prevention, check-out hours calculation, and leave request calendar updates
+- Daily logs submissions, character limits, working hours boundaries, and search filters
+- Weekly reports workflow, drafts, updates, deletions, submissions, and feedback callout rendering
+- Document center uploads, size restrictions, secure streaming downloads, unauthorized access blocks, replacements, and deletions
+- Global search, notification dropdowns, and exports
+
+To run the complete test suite in serial mode:
+```bash
+npx playwright test tests/student.spec.js
+```
+
+All tests automatically run a database cleaning routine in `beforeAll` using the seeded `student@university.com` credentials, guaranteeing clean, repeatable, and idempotent test execution.
 
 ---
 

@@ -300,7 +300,13 @@
                             </div>
 
                             <!-- Accordion list of reports -->
-                            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-folder-symlink me-2"></i>My Progress Reports</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-folder-symlink me-2"></i>My Progress Reports</h5>
+                                <div class="d-flex gap-2">
+                                    <a href="/api/student/export/reports?format=csv" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-1" style="font-size: 11px;"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+                                    <a href="/api/student/export/reports?format=pdf" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-1" style="font-size: 11px;"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+                                </div>
+                            </div>
                             <div class="accordion" id="reportsAccordion">
                                 <div class="text-center text-muted py-5">Loading progress reports...</div>
                             </div>
@@ -439,6 +445,11 @@
                                 <div class="remarks-box faculty">
                                     <div class="fw-bold text-dark mb-1"><i class="bi bi-chat-left-text-fill text-teal me-1"></i>Academic Coordinator Remarks</div>
                                     <div class="text-muted">${r.faculty_remarks}</div>
+                                </div>` : ''}
+
+                                ${(!r.mentor_remarks && !r.faculty_remarks) ? `
+                                <div class="alert alert-light border-0 small text-muted py-2 px-3 mt-3 rounded-3 mb-0">
+                                    <i class="bi bi-info-circle me-1"></i> No feedback or reviewer remarks received yet.
                                 </div>` : ''}
 
                                 ${r.status === 'draft' ? `

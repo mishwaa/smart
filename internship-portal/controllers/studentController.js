@@ -1,6 +1,7 @@
 /**
  * Student Controller
- * Handles student dashboard, profile, internship, attendance, logs, reports, and documents.
+ * Handles student dashboard, profile, internship, attendance, logs, reports, documents,
+ * analytics, insights, global search, exports, and notification center.
  */
 
 'use strict';
@@ -14,6 +15,7 @@ const DailyLog = require('../models/DailyLog');
 const WeeklyReport = require('../models/WeeklyReport');
 const StudentDocument = require('../models/StudentDocument');
 const TimelineEvent = require('../models/TimelineEvent');
+const exportHelper = require('../helpers/exportHelper');
 const { pool } = require('../config/database');
 const { validateEmail } = require('../middleware/validators');
 
@@ -22,7 +24,6 @@ const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
 /**
  * Helper to ensure a student has an active internship and accepted application,
  * auto-seeding a high-fidelity mock placement if none exists in the database.
- * This satisfies database foreign key constraints.
  */
 async function getOrCreateActiveInternship(studentId, department) {
   const [apps] = await pool.execute(
@@ -86,7 +87,7 @@ async function getOrCreateActiveInternship(studentId, department) {
     [studentId, internshipId]
   );
   
-  // Create default timeline events for setup
+  // Seed default timeline events
   await TimelineEvent.create({
     student_id: studentId,
     event_type: 'application',
@@ -117,6 +118,51 @@ async function getOrCreateActiveInternship(studentId, department) {
   });
   
   return internshipId;
+}
+
+/**
+ * Calculates the longest attendance streak, ignoring weekend gaps.
+ */
+async function getLongestAttendanceStreak(studentId) {
+  const [rows] = await pool.execute(
+    `SELECT date FROM attendance 
+     WHERE student_id = ? AND status = 'present' 
+     ORDER BY date ASC`,
+    [studentId]
+  );
+  if (rows.length === 0) return 0;
+  
+  let longestStreak = 0;
+  let currentStreak = 0;
+  let prevDate = null;
+  
+  for (const row of rows) {
+    const currentDate = new Date(row.date);
+    if (prevDate === null) {
+      currentStreak = 1;
+    } else {
+      const diffTime = Math.abs(currentDate - prevDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        currentStreak++;
+      } else if (diffDays > 1) {
+        const prevDayOfWeek = prevDate.getDay(); // 5 = Friday
+        const currentDayOfWeek = currentDate.getDay(); // 1 = Monday
+        if (prevDayOfWeek === 5 && currentDayOfWeek === 1 && diffDays === 3) {
+          currentStreak++; // Weekend gap, maintain streak
+        } else {
+          currentStreak = 1; // Broken streak
+        }
+      }
+    }
+    if (currentStreak > longestStreak) {
+      longestStreak = currentStreak;
+    }
+    prevDate = currentDate;
+  }
+  
+  return longestStreak;
 }
 
 const studentController = {
@@ -271,12 +317,12 @@ const studentController = {
       req.session.user.name = fullName;
       req.session.user.email = email;
 
-      // Log activity
+      // Log notification/timeline event
       await TimelineEvent.create({
         student_id: student.id,
         event_type: 'attendance',
-        title: 'Updated Profile',
-        description: 'Modified personal and academic details in settings.'
+        title: 'Profile Updated',
+        description: 'Successfully updated your personal and academic details in profile settings.'
       });
 
       return res.json({
@@ -319,12 +365,12 @@ const studentController = {
         profile_image: photoPath
       });
 
-      // Log activity
+      // Log notification/timeline event
       await TimelineEvent.create({
         student_id: student.id,
         event_type: 'attendance',
-        title: 'Uploaded Profile Photo',
-        description: 'Successfully updated profile picture.'
+        title: 'Profile Updated',
+        description: 'Uploaded a new profile picture.'
       });
 
       return res.json({
@@ -403,7 +449,7 @@ const studentController = {
   // ─── Attendance & Leaves API ───────────────────────────────────────────────
   async getAttendanceData(req, res) {
     const userId = req.session.user.id;
-    const { month, year, status } = req.query;
+    const { month, year, status, sortBy, page, limit } = req.query;
 
     try {
       const student = await Student.findByUserId(userId);
@@ -416,7 +462,10 @@ const studentController = {
       const filters = {
         month: month ? parseInt(month, 10) : null,
         year: year ? parseInt(year, 10) : null,
-        status: status || null
+        status: status || null,
+        sortBy: sortBy || 'newest',
+        page: page ? parseInt(page, 10) : 1,
+        limit: limit ? parseInt(limit, 10) : null // If no limit, fetch all (for exports/full lists)
       };
 
       const records = await Attendance.getAttendanceList(student.id, filters);
@@ -482,12 +531,12 @@ const studentController = {
         remarks
       });
 
-      // Log timeline event
+      // Log notification/timeline event
       await TimelineEvent.create({
         student_id: student.id,
         event_type: 'attendance',
-        title: 'Checked In',
-        description: `Checked in at ${checkInTime}. Remarks: ${remarks || 'None'}`
+        title: 'Attendance Recorded',
+        description: `Checked in successfully at ${checkInTime} (${location || 'Remote'}).`
       });
 
       return res.json({ success: true, message: 'Checked in successfully.', time: checkInTime });
@@ -532,12 +581,12 @@ const studentController = {
         remarks
       });
 
-      // Log timeline event
+      // Log notification/timeline event
       await TimelineEvent.create({
         student_id: student.id,
         event_type: 'attendance',
-        title: 'Checked Out',
-        description: `Checked out at ${checkOutTime}. Working hours: ${workingHours}h. Remarks: ${remarks || 'None'}`
+        title: 'Attendance Recorded',
+        description: `Checked out successfully at ${checkOutTime}. Logged ${workingHours} working hours.`
       });
 
       return res.json({ success: true, message: 'Checked out successfully.', time: checkOutTime, hours: workingHours });
@@ -579,12 +628,12 @@ const studentController = {
         leave_reason: reason
       });
 
-      // Log timeline event
+      // Log notification/timeline event
       await TimelineEvent.create({
         student_id: student.id,
         event_type: 'attendance',
-        title: 'Requested Leave',
-        description: `Submitted leave request for ${date}. Reason: ${reason}`
+        title: 'Leave Status',
+        description: `Submitted a leave request for ${date}. Status: PENDING.`
       });
 
       return res.json({ success: true, message: 'Leave request submitted successfully.' });
@@ -597,7 +646,7 @@ const studentController = {
   // ─── Daily Work Log API ────────────────────────────────────────────────────
   async getDailyLogs(req, res) {
     const userId = req.session.user.id;
-    const { startDate, endDate, search } = req.query;
+    const { startDate, endDate, search, sortBy, page, limit } = req.query;
 
     try {
       const student = await Student.findByUserId(userId);
@@ -605,7 +654,15 @@ const studentController = {
         return res.status(404).json({ success: false, message: 'Student profile not found.' });
       }
 
-      const filters = { startDate, endDate, search };
+      const filters = {
+        startDate,
+        endDate,
+        search: search || null,
+        sortBy: sortBy || 'newest',
+        page: page ? parseInt(page, 10) : 1,
+        limit: limit ? parseInt(limit, 10) : null
+      };
+      
       const logs = await DailyLog.getLogsList(student.id, filters);
       const stats = await DailyLog.getStatistics(student.id);
 
@@ -623,7 +680,6 @@ const studentController = {
       technology_used, problems_faced, learning_outcome, remarks
     } = req.body;
 
-    // Validation
     if (!date || !tasks_completed || hours_worked === undefined) {
       return res.status(400).json({ success: false, message: 'Missing required fields: Date, Tasks, and Hours are required.' });
     }
@@ -632,7 +688,6 @@ const studentController = {
       return res.status(400).json({ success: false, message: 'Invalid date format.' });
     }
 
-    // Prevent future date logs
     const todayStr = new Date().toISOString().slice(0, 10);
     if (date > todayStr) {
       return res.status(400).json({ success: false, message: 'Cannot submit work logs for future dates.' });
@@ -643,7 +698,6 @@ const studentController = {
       return res.status(400).json({ success: false, message: 'Hours worked must be a number between 0 and 24.' });
     }
 
-    // Limit text fields to 1000 characters
     const textLimit = (str) => (str || '').slice(0, 1000);
 
     try {
@@ -671,12 +725,12 @@ const studentController = {
         remarks: textLimit(remarks)
       });
 
-      // Log timeline event
+      // Log notification/timeline event
       await TimelineEvent.create({
         student_id: student.id,
         event_type: 'attendance',
-        title: 'Submitted Daily Log',
-        description: `Logged ${hours} hours for ${date}. Tech used: ${technology_used || 'None'}`
+        title: 'Attendance Recorded',
+        description: `Submitted work log for ${date} (${hours} hours).`
       });
 
       return res.json({ success: true, message: 'Daily work log submitted successfully.' });
@@ -689,7 +743,7 @@ const studentController = {
   // ─── Weekly Reports API ────────────────────────────────────────────────────
   async getWeeklyReports(req, res) {
     const userId = req.session.user.id;
-    const { status, search } = req.query;
+    const { status, search, sortBy, page, limit } = req.query;
 
     try {
       const student = await Student.findByUserId(userId);
@@ -697,7 +751,15 @@ const studentController = {
         return res.status(404).json({ success: false, message: 'Student profile not found.' });
       }
 
-      const reports = await WeeklyReport.getReportsList(student.id, { status, search });
+      const filters = {
+        status: status || null,
+        search: search || null,
+        sortBy: sortBy || 'newest',
+        page: page ? parseInt(page, 10) : 1,
+        limit: limit ? parseInt(limit, 10) : null
+      };
+
+      const reports = await WeeklyReport.getReportsList(student.id, filters);
       const stats = await WeeklyReport.getStatistics(student.id);
 
       return res.json({ success: true, reports, statistics: stats });
@@ -751,12 +813,12 @@ const studentController = {
         future_plan: future_plan || ''
       });
 
-      // Log timeline event
+      // Log notification/timeline event
       await TimelineEvent.create({
         student_id: student.id,
         event_type: 'weekly_reports',
-        title: 'Created Weekly Report Draft',
-        description: `Saved Week ${weekNum} report draft.`
+        title: 'Timeline Updates',
+        description: `Created Week ${weekNum} weekly report draft.`
       });
 
       return res.json({ success: true, message: 'Weekly report draft saved successfully.' });
@@ -864,12 +926,12 @@ const studentController = {
 
       await WeeklyReport.submit(reportId);
 
-      // Log timeline event
+      // Log notification/timeline event
       await TimelineEvent.create({
         student_id: student.id,
         event_type: 'weekly_reports',
-        title: 'Submitted Weekly Report',
-        description: `Successfully submitted Week ${report.week_number} report for review.`
+        title: 'Report Submitted',
+        description: `Submitted Week ${report.week_number} progress report for coordinator review.`
       });
 
       return res.json({ success: true, message: 'Weekly report submitted successfully.' });
@@ -882,7 +944,7 @@ const studentController = {
   // ─── Document Center API ───────────────────────────────────────────────────
   async getDocuments(req, res) {
     const userId = req.session.user.id;
-    const { documentType, search } = req.query;
+    const { documentType, search, sortBy, page, limit } = req.query;
 
     try {
       const student = await Student.findByUserId(userId);
@@ -890,7 +952,15 @@ const studentController = {
         return res.status(404).json({ success: false, message: 'Student profile not found.' });
       }
 
-      const documents = await StudentDocument.getDocumentsList(student.id, { documentType, search });
+      const filters = {
+        documentType: documentType || null,
+        search: search || null,
+        sortBy: sortBy || 'newest',
+        page: page ? parseInt(page, 10) : 1,
+        limit: limit ? parseInt(limit, 10) : null
+      };
+
+      const documents = await StudentDocument.getDocumentsList(student.id, filters);
       const stats = await StudentDocument.getStatistics(student.id);
 
       return res.json({ success: true, documents, statistics: stats });
@@ -907,7 +977,7 @@ const studentController = {
     const allowedTypes = ['resume', 'offer_letter', 'noc', 'weekly_report_pdf', 'presentation', 'final_report', 'certificate', 'other'];
     if (!allowedTypes.includes(document_type)) {
       if (req.file) {
-        fs.unlink(req.file.path, () => {}); // Clean up file on validation error
+        fs.unlink(req.file.path, () => {});
       }
       return res.status(400).json({ success: false, message: 'Invalid document type.' });
     }
@@ -927,16 +997,16 @@ const studentController = {
         student_id: student.id,
         document_type,
         file_name: req.file.originalname,
-        file_path: `/uploads/documents/${req.file.filename}`, // Secure virtual path
+        file_path: `/uploads/documents/${req.file.filename}`,
         file_size: req.file.size
       });
 
-      // Log timeline event
+      // Log notification/timeline event
       await TimelineEvent.create({
         student_id: student.id,
-        event_type: 'offer_letter', // Maps generally to document-related timeline icons
-        title: 'Uploaded Document',
-        description: `Uploaded ${document_type.replace('_', ' ')}: ${req.file.originalname}`
+        event_type: 'offer_letter',
+        title: 'Document Uploaded',
+        description: `Successfully uploaded ${document_type.replace('_', ' ')}: ${req.file.originalname}.`
       });
 
       return res.json({ success: true, message: 'Document uploaded successfully.', document: doc });
@@ -968,7 +1038,6 @@ const studentController = {
         return res.status(403).json({ success: false, message: 'Unauthorized access to this document.' });
       }
 
-      // Secure physical resolution and directory traversal prevention
       const rootUploads = path.resolve(__dirname, '..', 'uploads', 'documents');
       const filename = path.basename(doc.file_path);
       const fullPath = path.join(rootUploads, filename);
@@ -980,14 +1049,6 @@ const studentController = {
       if (!fs.existsSync(fullPath)) {
         return res.status(404).json({ success: false, message: 'Physical file not found on server.' });
       }
-
-      // Track timeline event download history
-      await TimelineEvent.create({
-        student_id: student.id,
-        event_type: 'offer_letter',
-        title: 'Downloaded Document',
-        description: `Downloaded file: ${doc.file_name}`
-      });
 
       return res.download(fullPath, doc.file_name);
     } catch (error) {
@@ -1025,14 +1086,6 @@ const studentController = {
 
       await StudentDocument.delete(docId);
 
-      // Log timeline event
-      await TimelineEvent.create({
-        student_id: student.id,
-        event_type: 'offer_letter',
-        title: 'Deleted Document',
-        description: `Removed file: ${doc.file_name}`
-      });
-
       return res.json({ success: true, message: 'Document deleted successfully.' });
     } catch (error) {
       console.error('Error deleting document:', error);
@@ -1066,7 +1119,6 @@ const studentController = {
         return res.status(403).json({ success: false, message: 'Unauthorized to replace this document.' });
       }
 
-      // Delete old physical file
       const rootUploads = path.resolve(__dirname, '..', 'uploads', 'documents');
       const oldFilename = path.basename(doc.file_path);
       const oldFullPath = path.join(rootUploads, oldFilename);
@@ -1075,24 +1127,14 @@ const studentController = {
         fs.unlinkSync(oldFullPath);
       }
 
-      // Delete old DB record
       await StudentDocument.delete(docId);
 
-      // Create new DB record
       const newDoc = await StudentDocument.create({
         student_id: student.id,
-        document_type: doc.document_type, // Maintain same type
+        document_type: doc.document_type,
         file_name: req.file.originalname,
         file_path: `/uploads/documents/${req.file.filename}`,
         file_size: req.file.size
-      });
-
-      // Log timeline event
-      await TimelineEvent.create({
-        student_id: student.id,
-        event_type: 'offer_letter',
-        title: 'Replaced Document',
-        description: `Replaced ${doc.document_type.replace('_', ' ')} with: ${req.file.originalname}`
       });
 
       return res.json({ success: true, message: 'Document replaced successfully.', document: newDoc });
@@ -1155,26 +1197,34 @@ const studentController = {
 
       const internshipId = await getOrCreateActiveInternship(student.id, student.department);
 
-      // Get internship days percentage
+      // Get internship days percentage and remaining days
       const [rows] = await pool.execute(
         `SELECT start_date, end_date FROM internships WHERE id = ? LIMIT 1`,
         [internshipId]
       );
+      
       let internshipPercent = 0;
+      let remainingDays = 0;
+      let startDateVal = new Date();
+      
       if (rows.length > 0) {
         const start = new Date(rows[0].start_date);
         const end = new Date(rows[0].end_date);
         const today = new Date();
         const total = end.getTime() - start.getTime();
         const totalDays = Math.ceil(total / (1000 * 60 * 60 * 24)) || 120;
+        
+        startDateVal = start;
+        
         let completed = 0;
         if (today > start) {
           completed = Math.min(totalDays, Math.ceil((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
         }
         internshipPercent = Math.round((completed / totalDays) * 100);
+        remainingDays = Math.max(0, Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
       }
 
-      // Fetch statistics from modules
+      // Fetch statistics
       const attStats = await Attendance.getStatistics(student.id);
       const repStats = await WeeklyReport.getStatistics(student.id);
       const docStats = await StudentDocument.getStatistics(student.id);
@@ -1182,6 +1232,72 @@ const studentController = {
       const overallCompletion = Math.round(
         (internshipPercent + attStats.attendancePercentage + repStats.reportsPercentage + docStats.documentsPercentage) / 4
       );
+
+      // ─── Calculate Advanced Insights ───
+      // 1. Longest Streak
+      const longestStreak = await getLongestAttendanceStreak(student.id);
+      
+      // 2. Average Working Hours
+      const [hourRows] = await pool.execute(
+        `SELECT AVG(hours_worked) AS avg_hours, SUM(hours_worked) AS total_hours FROM daily_logs WHERE student_id = ?`,
+        [student.id]
+      );
+      const avgDailyHours = hourRows[0] && hourRows[0].avg_hours ? parseFloat(parseFloat(hourRows[0].avg_hours).toFixed(1)) : 0.0;
+      const totalHours = hourRows[0] && hourRows[0].total_hours ? parseFloat(hourRows[0].total_hours) : 0.0;
+
+      // 3. Missing Reports calculation (based on elapsed weeks)
+      const missingReports = [];
+      const today = new Date();
+      if (today > startDateVal) {
+        const diffTime = today.getTime() - startDateVal.getTime();
+        const elapsedWeeks = Math.min(16, Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7)));
+        
+        const [existingReports] = await pool.execute(
+          `SELECT week_number FROM weekly_reports WHERE student_id = ?`,
+          [student.id]
+        );
+        const reportWeeks = new Set(existingReports.map(r => r.week_number));
+        
+        for (let w = 1; w <= elapsedWeeks; w++) {
+          if (!reportWeeks.has(w)) {
+            missingReports.push(w);
+          }
+        }
+      }
+
+      // 4. Missing Documents
+      const missingDocs = [];
+      if (docStats.resumeCount === 0) missingDocs.push('Resume / CV');
+      if (docStats.offerLetterCount === 0) missingDocs.push('Signed Offer Letter');
+      if (docStats.nocCount === 0) missingDocs.push('No Objection Certificate (NOC)');
+      if (docStats.finalReportCount === 0) missingDocs.push('Final Project Report');
+
+      // 5. Pending Approvals
+      const pendingApprovals = repStats.submittedCount + attStats.pendingLeaves;
+
+      // 6. Next Friday Deadline
+      const getNextFriday = () => {
+        const d = new Date();
+        const day = d.getDay();
+        const diff = d.getDate() + (5 - day + (day >= 5 ? 7 : 0));
+        return new Date(d.setDate(diff)).toISOString().slice(0, 10);
+      };
+      const nextFriday = getNextFriday();
+
+      // 7. Dynamic Suggestions
+      const suggestions = [];
+      if (attStats.attendancePercentage < 90) {
+        suggestions.push('Your attendance rate is below 90%. Punch in daily to meet university guidelines.');
+      }
+      if (missingReports.length > 0) {
+        suggestions.push(`Please submit missing weekly reports (Week ${missingReports.join(', ')}) to maintain academic compliance.`);
+      }
+      if (missingDocs.length > 0) {
+        suggestions.push(`Upload missing required documents: ${missingDocs.join(', ')} in the Document Center.`);
+      }
+      if (suggestions.length === 0) {
+        suggestions.push('Excellent job! You are in perfect compliance with all program benchmarks.');
+      }
 
       return res.json({
         success: true,
@@ -1191,11 +1307,221 @@ const studentController = {
           weeklyReportsPercentage: repStats.reportsPercentage,
           documentsPercentage: docStats.documentsPercentage,
           overallCompletionPercentage: Math.min(100, overallCompletion)
+        },
+        insights: {
+          remainingInternshipDays: remainingDays,
+          averageDailyHours: avgDailyHours,
+          totalHoursLogged: totalHours,
+          longestAttendanceStreak: longestStreak,
+          missingReports,
+          missingDocuments: missingDocs,
+          pendingApprovals,
+          upcomingDeadlines: `Weekly Report due on ${nextFriday} at 5:00 PM`,
+          suggestions
         }
       });
     } catch (error) {
       console.error('Error fetching progress data:', error);
       return res.status(500).json({ success: false, message: 'Internal server error while fetching progress statistics.' });
+    }
+  },
+
+  // ─── Global Search API ─────────────────────────────────────────────────────
+  async getGlobalSearch(req, res) {
+    const userId = req.session.user.id;
+    const { q } = req.query;
+
+    if (!q || q.trim().length < 2) {
+      return res.json({
+        success: true,
+        results: { attendance: [], logs: [], reports: [], documents: [], timeline: [] }
+      });
+    }
+
+    const searchTerm = `%${q.trim()}%`;
+
+    try {
+      const student = await Student.findByUserId(userId);
+      if (!student) {
+        return res.status(404).json({ success: false, message: 'Student profile not found.' });
+      }
+
+      // 1. Search Attendance
+      const [attendance] = await pool.execute(
+        `SELECT * FROM attendance 
+         WHERE student_id = ? AND (remarks LIKE ? OR location LIKE ? OR leave_reason LIKE ?)
+         ORDER BY date DESC LIMIT 10`,
+        [student.id, searchTerm, searchTerm, searchTerm]
+      );
+
+      // 2. Search Daily Logs
+      const [logs] = await pool.execute(
+        `SELECT * FROM daily_logs 
+         WHERE student_id = ? AND (tasks_completed LIKE ? OR technology_used LIKE ? OR learning_outcome LIKE ?)
+         ORDER BY date DESC LIMIT 10`,
+        [student.id, searchTerm, searchTerm, searchTerm]
+      );
+
+      // 3. Search Weekly Reports
+      const [reports] = await pool.execute(
+        `SELECT * FROM weekly_reports 
+         WHERE student_id = ? AND (report_content LIKE ? OR skills_learned LIKE ? OR achievements LIKE ?)
+         ORDER BY week_number DESC LIMIT 10`,
+        [student.id, searchTerm, searchTerm, searchTerm]
+      );
+
+      // 4. Search Documents
+      const [documents] = await pool.execute(
+        `SELECT * FROM student_documents 
+         WHERE student_id = ? AND file_name LIKE ?
+         ORDER BY uploaded_at DESC LIMIT 10`,
+        [student.id, searchTerm]
+      );
+
+      // 5. Search Timeline
+      const [timeline] = await pool.execute(
+        `SELECT * FROM timeline_events 
+         WHERE student_id = ? AND (title LIKE ? OR description LIKE ?)
+         ORDER BY event_date DESC LIMIT 10`,
+        [student.id, searchTerm, searchTerm]
+      );
+
+      return res.json({
+        success: true,
+        results: { attendance, logs, reports, documents, timeline }
+      });
+    } catch (error) {
+      console.error('Error during global search:', error);
+      return res.status(500).json({ success: false, message: 'Internal server error during search query.' });
+    }
+  },
+
+  // ─── Local Notification Center API ──────────────────────────────────────────
+  async getNotifications(req, res) {
+    const userId = req.session.user.id;
+
+    try {
+      const student = await Student.findByUserId(userId);
+      if (!student) {
+        return res.status(404).json({ success: false, message: 'Student profile not found.' });
+      }
+
+      // Count unread notifications
+      const [countRows] = await pool.execute(
+        `SELECT COUNT(*) AS unread FROM timeline_events WHERE student_id = ? AND is_read = FALSE`,
+        [student.id]
+      );
+      const unreadCount = countRows[0] && countRows[0].unread ? countRows[0].unread : 0;
+
+      // Fetch 10 most recent events (notifications)
+      const [notifications] = await pool.execute(
+        `SELECT * FROM timeline_events WHERE student_id = ? ORDER BY created_at DESC LIMIT 10`,
+        [student.id]
+      );
+
+      return res.json({
+        success: true,
+        unreadCount,
+        notifications
+      });
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      return res.status(500).json({ success: false, message: 'Internal server error while fetching notifications.' });
+    }
+  },
+
+  async markNotificationsRead(req, res) {
+    const userId = req.session.user.id;
+
+    try {
+      const student = await Student.findByUserId(userId);
+      if (!student) {
+        return res.status(404).json({ success: false, message: 'Student profile not found.' });
+      }
+
+      await pool.execute(
+        `UPDATE timeline_events SET is_read = TRUE WHERE student_id = ? AND is_read = FALSE`,
+        [student.id]
+      );
+
+      return res.json({ success: true, message: 'All notifications marked as read.' });
+    } catch (error) {
+      console.error('Error marking notifications as read:', error);
+      return res.status(500).json({ success: false, message: 'Internal server error while modifying notifications.' });
+    }
+  },
+
+  // ─── Export System API (PDF & CSV) ─────────────────────────────────────────
+  async exportData(req, res) {
+    const userId = req.session.user.id;
+    const { type } = req.params;
+    const { format } = req.query;
+
+    const allowedTypes = ['attendance', 'reports', 'logs', 'timeline', 'documents'];
+    const allowedFormats = ['pdf', 'csv'];
+
+    if (!allowedTypes.includes(type) || !allowedFormats.includes(format)) {
+      return res.status(400).json({ success: false, message: 'Invalid export type or format.' });
+    }
+
+    try {
+      const student = await Student.findByUserId(userId);
+      if (!student) {
+        return res.status(404).json({ success: false, message: 'Student profile not found.' });
+      }
+
+      let rows = [];
+      let headers = [];
+      let keys = [];
+      let title = '';
+
+      // Query complete ledger data
+      if (type === 'attendance') {
+        rows = await Attendance.getAttendanceList(student.id, { sortBy: 'oldest' });
+        headers = ['Date', 'Status', 'Check-In', 'Check-Out', 'Hours Worked', 'Remarks'];
+        keys = ['date', 'status', 'check_in_time', 'check_out_time', 'working_hours', 'remarks'];
+        title = 'Student Attendance Ledger';
+      } else if (type === 'reports') {
+        rows = await WeeklyReport.getReportsList(student.id, { sortBy: 'oldest' });
+        headers = ['Week', 'Date Range', 'Hours Logged', 'Status', 'Tasks Completed'];
+        keys = ['week_number', 'date_range', 'hours_worked', 'status', 'report_content'];
+        title = 'Weekly Progress Reports Index';
+      } else if (type === 'logs') {
+        rows = await DailyLog.getLogsList(student.id, { sortBy: 'oldest' });
+        headers = ['Date', 'Hours', 'Technologies Used', 'Tasks Completed'];
+        keys = ['date', 'hours_worked', 'technology_used', 'tasks_completed'];
+        title = 'Daily Work Logs Ledger';
+      } else if (type === 'timeline') {
+        const [timelineRows] = await pool.execute(
+          `SELECT * FROM timeline_events WHERE student_id = ? ORDER BY event_date ASC, created_at ASC`,
+          [student.id]
+        );
+        rows = timelineRows;
+        headers = ['Date', 'Milestone Event', 'Description Details'];
+        keys = ['event_date', 'title', 'description'];
+        title = 'Internship Placement Milestones Timeline';
+      } else if (type === 'documents') {
+        rows = await StudentDocument.getDocumentsList(student.id, { sortBy: 'name' });
+        headers = ['Filename', 'Document Category', 'File Size (Bytes)', 'Upload Date'];
+        keys = ['file_name', 'document_type', 'file_size', 'uploaded_at'];
+        title = 'Compliance Documents Index';
+      }
+
+      if (format === 'csv') {
+        const csvString = exportHelper.generateCSV(headers, rows, keys);
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename=${type}_export_${Date.now()}.csv`);
+        return res.send(csvString);
+      } else {
+        // PDF format
+        const pdfBuffer = await exportHelper.generatePDF(title, student, headers, rows, type);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${type}_export_${Date.now()}.pdf`);
+        return res.send(pdfBuffer);
+      }
+    } catch (error) {
+      console.error(`Error exporting ${type} to ${format}:`, error);
+      return res.status(500).json({ success: false, message: 'Internal server error during export compilation.' });
     }
   }
 };

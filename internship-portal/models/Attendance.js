@@ -83,7 +83,7 @@ const Attendance = {
   },
 
   /**
-   * Get attendance list for a student with optional filters
+   * Get attendance list for a student with optional filters, sorting, and pagination
    * @param {number} studentId
    * @param {Object} [filters]
    * @returns {Promise<Array>}
@@ -105,7 +105,16 @@ const Attendance = {
       params.push(filters.status);
     }
 
-    query += ` ORDER BY date DESC`;
+    // Sorting
+    const direction = filters.sortBy === 'oldest' ? 'ASC' : 'DESC';
+    query += ` ORDER BY date ${direction}`;
+
+    // Pagination
+    if (filters.limit) {
+      const offset = (parseInt(filters.page || 1, 10) - 1) * parseInt(filters.limit, 10);
+      query += ` LIMIT ? OFFSET ?`;
+      params.push(String(filters.limit), String(offset));
+    }
 
     const [rows] = await pool.execute(query, params);
     return rows;

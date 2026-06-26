@@ -362,7 +362,13 @@
                                     </div>
 
                                     <!-- Table list of recent records -->
-                                    <h5 class="fw-bold mt-4 mb-3 text-dark"><i class="bi bi-list-check me-2"></i>Attendance Ledger</h5>
+                                    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+                                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-list-check me-2"></i>Attendance Ledger</h5>
+                                        <div class="d-flex gap-2">
+                                            <a href="/api/student/export/attendance?format=csv" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-1" style="font-size: 11px;"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+                                            <a href="/api/student/export/attendance?format=pdf" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-1" style="font-size: 11px;"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+                                        </div>
+                                    </div>
                                     <div class="table-responsive">
                                         <table class="table table-hover align-middle small text-start">
                                             <thead class="table-light">
@@ -388,9 +394,15 @@
                                 <div class="tab-pane fade" id="logs-pane" role="tabpanel" aria-labelledby="logs-tab">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-list-task me-2"></i>Daily Task Submissions</h5>
-                                        <button class="btn btn-primary btn-sm rounded-3 px-3 py-2 d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#submitLogModal">
-                                            <i class="bi bi-plus-lg"></i> Submit Log
-                                        </button>
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="/api/student/export/logs?format=csv" class="btn btn-outline-secondary btn-sm"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+                                                <a href="/api/student/export/logs?format=pdf" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-pdf me-1"></i>PDF</a>
+                                            </div>
+                                            <button class="btn btn-primary btn-sm rounded-3 px-3 py-2 d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#submitLogModal">
+                                                <i class="bi bi-plus-lg"></i> Submit Log
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <!-- Search & Date Filters for Logs -->
@@ -463,22 +475,22 @@
                             </div>
                             <div class="col-12">
                                 <label for="logTasks" class="form-label small fw-semibold text-dark">Tasks Completed <span class="text-danger">*</span></label>
-                                <textarea class="form-control rounded-3" id="logTasks" rows="3" placeholder="Detail the work accomplished today..." maxlength="1000" required></textarea>
+                                <textarea class="form-control rounded-3" id="logTasks" rows="3" placeholder="Detail the work accomplished today..." required></textarea>
                                 <div class="form-text small text-end" id="logTasksCount">0/1000 characters</div>
                             </div>
                             <div class="col-12">
                                 <label for="logProblems" class="form-label small fw-semibold text-dark">Problems Faced</label>
-                                <textarea class="form-control rounded-3" id="logProblems" rows="2" placeholder="Blockers, technical difficulties..." maxlength="1000"></textarea>
+                                <textarea class="form-control rounded-3" id="logProblems" rows="2" placeholder="Blockers, technical difficulties..."></textarea>
                                 <div class="form-text small text-end" id="logProblemsCount">0/1000 characters</div>
                             </div>
                             <div class="col-12">
                                 <label for="logLearning" class="form-label small fw-semibold text-dark">Learning Outcomes</label>
-                                <textarea class="form-control rounded-3" id="logLearning" rows="2" placeholder="New concepts learned, skills improved..." maxlength="1000"></textarea>
+                                <textarea class="form-control rounded-3" id="logLearning" rows="2" placeholder="New concepts learned, skills improved..."></textarea>
                                 <div class="form-text small text-end" id="logLearningCount">0/1000 characters</div>
                             </div>
                             <div class="col-12">
                                 <label for="logRemarks" class="form-label small fw-semibold text-dark">Remarks / Extra Notes</label>
-                                <textarea class="form-control rounded-3" id="logRemarks" rows="2" placeholder="Any additional information..." maxlength="1000"></textarea>
+                                <textarea class="form-control rounded-3" id="logRemarks" rows="2" placeholder="Any additional information..."></textarea>
                                 <div class="form-text small text-end" id="logRemarksCount">0/1000 characters</div>
                             </div>
                         </div>
@@ -505,9 +517,20 @@
 
             // Setup character counts for Textareas
             const wireCharCount = (inputEl, countEl) => {
-                inputEl.addEventListener('input', () => {
-                    countEl.textContent = `${inputEl.value.length}/1000 characters`;
-                });
+                const updateCount = () => {
+                    const len = inputEl.value.length;
+                    countEl.textContent = `${len}/1000 characters`;
+                    if (len > 1000) {
+                        countEl.classList.add('text-danger');
+                        inputEl.setCustomValidity('Content cannot exceed 1000 characters.');
+                    } else {
+                        countEl.classList.remove('text-danger');
+                        inputEl.setCustomValidity('');
+                    }
+                };
+                inputEl.addEventListener('input', updateCount);
+                // Run once on load/reset to sync
+                updateCount();
             };
             wireCharCount(document.getElementById('logTasks'), document.getElementById('logTasksCount'));
             wireCharCount(document.getElementById('logProblems'), document.getElementById('logProblemsCount'));
@@ -895,8 +918,16 @@
                 e.preventDefault();
                 const form = e.target;
 
+                // Clear any existing is-invalid classes
+                form.querySelectorAll('.form-control').forEach(el => el.classList.remove('is-invalid'));
+
                 if (!form.checkValidity()) {
                     form.classList.add('was-validated');
+                    form.querySelectorAll('.form-control').forEach(el => {
+                        if (!el.checkValidity()) {
+                            el.classList.add('is-invalid');
+                        }
+                    });
                     return;
                 }
 

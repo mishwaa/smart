@@ -50,7 +50,7 @@ const StudentDocument = {
   },
 
   /**
-   * Get all documents for a student with optional type filter
+   * Get all documents for a student with optional type, search, sorting, and pagination filters
    * @param {number} studentId
    * @param {Object} [filters]
    * @returns {Promise<Array>}
@@ -68,7 +68,21 @@ const StudentDocument = {
       params.push(`%${filters.search}%`);
     }
 
-    query += ` ORDER BY uploaded_at DESC`;
+    // Sorting
+    let sortClause = 'ORDER BY uploaded_at DESC';
+    if (filters.sortBy === 'oldest') {
+      sortClause = 'ORDER BY uploaded_at ASC';
+    } else if (filters.sortBy === 'name') {
+      sortClause = 'ORDER BY file_name ASC';
+    }
+    query += ` ${sortClause}`;
+
+    // Pagination
+    if (filters.limit) {
+      const offset = (parseInt(filters.page || 1, 10) - 1) * parseInt(filters.limit, 10);
+      query += ` LIMIT ? OFFSET ?`;
+      params.push(String(filters.limit), String(offset));
+    }
 
     const [rows] = await pool.execute(query, params);
     return rows;
