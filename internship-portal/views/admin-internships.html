@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Admin Opportunities Placement Management">
+    <title>Manage Opportunities - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/admin/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="bi bi-speedometer2"></i> Admin Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/users">
+                            <i class="bi bi-shield-lock"></i> Manage Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/students">
+                            <i class="bi bi-people"></i> Manage Students
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/faculty">
+                            <i class="bi bi-person-badge"></i> Manage Faculty
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/companies">
+                            <i class="bi bi-building"></i> Manage Companies
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/internships">
+                            <i class="bi bi-briefcase"></i> Manage Internships
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/system">
+                            <i class="bi bi-gear"></i> System Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle text-primary"></i> <span id="navUserName">Loading Admin...</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/change-password"><i class="bi bi-key me-2"></i>Change Password</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-0 fw-bold text-dark">Placement Opportunities Portfolio</h1>
+                        <p class="text-muted mb-0">Create placement tracks, assign student cohorts, close filled jobs, and track applications.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary rounded-3" onclick="exportData('csv')"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
+                        <button class="btn btn-outline-danger rounded-3" onclick="exportData('pdf')"><i class="bi bi-file-pdf me-1"></i> Export PDF Ledger</button>
+                        <button class="btn btn-primary rounded-3" onclick="openCreateModal()"><i class="bi bi-briefcase-fill me-1"></i> Create Internship Posting</button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card bg-white border-0 shadow-sm p-4 mb-4 rounded-4">
+                    <form id="filterForm" onsubmit="event.preventDefault(); loadInternships(1);">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="filterSearch" class="form-label small fw-semibold text-muted">Search Position Title / Company</label>
+                                <input type="text" class="form-control bg-light" id="filterSearch" placeholder="e.g. Backend Developer, TechCorp">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filterCompany" class="form-label small fw-semibold text-muted">Employer Partner</label>
+                                <select class="form-select bg-light" id="filterCompany">
+                                    <option value="">All Companies</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filterStatus" class="form-label small fw-semibold text-muted">Opportunity Status</label>
+                                <select class="form-select bg-light" id="filterStatus">
+                                    <option value="">All Statuses</option>
+                                    <option value="open">Open (Accepting Placements)</option>
+                                    <option value="closed">Closed / Expired</option>
+                                    <option value="filled">Filled</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end justify-content-end gap-2">
+                                <button type="button" class="btn btn-light rounded-3 w-100" onclick="resetFilters()">Reset</button>
+                                <button type="submit" class="btn btn-primary rounded-3 w-100">Apply</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Opportunities Table -->
+                <div class="card bg-white border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Placement Position</th>
+                                    <th>Corporate Partner</th>
+                                    <th>Location</th>
+                                    <th>Stipend (Monthly)</th>
+                                    <th>Duration</th>
+                                    <th>Open Openings</th>
+                                    <th>Active Interns</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="internshipsTableBody">
+                                <tr>
+                                    <td colspan="9" class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading opportunities...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Opportunities pagination" class="mt-4">
+                    <ul class="pagination justify-content-center" id="pagination"></ul>
+                </nav>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer mt-auto">
+                &copy; 2026 Smart University Internship Portal. Administrative ERP Secure Center.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Create Internship Modal -->
+    <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="createModalLabel"><i class="bi bi-briefcase-fill text-primary me-2"></i>Create Internship Posting</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="createForm" onsubmit="submitCreateInternship(event)">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="createCompanyId" class="form-label fw-semibold small">Employer Partner</label>
+                                <select class="form-select rounded-3" id="createCompanyId" required>
+                                    <option value="">Choose partner...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="createTitle" class="form-label fw-semibold small">Placement Position Title</label>
+                                <input type="text" class="form-control rounded-3" id="createTitle" placeholder="e.g. Node.js Developer Intern" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="createLocation" class="form-label fw-semibold small">Work Location</label>
+                                <input type="text" class="form-control rounded-3" id="createLocation" placeholder="e.g. Remote, Boston">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="createDuration" class="form-label fw-semibold small">Internship Duration</label>
+                                <input type="text" class="form-control rounded-3" id="createDuration" placeholder="e.g. 6 Months" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="createStipend" class="form-label fw-semibold small">Stipend ($)</label>
+                                <input type="number" class="form-control rounded-3" id="createStipend" placeholder="e.g. 1500" min="0">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="createPositions" class="form-label fw-semibold small">Positions</label>
+                                <input type="number" class="form-control rounded-3" id="createPositions" value="1" min="1" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="createDescription" class="form-label fw-semibold small">Placement Description</label>
+                                <textarea class="form-control rounded-3" id="createDescription" rows="3" placeholder="Job description..."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="createRequirements" class="form-label fw-semibold small">Requirements / Prerequisites</label>
+                                <textarea class="form-control rounded-3" id="createRequirements" rows="2" placeholder="Skills, course requirements..."></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4 py-2 rounded-3">Publish Opportunity</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Internship Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="editModalLabel"><i class="bi bi-pencil-square text-primary me-2"></i>Edit Opportunity parameters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="editForm" onsubmit="submitEditInternship(event)">
+                        <input type="hidden" id="editInternshipId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="editCompanyLabel" class="form-label fw-semibold small">Employer Partner</label>
+                                <input type="text" class="form-control rounded-3 bg-light" id="editCompanyLabel" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editTitle" class="form-label fw-semibold small">Placement Position Title</label>
+                                <input type="text" class="form-control rounded-3" id="editTitle" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="editLocation" class="form-label fw-semibold small">Work Location</label>
+                                <input type="text" class="form-control rounded-3" id="editLocation" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="editDuration" class="form-label fw-semibold small">Duration</label>
+                                <input type="text" class="form-control rounded-3" id="editDuration" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="editStipend" class="form-label fw-semibold small">Stipend ($)</label>
+                                <input type="number" class="form-control rounded-3" id="editStipend" min="0">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="editPositions" class="form-label fw-semibold small">Positions</label>
+                                <input type="number" class="form-control rounded-3" id="editPositions" min="1" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="editStatus" class="form-label fw-semibold small">Opportunity Status</label>
+                                <select class="form-select rounded-3" id="editStatus" required>
+                                    <option value="open">Open</option>
+                                    <option value="closed">Closed</option>
+                                    <option value="filled">Filled</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="editDescription" class="form-label fw-semibold small">Placement Description</label>
+                                <textarea class="form-control rounded-3" id="editDescription" rows="3"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="editRequirements" class="form-label fw-semibold small">Requirements</label>
+                                <textarea class="form-control rounded-3" id="editRequirements" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4 py-2 rounded-3">Save Opportunities</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let currentPage = 1;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load Profile Name
+            try {
+                const response = await fetch('/api/auth/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        document.getElementById('navUserName').innerText = data.user.name;
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching admin profile:', err);
+            }
+
+            // Load Companies list
+            await loadCompaniesDropdown();
+
+            // Initial load of internships
+            await loadInternships(1);
+
+            // Setup Mobile Sidebar Toggle
+            const sidebarToggle = document.querySelector('.btn-sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebarToggle && sidebar && overlay) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.add('show');
+                    overlay.classList.add('show');
+                });
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                });
+            }
+        });
+
+        async function loadCompaniesDropdown() {
+            try {
+                const response = await fetch('/api/admin/companies?limit=200');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.companies) {
+                        const filterCompany = document.getElementById('filterCompany');
+                        const createCompanyId = document.getElementById('createCompanyId');
+
+                        data.companies.forEach(c => {
+                            const opt1 = new Option(c.company_name, c.id);
+                            filterCompany.add(opt1);
+
+                            const opt2 = new Option(c.company_name, c.id);
+                            createCompanyId.add(opt2);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading companies dropdown:', err);
+            }
+        }
+
+        async function loadInternships(page = 1) {
+            currentPage = page;
+            const search = document.getElementById('filterSearch').value;
+            const companyId = document.getElementById('filterCompany').value;
+            const status = document.getElementById('filterStatus').value;
+
+            const params = new URLSearchParams({
+                page,
+                limit: 10,
+                search,
+                companyId,
+                status
+            });
+
+            try {
+                const response = await fetch(`/api/admin/internships?${params.toString()}`);
+                if (!response.ok) throw new Error('Failed to load internships.');
+                const data = await response.json();
+                if (data.success) {
+                    const { internships, total, totalPages } = data;
+                    const tableBody = document.getElementById('internshipsTableBody');
+
+                    if (internships.length > 0) {
+                        tableBody.innerHTML = internships.map(i => {
+                            const statusBadge = {
+                                open: '<span class="badge bg-success rounded-pill px-2">OPEN</span>',
+                                closed: '<span class="badge bg-danger rounded-pill px-2">CLOSED</span>',
+                                filled: '<span class="badge bg-secondary rounded-pill px-2">FILLED</span>'
+                            }[i.status] || i.status;
+
+                            const stipendLabel = i.stipend !== null ? `$${parseFloat(i.stipend).toFixed(0)}` : 'Unpaid';
+                            const activeCount = i.assigned_students_count || 0;
+
+                            return `
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold text-dark">${escapeHtml(i.title)}</div>
+                                        <div class="text-secondary small italic">${escapeHtml(i.duration || '6 Months')} duration</div>
+                                    </td>
+                                    <td><span class="fw-semibold text-dark">${escapeHtml(i.company_name)}</span></td>
+                                    <td><span class="badge bg-light text-dark border"><i class="bi bi-geo-alt me-1"></i>${escapeHtml(i.location || 'Remote')}</span></td>
+                                    <td class="font-monospace fw-bold text-success">${stipendLabel}</td>
+                                    <td class="text-secondary small">${escapeHtml(i.duration || '--')}</td>
+                                    <td class="text-center font-monospace small">${i.positions || 1} Openings</td>
+                                    <td class="text-center font-monospace fw-bold text-primary">${activeCount} Interns</td>
+                                    <td>${statusBadge}</td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-outline-primary btn-sm rounded-3" onclick="openEditModal(${i.id}, '${escapeHtml(i.title)}', '${escapeHtml(i.company_name)}', '${escapeHtml(i.location)}', '${escapeHtml(i.duration)}', ${i.stipend}, ${i.positions}, '${i.status}', '${escapeHtml(i.description)}', '${escapeHtml(i.requirements)}')"><i class="bi bi-pencil-square"></i> Manage Opportunity</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="9" class="text-center py-5 text-muted">
+                                    <i class="bi bi-briefcase fs-2 d-block mb-2 text-secondary"></i>
+                                    No placement opportunities match your search parameters.
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    setupPagination(totalPages, page);
+                }
+            } catch (err) {
+                console.error('Error loading internships:', err);
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('filterSearch').value = '';
+            document.getElementById('filterCompany').value = '';
+            document.getElementById('filterStatus').value = '';
+            loadInternships(1);
+        }
+
+        function setupPagination(totalPages, activePage) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous
+            pagination.innerHTML += `
+                <li class="page-item ${activePage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="event.preventDefault(); loadInternships(${activePage - 1})">Previous</a>
+                </li>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.innerHTML += `
+                    <li class="page-item ${activePage === i ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="event.preventDefault(); loadInternships(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next
+            pagination.innerHTML += `
+                <li class="page-item ${activePage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="event.preventDefault(); loadInternships(${activePage + 1})">Next</a>
+                </li>
+            `;
+        }
+
+        function openCreateModal() {
+            document.getElementById('createForm').reset();
+            const modal = new bootstrap.Modal(document.getElementById('createModal'));
+            modal.show();
+        }
+
+        async function submitCreateInternship(e) {
+            e.preventDefault();
+            const company_id = document.getElementById('createCompanyId').value;
+            const title = document.getElementById('createTitle').value;
+            const location = document.getElementById('createLocation').value;
+            const duration = document.getElementById('createDuration').value;
+            const stipend = document.getElementById('createStipend').value;
+            const positions = document.getElementById('createPositions').value;
+            const description = document.getElementById('createDescription').value;
+            const requirements = document.getElementById('createRequirements').value;
+
+            try {
+                const response = await fetch('/api/admin/internships', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ company_id, title, location, duration, stipend, positions, description, requirements })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const modalEl = document.getElementById('createModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    await loadInternships(1);
+                } else {
+                    alert(data.message || 'Error creating internship.');
+                }
+            } catch (err) {
+                console.error('Error creating internship:', err);
+                alert('Internal server error.');
+            }
+        }
+
+        function openEditModal(id, title, companyName, location, duration, stipend, positions, status, description, requirements) {
+            document.getElementById('editInternshipId').value = id;
+            document.getElementById('editCompanyLabel').value = companyName;
+            document.getElementById('editTitle').value = title;
+            document.getElementById('editLocation').value = location !== 'null' ? location : '';
+            document.getElementById('editDuration').value = duration !== 'null' ? duration : '';
+            document.getElementById('editStipend').value = (stipend !== null && stipend !== 'null') ? stipend : '';
+            document.getElementById('editPositions').value = positions || 1;
+            document.getElementById('editStatus').value = status;
+            document.getElementById('editDescription').value = description !== 'null' ? description : '';
+            document.getElementById('editRequirements').value = requirements !== 'null' ? requirements : '';
+
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+        }
+
+        async function submitEditInternship(e) {
+            e.preventDefault();
+            const id = document.getElementById('editInternshipId').value;
+            const title = document.getElementById('editTitle').value;
+            const location = document.getElementById('editLocation').value;
+            const duration = document.getElementById('editDuration').value;
+            const stipend = document.getElementById('editStipend').value;
+            const positions = document.getElementById('editPositions').value;
+            const status = document.getElementById('editStatus').value;
+            const description = document.getElementById('editDescription').value;
+            const requirements = document.getElementById('editRequirements').value;
+
+            try {
+                const response = await fetch(`/api/admin/internships/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, location, duration, stipend, positions, status, description, requirements })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const modalEl = document.getElementById('editModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    await loadInternships(currentPage);
+                } else {
+                    alert(data.message || 'Error updating internship.');
+                }
+            } catch (err) {
+                console.error('Error submitting edit internship:', err);
+                alert('Internal server error.');
+            }
+        }
+
+        function exportData(format) {
+            window.open(`/api/admin/export/internships?format=${format}`, '_blank');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>

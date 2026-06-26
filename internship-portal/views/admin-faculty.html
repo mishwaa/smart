@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Admin Faculty Management">
+    <title>Manage Faculty - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/admin/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="bi bi-speedometer2"></i> Admin Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/users">
+                            <i class="bi bi-shield-lock"></i> Manage Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/students">
+                            <i class="bi bi-people"></i> Manage Students
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/faculty">
+                            <i class="bi bi-person-badge"></i> Manage Faculty
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/companies">
+                            <i class="bi bi-building"></i> Manage Companies
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/internships">
+                            <i class="bi bi-briefcase"></i> Manage Internships
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/system">
+                            <i class="bi bi-gear"></i> System Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle text-primary"></i> <span id="navUserName">Loading Admin...</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/change-password"><i class="bi bi-key me-2"></i>Change Password</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-0 fw-bold text-dark">Faculty Coordinators Workload</h1>
+                        <p class="text-muted mb-0">Manage academic departments, track student supervision workloads, and update profiles.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary rounded-3" onclick="exportData('csv')"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
+                        <button class="btn btn-outline-danger rounded-3" onclick="exportData('pdf')"><i class="bi bi-file-pdf me-1"></i> Export PDF Ledger</button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card bg-white border-0 shadow-sm p-4 mb-4 rounded-4">
+                    <form id="filterForm" onsubmit="event.preventDefault(); loadFaculty(1);">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="filterSearch" class="form-label small fw-semibold text-muted">Search Name / Employee ID</label>
+                                <input type="text" class="form-control bg-light" id="filterSearch" placeholder="e.g. Professor Connor, FAC-501">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="filterDept" class="form-label small fw-semibold text-muted">Department</label>
+                                <select class="form-select bg-light" id="filterDept">
+                                    <option value="">All Departments</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Information Technology">Information Technology</option>
+                                    <option value="Electronics & Communication">Electronics & Communication</option>
+                                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end justify-content-end gap-2">
+                                <button type="button" class="btn btn-light rounded-3 w-100" onclick="resetFilters()">Reset</button>
+                                <button type="submit" class="btn btn-primary rounded-3 w-100">Apply</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Faculty Table -->
+                <div class="card bg-white border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Employee ID</th>
+                                    <th>Coordinator Name</th>
+                                    <th>Department</th>
+                                    <th>Designation</th>
+                                    <th>Contact Phone</th>
+                                    <th>Supervision Workload</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="facultyTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading faculty...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Faculty pagination" class="mt-4">
+                    <ul class="pagination justify-content-center" id="pagination"></ul>
+                </nav>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer mt-auto">
+                &copy; 2026 Smart University Internship Portal. Administrative ERP Secure Center.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Edit Faculty Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="editModalLabel"><i class="bi bi-pencil-square me-2 text-primary"></i>Edit Faculty Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="editForm" onsubmit="submitEditFaculty(event)">
+                        <input type="hidden" id="editFacultyId">
+                        <div class="mb-3">
+                            <label for="editFacultyName" class="form-label fw-semibold small">Coordinator Name</label>
+                            <input type="text" class="form-control rounded-3" id="editFacultyName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDesignation" class="form-label fw-semibold small">Designation</label>
+                            <input type="text" class="form-control rounded-3" id="editDesignation" placeholder="e.g. Associate Professor" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDept" class="form-label fw-semibold small">Department</label>
+                            <select class="form-select rounded-3" id="editDept" required>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Electronics & Communication">Electronics & Communication</option>
+                                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPhone" class="form-label fw-semibold small">Contact Phone</label>
+                            <input type="text" class="form-control rounded-3" id="editPhone" placeholder="e.g. +1 555-0199">
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4 py-2 rounded-3">Update Faculty Details</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let currentPage = 1;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load Profile Name
+            try {
+                const response = await fetch('/api/auth/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        document.getElementById('navUserName').innerText = data.user.name;
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching admin profile:', err);
+            }
+
+            // Initial load of faculty
+            await loadFaculty(1);
+
+            // Setup Mobile Sidebar Toggle
+            const sidebarToggle = document.querySelector('.btn-sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebarToggle && sidebar && overlay) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.add('show');
+                    overlay.classList.add('show');
+                });
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                });
+            }
+        });
+
+        async function loadFaculty(page = 1) {
+            currentPage = page;
+            const search = document.getElementById('filterSearch').value;
+            const department = document.getElementById('filterDept').value;
+
+            const params = new URLSearchParams({
+                page,
+                limit: 10,
+                search,
+                department
+            });
+
+            try {
+                const response = await fetch(`/api/admin/faculty?${params.toString()}`);
+                if (!response.ok) throw new Error('Failed to load faculty.');
+                const data = await response.json();
+                if (data.success) {
+                    const { faculty, total, totalPages } = data;
+                    const tableBody = document.getElementById('facultyTableBody');
+
+                    if (faculty.length > 0) {
+                        tableBody.innerHTML = faculty.map(f => {
+                            const count = f.student_count || 0;
+                            const workloadBadge = count > 20
+                                ? `<span class="badge bg-danger rounded-pill px-2 py-1">${count} Interns (High)</span>`
+                                : count > 0
+                                ? `<span class="badge bg-success rounded-pill px-2 py-1">${count} Interns</span>`
+                                : `<span class="badge bg-secondary rounded-pill px-2 py-1">0 Interns (Idle)</span>`;
+
+                            return `
+                                <tr>
+                                    <td class="ps-4 text-muted font-monospace small">${f.employee_id}</td>
+                                    <td>
+                                        <div class="fw-bold text-dark">${escapeHtml(f.first_name)} ${escapeHtml(f.last_name)}</div>
+                                        <div class="text-muted small">${escapeHtml(f.email)}</div>
+                                    </td>
+                                    <td><span class="fw-semibold text-dark">${escapeHtml(f.department || 'N/A')}</span></td>
+                                    <td>${escapeHtml(f.designation || 'Lecturer')}</td>
+                                    <td class="text-secondary small">${escapeHtml(f.phone || '--')}</td>
+                                    <td>${workloadBadge}</td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-outline-primary btn-sm rounded-3" onclick="openEditModal(${f.id}, '${escapeHtml(f.first_name)} ${escapeHtml(f.last_name)}', '${escapeHtml(f.designation)}', '${escapeHtml(f.department)}', '${escapeHtml(f.phone)}')"><i class="bi bi-pencil"></i> Edit Profile</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-person-badge fs-2 d-block mb-2 text-secondary"></i>
+                                    No faculty coordinators match your search parameters.
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    setupPagination(totalPages, page);
+                }
+            } catch (err) {
+                console.error('Error loading faculty list:', err);
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('filterSearch').value = '';
+            document.getElementById('filterDept').value = '';
+            loadFaculty(1);
+        }
+
+        function setupPagination(totalPages, activePage) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous
+            pagination.innerHTML += `
+                <li class="page-item ${activePage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="event.preventDefault(); loadFaculty(${activePage - 1})">Previous</a>
+                </li>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.innerHTML += `
+                    <li class="page-item ${activePage === i ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="event.preventDefault(); loadFaculty(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next
+            pagination.innerHTML += `
+                <li class="page-item ${activePage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="event.preventDefault(); loadFaculty(${activePage + 1})">Next</a>
+                </li>
+            `;
+        }
+
+        function openEditModal(id, name, designation, dept, phone) {
+            document.getElementById('editFacultyId').value = id;
+            document.getElementById('editFacultyName').value = name;
+            document.getElementById('editDesignation').value = designation || 'Lecturer';
+            document.getElementById('editDept').value = dept || 'Computer Science';
+            document.getElementById('editPhone').value = (phone !== 'null' && phone !== '--') ? phone : '';
+
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+        }
+
+        async function submitEditFaculty(e) {
+            e.preventDefault();
+            const id = document.getElementById('editFacultyId').value;
+            const designation = document.getElementById('editDesignation').value;
+            const department = document.getElementById('editDept').value;
+            const phone = document.getElementById('editPhone').value;
+
+            try {
+                const response = await fetch(`/api/admin/faculty/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ designation, department, phone })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const modalEl = document.getElementById('editModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    await loadFaculty(currentPage);
+                } else {
+                    alert(data.message || 'Error updating faculty.');
+                }
+            } catch (err) {
+                console.error('Error submitting edit faculty:', err);
+                alert('Internal server error.');
+            }
+        }
+
+        function exportData(format) {
+            window.open(`/api/admin/export/faculty?format=${format}`, '_blank');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>

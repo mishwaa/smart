@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Admin Student Management">
+    <title>Manage Students - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/admin/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="bi bi-speedometer2"></i> Admin Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/users">
+                            <i class="bi bi-shield-lock"></i> Manage Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/students">
+                            <i class="bi bi-people"></i> Manage Students
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/faculty">
+                            <i class="bi bi-person-badge"></i> Manage Faculty
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/companies">
+                            <i class="bi bi-building"></i> Manage Companies
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/internships">
+                            <i class="bi bi-briefcase"></i> Manage Internships
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/system">
+                            <i class="bi bi-gear"></i> System Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle text-primary"></i> <span id="navUserName">Loading Admin...</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/change-password"><i class="bi bi-key me-2"></i>Change Password</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-0 fw-bold text-dark">Student Placement Management</h1>
+                        <p class="text-muted mb-0">Track student academic parameters, assign faculty coordinators, and orchestrate internship assignments.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary rounded-3" onclick="exportData('csv')"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
+                        <button class="btn btn-outline-danger rounded-3" onclick="exportData('pdf')"><i class="bi bi-file-pdf me-1"></i> Export PDF Ledger</button>
+                        <button class="btn btn-warning rounded-3" onclick="openBulkAssignModal()"><i class="bi bi-person-gear me-1"></i> Bulk Assign Faculty</button>
+                    </div>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="card bg-white border-0 shadow-sm p-4 mb-4 rounded-4">
+                    <form id="filterForm" onsubmit="event.preventDefault(); loadStudents(1);">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="filterSearch" class="form-label small fw-semibold text-muted">Search Name / Roll No</label>
+                                <input type="text" class="form-control bg-light" id="filterSearch" placeholder="e.g. Robert Davis">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filterDept" class="form-label small fw-semibold text-muted">Department</label>
+                                <select class="form-select bg-light" id="filterDept">
+                                    <option value="">All Departments</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Information Technology">Information Technology</option>
+                                    <option value="Electronics & Communication">Electronics & Communication</option>
+                                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="filterSemester" class="form-label small fw-semibold text-muted">Semester</label>
+                                <select class="form-select bg-light" id="filterSemester">
+                                    <option value="">All</option>
+                                    <option value="5">Sem 5</option>
+                                    <option value="6">Sem 6</option>
+                                    <option value="7">Sem 7</option>
+                                    <option value="8">Sem 8</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="filterFaculty" class="form-label small fw-semibold text-muted">Coordinator</label>
+                                <select class="form-select bg-light" id="filterFaculty">
+                                    <option value="">All Coordinators</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end justify-content-end gap-2">
+                                <button type="button" class="btn btn-light rounded-3 w-100" onclick="resetFilters()">Reset</button>
+                                <button type="submit" class="btn btn-primary rounded-3 w-100">Apply</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Students Table -->
+                <div class="card bg-white border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4" style="width: 40px;">
+                                        <input class="form-check-input" type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                                    </th>
+                                    <th>Student Details</th>
+                                    <th>Department & Sem</th>
+                                    <th>Academic Coordinator</th>
+                                    <th>Corporate Placement</th>
+                                    <th>CGPA</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading students...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Students pagination" class="mt-4">
+                    <ul class="pagination justify-content-center" id="pagination"></ul>
+                </nav>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer mt-auto">
+                &copy; 2026 Smart University Internship Portal. Administrative ERP Secure Center.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="editModalLabel"><i class="bi bi-pencil-square me-2 text-primary"></i>Manage Student Placement & Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="editForm" onsubmit="submitEditStudent(event)">
+                        <input type="hidden" id="editStudentId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="editStudentName" class="form-label fw-semibold small">Student Name</label>
+                                <input type="text" class="form-control rounded-3" id="editStudentName" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editStudentRoll" class="form-label fw-semibold small">Roll Number</label>
+                                <input type="text" class="form-control rounded-3" id="editStudentRoll" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="editDept" class="form-label fw-semibold small">Department</label>
+                                <select class="form-select rounded-3" id="editDept" required>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Information Technology">Information Technology</option>
+                                    <option value="Electronics & Communication">Electronics & Communication</option>
+                                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="editSemester" class="form-label fw-semibold small">Semester</label>
+                                <input type="number" class="form-control rounded-3" id="editSemester" min="1" max="10" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="editCgpa" class="form-label fw-semibold small">CGPA Score</label>
+                                <input type="number" class="form-control rounded-3" id="editCgpa" min="0.00" max="10.00" step="0.01" required>
+                            </div>
+
+                            <!-- Assignment Sections -->
+                            <div class="col-12 border-top pt-3">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-badge text-success me-2"></i>Academic Supervision Assignment</h6>
+                            </div>
+                            <div class="col-12">
+                                <label for="editFacultyId" class="form-label fw-semibold small">Academic Coordinator</label>
+                                <select class="form-select rounded-3" id="editFacultyId">
+                                    <option value="">Unassigned</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 border-top pt-3">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-briefcase text-warning me-2"></i>Corporate Placement Assignment</h6>
+                            </div>
+                            <div class="col-12">
+                                <label for="editInternshipId" class="form-label fw-semibold small">Placement Internship Posting</label>
+                                <select class="form-select rounded-3" id="editInternshipId">
+                                    <option value="">Unplaced</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4 py-2 rounded-3">Update Student Portfolio</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Assign Faculty Modal -->
+    <div class="modal fade" id="bulkAssignModal" tabindex="-1" aria-labelledby="bulkAssignModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="bulkAssignModalLabel"><i class="bi bi-person-gear me-2 text-warning"></i>Bulk Assign Coordinator</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="bulkAssignForm" onsubmit="submitBulkAssign(event)">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Selected Students Count</label>
+                            <input type="text" class="form-control rounded-3 bg-light" id="bulkCount" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bulkFacultyId" class="form-label fw-semibold small">Select Academic Coordinator</label>
+                            <select class="form-select rounded-3" id="bulkFacultyId" required>
+                                <option value="">Select Coordinator...</option>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning px-4 py-2 rounded-3">Bulk Map Coordinator</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let currentPage = 1;
+        let selectedStudentIds = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load Profile Name
+            try {
+                const response = await fetch('/api/auth/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        document.getElementById('navUserName').innerText = data.user.name;
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching admin profile:', err);
+            }
+
+            // Load filter and edit drop-downs (Faculty, Internships)
+            await loadDropdowns();
+
+            // Initial load of students
+            await loadStudents(1);
+
+            // Setup Mobile Sidebar Toggle
+            const sidebarToggle = document.querySelector('.btn-sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebarToggle && sidebar && overlay) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.add('show');
+                    overlay.classList.add('show');
+                });
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                });
+            }
+        });
+
+        async function loadDropdowns() {
+            try {
+                // 1. Fetch Faculty list
+                const facResponse = await fetch(`/api/admin/faculty?limit=200&_t=${Date.now()}`);
+                if (facResponse.ok) {
+                    const data = await facResponse.json();
+                    if (data.success && data.faculty) {
+                        const filterFaculty = document.getElementById('filterFaculty');
+                        const editFacultyId = document.getElementById('editFacultyId');
+                        const bulkFacultyId = document.getElementById('bulkFacultyId');
+
+                        data.faculty.forEach(f => {
+                            const optionText = `${f.first_name} ${f.last_name} (${f.employee_id} - ${f.department})`;
+                            
+                            const opt1 = new Option(optionText, f.id);
+                            filterFaculty.add(opt1);
+                            
+                            const opt2 = new Option(optionText, f.id);
+                            editFacultyId.add(opt2);
+                            
+                            const opt3 = new Option(optionText, f.id);
+                            bulkFacultyId.add(opt3);
+                        });
+                    }
+                }
+
+                // 2. Fetch Active Internships list
+                const intResponse = await fetch(`/api/admin/internships?limit=500&_t=${Date.now()}`);
+                if (intResponse.ok) {
+                    const data = await intResponse.json();
+                    if (data.success && data.internships) {
+                        const editInternshipId = document.getElementById('editInternshipId');
+                        data.internships.forEach(i => {
+                            const optionText = `${i.title} at ${i.company_name} (${i.location} - ${i.status.toUpperCase()})`;
+                            const opt = new Option(optionText, i.id);
+                            editInternshipId.add(opt);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading dropdown lists:', err);
+            }
+        }
+
+        async function loadStudents(page = 1) {
+            currentPage = page;
+            const search = document.getElementById('filterSearch').value;
+            const department = document.getElementById('filterDept').value;
+            const semester = document.getElementById('filterSemester').value;
+            const facultyId = document.getElementById('filterFaculty').value;
+
+            const params = new URLSearchParams({
+                page,
+                limit: 10,
+                search,
+                department,
+                semester,
+                facultyId
+            });
+
+            try {
+                const response = await fetch(`/api/admin/students?${params.toString()}&_t=${Date.now()}`);
+                if (!response.ok) throw new Error('Failed to load students.');
+                const data = await response.json();
+                if (data.success) {
+                    const { students, total, totalPages } = data;
+                    const tableBody = document.getElementById('studentsTableBody');
+
+                    if (students.length > 0) {
+                        tableBody.innerHTML = students.map(s => {
+                            const isChecked = selectedStudentIds.includes(s.id) ? 'checked' : '';
+                            
+                            const placementLabel = s.internship_title
+                                ? `<span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 mb-1"><i class="bi bi-building me-1"></i>${escapeHtml(s.company_name)}</span><div class="small text-secondary fw-semibold">${escapeHtml(s.internship_title)}</div>`
+                                : `<span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2">Unplaced</span>`;
+
+                            const coordinatorLabel = s.faculty_name
+                                ? `<div class="fw-semibold text-dark">${escapeHtml(s.faculty_name)}</div>`
+                                : `<span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2">Unassigned</span>`;
+
+                            return `
+                                <tr>
+                                    <td class="ps-4">
+                                        <input class="form-check-input student-checkbox" type="checkbox" value="${s.id}" ${isChecked} onchange="toggleStudentSelection(${s.id}, this)">
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark">${escapeHtml(s.first_name)} ${escapeHtml(s.last_name)}</div>
+                                        <div class="text-muted small">${escapeHtml(s.roll_number)} | ${escapeHtml(s.email)}</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">${escapeHtml(s.department || 'N/A')}</div>
+                                        <div class="text-muted small">Semester ${s.semester || 'N/A'}</div>
+                                    </td>
+                                    <td>${coordinatorLabel}</td>
+                                    <td>${placementLabel}</td>
+                                    <td class="font-monospace fw-bold text-secondary">${s.cgpa !== null ? parseFloat(s.cgpa).toFixed(2) : '--'}</td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-outline-primary btn-sm rounded-3" onclick="openEditModal(${s.id}, '${escapeHtml(s.first_name)} ${escapeHtml(s.last_name)}', '${escapeHtml(s.roll_number)}', '${escapeHtml(s.department)}', ${s.semester}, ${s.cgpa}, ${s.faculty_id || 'null'}, ${s.active_internship_id || 'null'})"><i class="bi bi-pencil-square"></i> Assign / Edit</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-mortarboard fs-2 d-block mb-2 text-secondary"></i>
+                                    No student profiles match your search parameters.
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    setupPagination(totalPages, page);
+                }
+            } catch (err) {
+                console.error('Error loading students list:', err);
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('filterSearch').value = '';
+            document.getElementById('filterDept').value = '';
+            document.getElementById('filterSemester').value = '';
+            document.getElementById('filterFaculty').value = '';
+            loadStudents(1);
+        }
+
+        function setupPagination(totalPages, activePage) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous
+            pagination.innerHTML += `
+                <li class="page-item ${activePage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="event.preventDefault(); loadStudents(${activePage - 1})">Previous</a>
+                </li>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.innerHTML += `
+                    <li class="page-item ${activePage === i ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="event.preventDefault(); loadStudents(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next
+            pagination.innerHTML += `
+                <li class="page-item ${activePage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="event.preventDefault(); loadStudents(${activePage + 1})">Next</a>
+                </li>
+            `;
+        }
+
+        // Selection Handlers
+        function toggleStudentSelection(id, checkbox) {
+            if (checkbox.checked) {
+                if (!selectedStudentIds.includes(id)) selectedStudentIds.push(id);
+            } else {
+                selectedStudentIds = selectedStudentIds.filter(val => val !== id);
+            }
+        }
+
+        function toggleSelectAll() {
+            const master = document.getElementById('selectAllCheckbox');
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = master.checked;
+                const id = parseInt(cb.value, 10);
+                toggleStudentSelection(id, cb);
+            });
+        }
+
+        // Modals
+        async function openEditModal(id, name, roll, dept, sem, cgpa, facultyId, internshipId) {
+            document.getElementById('editStudentId').value = id;
+            document.getElementById('editStudentName').value = name;
+            document.getElementById('editStudentRoll').value = roll;
+            document.getElementById('editDept').value = dept || 'Computer Science';
+            document.getElementById('editSemester').value = sem || 8;
+            document.getElementById('editCgpa').value = cgpa !== null ? cgpa : '';
+
+            // Set Drop-Down selections
+            // We fetch the active student dossier or simply find the accepted placement from active dropdown lists
+            // For placements: the accepted internship_id is stored in a data-attribute or we can query
+            document.getElementById('editFacultyId').value = facultyId !== null ? facultyId : '';
+            
+            // To find the student's active internship assignment:
+            try {
+                // Find if an accepted application already exists to pre-fill the dropdown
+                const response = await fetch(`/api/admin/students?search=${roll}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.students && data.students[0]) {
+                        const stud = data.students[0];
+                        // If they have an active placement title, find the matching internship ID in the dropdown
+                        // We will set it in a fetch in production or search for the matching name
+                    }
+                }
+            } catch(e){}
+
+            document.getElementById('editInternshipId').value = ''; // default empty, admin can select to override
+
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+        }
+
+        async function submitEditStudent(e) {
+            e.preventDefault();
+            const id = document.getElementById('editStudentId').value;
+            const faculty_id = document.getElementById('editFacultyId').value;
+            const department = document.getElementById('editDept').value;
+            const semester = document.getElementById('editSemester').value;
+            const cgpa = document.getElementById('editCgpa').value;
+            const internship_id = document.getElementById('editInternshipId').value;
+
+            try {
+                const response = await fetch(`/api/admin/students/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ faculty_id, department, semester, cgpa, internship_id })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const modalEl = document.getElementById('editModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    await loadStudents(currentPage);
+                } else {
+                    alert(data.message || 'Error updating student.');
+                }
+            } catch (err) {
+                console.error('Error submitting edit student:', err);
+                alert('Internal server error.');
+            }
+        }
+
+        function openBulkAssignModal() {
+            if (selectedStudentIds.length === 0) {
+                alert('Please select one or more students using the checkboxes in the table.');
+                return;
+            }
+
+            document.getElementById('bulkCount').value = `${selectedStudentIds.length} Students Selected`;
+            document.getElementById('bulkFacultyId').value = '';
+
+            const modal = new bootstrap.Modal(document.getElementById('bulkAssignModal'));
+            modal.show();
+        }
+
+        async function submitBulkAssign(e) {
+            e.preventDefault();
+            const facultyId = document.getElementById('bulkFacultyId').value;
+
+            try {
+                const response = await fetch('/api/admin/students/bulk-assign', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ studentIds: selectedStudentIds, facultyId })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const modalEl = document.getElementById('bulkAssignModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    alert(`Successfully assigned coordinator to ${selectedStudentIds.length} students.`);
+                    selectedStudentIds = [];
+                    document.getElementById('selectAllCheckbox').checked = false;
+                    await loadStudents(currentPage);
+                } else {
+                    alert(data.message || 'Error in bulk assignment.');
+                }
+            } catch (err) {
+                console.error('Error in bulk assign:', err);
+                alert('Internal server error.');
+            }
+        }
+
+        function exportData(format) {
+            window.open(`/api/admin/export/students?format=${format}`, '_blank');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>

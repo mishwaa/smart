@@ -13,6 +13,7 @@ const authController = require('../controllers/authController');
 const studentController = require('../controllers/studentController');
 const facultyController = require('../controllers/facultyController');
 const companyController = require('../controllers/companyController');
+const adminController = require('../controllers/adminController');
 const { requireAuth, requireAdmin, requireFaculty, requireCompany, requireStudent, isGuest } = require('../middleware/auth');
 const { uploadProfilePhoto, uploadStudentDocument } = require('../config/upload');
 
@@ -32,9 +33,14 @@ router.get('/change-password', requireAuth, authController.getChangePasswordPage
 router.post('/change-password', requireAuth, authController.changePassword);
 
 // ─── Role-Specific Dashboard & Page Modules ──────────────────────────────────
-router.get('/admin/dashboard', requireAuth, requireAdmin, (req, res) => {
-  res.sendFile(path.join(__dirname, '../views/admin-dashboard.html'));
-});
+// Admin Portal Views
+router.get('/admin/dashboard', requireAuth, requireAdmin, adminController.getDashboard);
+router.get('/admin/users', requireAuth, requireAdmin, adminController.getUsersPage);
+router.get('/admin/students', requireAuth, requireAdmin, adminController.getStudentsPage);
+router.get('/admin/faculty', requireAuth, requireAdmin, adminController.getFacultyPage);
+router.get('/admin/companies', requireAuth, requireAdmin, adminController.getCompaniesPage);
+router.get('/admin/internships', requireAuth, requireAdmin, adminController.getInternshipsPage);
+router.get('/admin/system', requireAuth, requireAdmin, adminController.getSystemPage);
 
 // Faculty Portal Views
 router.get('/faculty/dashboard', requireAuth, requireFaculty, facultyController.getDashboard);
@@ -149,5 +155,46 @@ router.post('/api/company/interns/:id/feedback', requireAuth, requireCompany, co
 
 // Secure Exports API
 router.get('/api/company/interns/:id/export/:type', requireAuth, requireCompany, companyController.exportInternData);
+
+// ─── Admin Portal API Endpoints ─────────────────────────────────────────────
+router.get('/api/admin/stats', requireAuth, requireAdmin, adminController.getDashboardStats);
+router.get('/api/admin/charts', requireAuth, requireAdmin, adminController.getDashboardCharts);
+router.get('/api/admin/recent-activities', requireAuth, requireAdmin, adminController.getRecentActivities);
+
+// User CRUD API
+router.get('/api/admin/users', requireAuth, requireAdmin, adminController.getUsers);
+router.post('/api/admin/users', requireAuth, requireAdmin, adminController.createUser);
+router.put('/api/admin/users/:id', requireAuth, requireAdmin, adminController.updateUser);
+router.delete('/api/admin/users/:id', requireAuth, requireAdmin, adminController.deleteUser);
+router.post('/api/admin/users/:id/reset-password', requireAuth, requireAdmin, adminController.resetPassword);
+
+// Student Cohort API
+router.get('/api/admin/students', requireAuth, requireAdmin, adminController.getStudents);
+router.put('/api/admin/students/:id', requireAuth, requireAdmin, adminController.updateStudent);
+router.post('/api/admin/students/bulk-assign', requireAuth, requireAdmin, adminController.bulkAssignFaculty);
+
+// Faculty Supervision API
+router.get('/api/admin/faculty', requireAuth, requireAdmin, adminController.getFaculty);
+router.put('/api/admin/faculty/:id', requireAuth, requireAdmin, adminController.updateFaculty);
+
+// Company & Partnership API
+router.get('/api/admin/companies', requireAuth, requireAdmin, adminController.getCompanies);
+router.post('/api/admin/companies/:id/approve', requireAuth, requireAdmin, adminController.approveCompany);
+router.put('/api/admin/companies/:id', requireAuth, requireAdmin, adminController.updateCompany);
+
+// Internship Placements API
+router.get('/api/admin/internships', requireAuth, requireAdmin, adminController.getInternships);
+router.post('/api/admin/internships', requireAuth, requireAdmin, adminController.createInternship);
+router.put('/api/admin/internships/:id', requireAuth, requireAdmin, adminController.updateInternship);
+
+// System Configuration & Logs API
+router.get('/api/admin/settings', requireAuth, requireAdmin, adminController.getSettings);
+router.post('/api/admin/settings', requireAuth, requireAdmin, adminController.updateSettings);
+router.get('/api/admin/audit-logs', requireAuth, requireAdmin, adminController.getAuditLogs);
+router.post('/api/admin/system/integrity', requireAuth, requireAdmin, adminController.runDataIntegrityChecks);
+router.post('/api/admin/system/backup', requireAuth, requireAdmin, adminController.runSystemBackup);
+
+// Secure Admin Exports API
+router.get('/api/admin/export/:type', requireAuth, requireAdmin, adminController.exportAdminData);
 
 module.exports = router;

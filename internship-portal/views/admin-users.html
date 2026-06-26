@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Admin Users Management">
+    <title>Manage Users - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/admin/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="bi bi-speedometer2"></i> Admin Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/users">
+                            <i class="bi bi-shield-lock"></i> Manage Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/students">
+                            <i class="bi bi-people"></i> Manage Students
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/faculty">
+                            <i class="bi bi-person-badge"></i> Manage Faculty
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/companies">
+                            <i class="bi bi-building"></i> Manage Companies
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/internships">
+                            <i class="bi bi-briefcase"></i> Manage Internships
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/system">
+                            <i class="bi bi-gear"></i> System Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle text-primary"></i> <span id="navUserName">Loading Admin...</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/change-password"><i class="bi bi-key me-2"></i>Change Password</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-0 fw-bold text-dark">User Accounts Orchestration</h1>
+                        <p class="text-muted mb-0">Audit, create, edit, deactivate, or delete core user accounts across all portal roles.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary rounded-3" onclick="exportData('csv')"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
+                        <button class="btn btn-outline-danger rounded-3" onclick="exportData('pdf')"><i class="bi bi-file-pdf me-1"></i> Export PDF Ledger</button>
+                        <button class="btn btn-primary rounded-3" onclick="openCreateModal()"><i class="bi bi-person-plus me-1"></i> Create User Account</button>
+                    </div>
+                </div>
+
+                <!-- Filters panel -->
+                <div class="card bg-white border-0 shadow-sm p-4 mb-4 rounded-4">
+                    <form id="filterForm" onsubmit="event.preventDefault(); loadUsers(1);">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="filterSearch" class="form-label small fw-semibold text-muted">Search Name / Email</label>
+                                <input type="text" class="form-control bg-light" id="filterSearch" placeholder="e.g. Professor Connor, student@university.com">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="filterRole" class="form-label small fw-semibold text-muted">System Role</label>
+                                <select class="form-select bg-light" id="filterRole">
+                                    <option value="">All Roles</option>
+                                    <option value="student">Student</option>
+                                    <option value="faculty">Faculty Coordinator</option>
+                                    <option value="company">Corporate Employer</option>
+                                    <option value="admin">System Administrator</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end justify-content-end gap-2">
+                                <button type="button" class="btn btn-light rounded-3 w-100" onclick="resetFilters()">Reset</button>
+                                <button type="submit" class="btn btn-primary rounded-3 w-100">Apply</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Users Table -->
+                <div class="card bg-white border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">ID</th>
+                                    <th>User Account Details</th>
+                                    <th>System Role</th>
+                                    <th>Account Status</th>
+                                    <th>Registration Date</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading users...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Users pagination" class="mt-4">
+                    <ul class="pagination justify-content-center" id="pagination"></ul>
+                </nav>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer mt-auto">
+                &copy; 2026 Smart University Internship Portal. Administrative ERP Secure Center.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="createModalLabel"><i class="bi bi-person-plus me-2 text-primary"></i>Create User Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="createForm" onsubmit="submitCreateUser(event)">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="createName" class="form-label fw-semibold small">Full Name</label>
+                                <input type="text" class="form-control rounded-3" id="createName" placeholder="e.g. John Davis" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="createEmail" class="form-label fw-semibold small">Email Address</label>
+                                <input type="email" class="form-control rounded-3" id="createEmail" placeholder="e.g. john@university.com" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="createPassword" class="form-label fw-semibold small">Initial Password</label>
+                                <input type="password" class="form-control rounded-3" id="createPassword" placeholder="Initial access password" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="createRole" class="form-label fw-semibold small">System Role</label>
+                                <select class="form-select rounded-3" id="createRole" onchange="toggleRoleFields()" required>
+                                    <option value="">Choose a role...</option>
+                                    <option value="student">Student</option>
+                                    <option value="faculty">Faculty Coordinator</option>
+                                    <option value="company">Corporate Employer</option>
+                                    <option value="admin">System Administrator</option>
+                                </select>
+                            </div>
+
+                            <!-- Role-Specific Custom Fields -->
+                            <div class="col-12 border-top pt-3 d-none" id="roleFieldsHeader">
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-plus-circle me-2 text-info"></i>Role-Specific Profile Data</h6>
+                            </div>
+
+                            <!-- Student Fields -->
+                            <div class="col-md-4 student-field d-none">
+                                <label for="studRoll" class="form-label fw-semibold small">Roll Number</label>
+                                <input type="text" class="form-control rounded-3 student-input" id="studRoll" placeholder="e.g. CS204">
+                            </div>
+                            <div class="col-md-4 student-field d-none">
+                                <label for="studEnroll" class="form-label fw-semibold small">Enrollment Number</label>
+                                <input type="text" class="form-control rounded-3 student-input" id="studEnroll" placeholder="e.g. ENR-CS204">
+                            </div>
+                            <div class="col-md-4 student-field d-none">
+                                <label for="studDept" class="form-label fw-semibold small">Department</label>
+                                <input type="text" class="form-control rounded-3 student-input" id="studDept" placeholder="e.g. Computer Science">
+                            </div>
+
+                            <!-- Faculty Fields -->
+                            <div class="col-md-6 faculty-field d-none">
+                                <label for="facEmployeeId" class="form-label fw-semibold small">Employee ID</label>
+                                <input type="text" class="form-control rounded-3 faculty-input" id="facEmployeeId" placeholder="e.g. FAC-501">
+                            </div>
+                            <div class="col-md-6 faculty-field d-none">
+                                <label for="facDept" class="form-label fw-semibold small">Department</label>
+                                <input type="text" class="form-control rounded-3 faculty-input" id="facDept" placeholder="e.g. Computer Science">
+                            </div>
+
+                            <!-- Company Fields -->
+                            <div class="col-md-6 company-field d-none">
+                                <label for="compName" class="form-label fw-semibold small">Company Corporate Name</label>
+                                <input type="text" class="form-control rounded-3 company-input" id="compName" placeholder="e.g. Apex Systems">
+                            </div>
+                            <div class="col-md-6 company-field d-none">
+                                <label for="compIndustry" class="form-label fw-semibold small">Industry Sector</label>
+                                <input type="text" class="form-control rounded-3 company-input" id="compIndustry" placeholder="e.g. Finance, Software">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4 py-2 rounded-3">Register Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="editModalLabel"><i class="bi bi-pencil-square me-2 text-primary"></i>Edit User details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="editForm" onsubmit="submitEditUser(event)">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label for="editName" class="form-label fw-semibold small">Name</label>
+                            <input type="text" class="form-control rounded-3" id="editName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label fw-semibold small">Email Address</label>
+                            <input type="email" class="form-control rounded-3" id="editEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStatus" class="form-label fw-semibold small">Account Status</label>
+                            <select class="form-select rounded-3" id="editStatus" required>
+                                <option value="1">Active</option>
+                                <option value="0">Deactivated / Suspended</option>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-4 py-2 rounded-3">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="resetPasswordModalLabel"><i class="bi bi-key-fill me-2 text-warning"></i>Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="resetPasswordForm" onsubmit="submitResetPassword(event)">
+                        <input type="hidden" id="resetPasswordUserId">
+                        <div class="mb-3">
+                            <label for="resetPasswordInput" class="form-label fw-semibold small">New Password</label>
+                            <input type="password" class="form-control rounded-3" id="resetPasswordInput" placeholder="Enter secure new password..." required>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning px-4 py-2 rounded-3">Reset & Force Change</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let currentPage = 1;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load Profile Name
+            try {
+                const response = await fetch('/api/auth/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.user) {
+                        document.getElementById('navUserName').innerText = data.user.name;
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching admin profile:', err);
+            }
+
+            // Initial load of users
+            await loadUsers(1);
+
+            // Setup Mobile Sidebar Toggle
+            const sidebarToggle = document.querySelector('.btn-sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebarToggle && sidebar && overlay) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.add('show');
+                    overlay.classList.add('show');
+                });
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                });
+            }
+        });
+
+        async function loadUsers(page = 1) {
+            currentPage = page;
+            const search = document.getElementById('filterSearch').value;
+            const role = document.getElementById('filterRole').value;
+
+            const params = new URLSearchParams({
+                page,
+                limit: 10,
+                search,
+                role
+            });
+
+            try {
+                const response = await fetch(`/api/admin/users?${params.toString()}`);
+                if (!response.ok) throw new Error('Failed to load users.');
+                const data = await response.json();
+                if (data.success) {
+                    const { users, total, totalPages } = data;
+                    const tableBody = document.getElementById('usersTableBody');
+
+                    if (users.length > 0) {
+                        tableBody.innerHTML = users.map(u => {
+                            const dateStr = new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                            
+                            const roleBadge = {
+                                student: '<span class="badge bg-info text-dark rounded-pill px-2">STUDENT</span>',
+                                faculty: '<span class="badge bg-success rounded-pill px-2">FACULTY COORDINATOR</span>',
+                                company: '<span class="badge bg-warning text-dark rounded-pill px-2">EMPLOYER PARTNER</span>',
+                                admin: '<span class="badge bg-danger rounded-pill px-2">SYSTEM ADMIN</span>'
+                            }[u.role] || u.role;
+
+                            const statusBadge = u.is_active
+                                ? '<span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">Active</span>'
+                                : '<span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2">Deactivated</span>';
+
+                            return `
+                                <tr>
+                                    <td class="ps-4 text-muted font-monospace small">${u.id}</td>
+                                    <td>
+                                        <div class="fw-bold text-dark">${escapeHtml(u.name)}</div>
+                                        <div class="text-muted small">${escapeHtml(u.email)}</div>
+                                    </td>
+                                    <td>${roleBadge}</td>
+                                    <td>${statusBadge}</td>
+                                    <td class="text-muted small">${dateStr}</td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-secondary" onclick="openEditModal(${u.id}, '${escapeHtml(u.name)}', '${escapeHtml(u.email)}', ${u.is_active})"><i class="bi bi-pencil"></i> Edit</button>
+                                            <button class="btn btn-outline-warning" onclick="openResetPasswordModal(${u.id})"><i class="bi bi-key"></i> Reset</button>
+                                            <button class="btn btn-outline-danger" onclick="deleteUserAccount(${u.id}, '${escapeHtml(u.email)}')"><i class="bi bi-trash"></i> Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-people fs-2 d-block mb-2 text-secondary"></i>
+                                    No user accounts match your search parameters.
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    setupPagination(totalPages, page);
+                }
+            } catch (err) {
+                console.error('Error loading users:', err);
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('filterSearch').value = '';
+            document.getElementById('filterRole').value = '';
+            loadUsers(1);
+        }
+
+        function setupPagination(totalPages, activePage) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous
+            pagination.innerHTML += `
+                <li class="page-item ${activePage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="event.preventDefault(); loadUsers(${activePage - 1})">Previous</a>
+                </li>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.innerHTML += `
+                    <li class="page-item ${activePage === i ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="event.preventDefault(); loadUsers(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next
+            pagination.innerHTML += `
+                <li class="page-item ${activePage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="event.preventDefault(); loadUsers(${activePage + 1})">Next</a>
+                </li>
+            `;
+        }
+
+        // Modal Handlers
+        function openCreateModal() {
+            document.getElementById('createForm').reset();
+            toggleRoleFields();
+            const modal = new bootstrap.Modal(document.getElementById('createModal'));
+            modal.show();
+        }
+
+        function toggleRoleFields() {
+            const role = document.getElementById('createRole').value;
+            const header = document.getElementById('roleFieldsHeader');
+            
+            // Hide all
+            header.classList.add('d-none');
+            document.querySelectorAll('.student-field, .faculty-field, .company-field').forEach(el => el.classList.add('d-none'));
+            document.querySelectorAll('.student-input, .faculty-input, .company-input').forEach(el => el.removeAttribute('required'));
+
+            if (role === 'student') {
+                header.classList.remove('d-none');
+                document.querySelectorAll('.student-field').forEach(el => el.classList.remove('d-none'));
+                document.getElementById('studRoll').setAttribute('required', 'true');
+            } else if (role === 'faculty') {
+                header.classList.remove('d-none');
+                document.querySelectorAll('.faculty-field').forEach(el => el.classList.remove('d-none'));
+                document.getElementById('facEmployeeId').setAttribute('required', 'true');
+            } else if (role === 'company') {
+                header.classList.remove('d-none');
+                document.querySelectorAll('.company-field').forEach(el => el.classList.remove('d-none'));
+                document.getElementById('compName').setAttribute('required', 'true');
+            }
+        }
+
+        async function submitCreateUser(e) {
+            e.preventDefault();
+            const name = document.getElementById('createName').value;
+            const email = document.getElementById('createEmail').value;
+            const password = document.getElementById('createPassword').value;
+            const role = document.getElementById('createRole').value;
+
+            const profileData = {};
+            if (role === 'student') {
+                profileData.rollNumber = document.getElementById('studRoll').value;
+                profileData.enrollmentNumber = document.getElementById('studEnroll').value;
+                profileData.department = document.getElementById('studDept').value;
+            } else if (role === 'faculty') {
+                profileData.employeeId = document.getElementById('facEmployeeId').value;
+                profileData.department = document.getElementById('facDept').value;
+            } else if (role === 'company') {
+                profileData.companyName = document.getElementById('compName').value;
+                profileData.industry = document.getElementById('compIndustry').value;
+            }
+
+            try {
+                const response = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, role, profileData })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const modalEl = document.getElementById('createModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    await loadUsers(1);
+                } else {
+                    alert(data.message || 'Error creating user account.');
+                }
+            } catch (err) {
+                console.error('Error submitting create user:', err);
+                alert('Internal server error.');
+            }
+        }
+
+        function openEditModal(id, name, email, isActive) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editName').value = name;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editStatus').value = isActive ? '1' : '0';
+
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+        }
+
+        async function submitEditUser(e) {
+            e.preventDefault();
+            const id = document.getElementById('editUserId').value;
+            const name = document.getElementById('editName').value;
+            const email = document.getElementById('editEmail').value;
+            const isActive = document.getElementById('editStatus').value === '1';
+
+            try {
+                const response = await fetch(`/api/admin/users/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, is_active: isActive })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const modalEl = document.getElementById('editModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    await loadUsers(currentPage);
+                } else {
+                    alert(data.message || 'Error updating user.');
+                }
+            } catch (err) {
+                console.error('Error submitting edit user:', err);
+                alert('Internal server error.');
+            }
+        }
+
+        function openResetPasswordModal(id) {
+            document.getElementById('resetPasswordUserId').value = id;
+            document.getElementById('resetPasswordInput').value = '';
+            const modal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+            modal.show();
+        }
+
+        async function submitResetPassword(e) {
+            e.preventDefault();
+            const id = document.getElementById('resetPasswordUserId').value;
+            const password = document.getElementById('resetPasswordInput').value;
+
+            try {
+                const response = await fetch(`/api/admin/users/${id}/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const modalEl = document.getElementById('resetPasswordModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    alert('Password has been reset successfully. On login, the user will be forced to update it.');
+                } else {
+                    alert(data.message || 'Error resetting password.');
+                }
+            } catch (err) {
+                console.error('Error resetting password:', err);
+                alert('Internal server error.');
+            }
+        }
+
+        async function deleteUserAccount(id, email) {
+            if (!confirm(`Are you absolutely sure you want to permanently delete user account ${email}? This will also delete all student portfolios, daily logs, reports, and timeline records related to this user! This action is irreversible.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/users/${id}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    alert('User account deleted successfully.');
+                    await loadUsers(currentPage);
+                } else {
+                    alert(data.message || 'Error deleting user.');
+                }
+            } catch (err) {
+                console.error('Error deleting user:', err);
+                alert('Internal server error.');
+            }
+        }
+
+        function exportData(format) {
+            window.open(`/api/admin/export/users?format=${format}`, '_blank');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>
