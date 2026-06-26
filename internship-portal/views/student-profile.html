@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Student Profile">
+    <title>Student Profile - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .profile-avatar-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .profile-avatar-container:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        .profile-avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .profile-avatar-container:hover .profile-avatar-overlay {
+            opacity: 1;
+        }
+        .profile-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .section-title {
+            position: relative;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.15);
+        }
+        .social-icon-addon {
+            width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/student/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/student/profile">
+                            <i class="bi bi-person-circle"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/internship">
+                            <i class="bi bi-briefcase"></i> Internship
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled text-muted opacity-50" href="#">
+                            <i class="bi bi-calendar-check"></i> Attendance <span class="badge bg-secondary ms-1 small" style="font-size: 9px;">Soon</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled text-muted opacity-50" href="#">
+                            <i class="bi bi-journal-text"></i> Weekly Reports <span class="badge bg-secondary ms-1 small" style="font-size: 9px;">Soon</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled text-muted opacity-50" href="#">
+                            <i class="bi bi-folder"></i> Documents <span class="badge bg-secondary ms-1 small" style="font-size: 9px;">Soon</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Notifications -->
+                    <div class="dropdown">
+                        <button class="btn btn-light position-relative rounded-circle p-2" type="button" data-bs-toggle="dropdown" aria-label="Notifications">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px; padding: 3px 6px;">
+                                3
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 300px;">
+                            <li><h6 class="dropdown-header">Latest Notifications</h6></li>
+                            <li><a class="dropdown-item rounded-2 py-2" href="#"><div class="small fw-semibold">Internship Approved</div><div class="text-muted small">Your application to TechCorp was accepted.</div></a></li>
+                            <li><a class="dropdown-item rounded-2 py-2" href="#"><div class="small fw-semibold">Report Feedback</div><div class="text-muted small">Mentor reviewed Weekly Report 8.</div></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center small text-primary" href="#">View All Notifications</a></li>
+                        </ul>
+                    </div>
+                    <!-- User Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="/images/placeholder-avatar.png" id="navUserPhoto" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/icons/person-circle.svg'">
+                            <span id="navUserName" class="fw-semibold">Student</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="/student/profile"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="/change-password"><i class="bi bi-shield-lock me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 mb-0 fw-bold text-dark">My Profile</h1>
+                    <span class="badge bg-primary px-3 py-2 rounded-pill"><i class="bi bi-person-check-fill me-1"></i>Profile Settings</span>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Left Sidebar Profile Card -->
+                    <div class="col-lg-4">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 text-center">
+                            <!-- Avatar Upload Container -->
+                            <div class="profile-avatar-container" id="avatarUploadTrigger" title="Click to upload profile photo">
+                                <img src="/images/placeholder-avatar.png" id="cardUserPhoto" class="profile-avatar-img" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/icons/person-circle.svg'">
+                                <div class="profile-avatar-overlay">
+                                    <i class="bi bi-camera-fill" style="font-size: 24px;"></i>
+                                    <span class="small mt-1">Change Photo</span>
+                                </div>
+                            </div>
+                            <!-- Hidden File Input -->
+                            <input type="file" id="profilePhotoInput" accept="image/png, image/jpeg, image/jpg" style="display: none;">
+                            
+                            <h4 class="fw-bold mb-1" id="cardUserName">Student User</h4>
+                            <p class="text-primary small mb-3" id="cardUserRoll">ROLL-NUMBER</p>
+                            <p class="text-muted small px-2" id="cardUserBio">No biography provided yet. Add one in the profile editor.</p>
+                            
+                            <hr class="my-3 text-muted opacity-25">
+                            
+                            <div class="text-start small px-2">
+                                <div class="mb-2"><strong class="text-dark">Department:</strong> <span class="text-muted" id="cardUserDept">Computer Science</span></div>
+                                <div class="mb-2"><strong class="text-dark">Semester:</strong> <span class="text-muted" id="cardUserSem">6</span></div>
+                                <div class="mb-2"><strong class="text-dark">Enrollment:</strong> <span class="text-muted" id="cardUserEnroll">ENR-NUMBER</span></div>
+                            </div>
+
+                            <hr class="my-3 text-muted opacity-25">
+
+                            <div class="d-flex justify-content-center gap-3">
+                                <a href="#" id="linkedinLink" target="_blank" class="btn btn-outline-secondary btn-sm rounded-circle d-flex align-items-center justify-content-center opacity-50" style="width: 36px; height: 36px;" title="LinkedIn Profile"><i class="bi bi-linkedin"></i></a>
+                                <a href="#" id="githubLink" target="_blank" class="btn btn-outline-secondary btn-sm rounded-circle d-flex align-items-center justify-content-center opacity-50" style="width: 36px; height: 36px;" title="GitHub Profile"><i class="bi bi-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Profile Edit Form Card -->
+                    <div class="col-lg-8">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4">
+                            <form id="profileForm" novalidate>
+                                
+                                <!-- Section 1: Personal Details -->
+                                <h5 class="section-title"><i class="bi bi-person-fill me-2 text-primary"></i>Personal Details</h5>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label for="first_name" class="form-label small fw-semibold text-dark">First Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control rounded-3" id="first_name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="last_name" class="form-label small fw-semibold text-dark">Last Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control rounded-3" id="last_name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label small fw-semibold text-dark">Email Address <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control rounded-3" id="email" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="phone" class="form-label small fw-semibold text-dark">Phone Number</label>
+                                        <input type="tel" class="form-control rounded-3" id="phone" placeholder="e.g., +1234567890">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="dob" class="form-label small fw-semibold text-dark">Date of Birth</label>
+                                        <input type="date" class="form-control rounded-3" id="dob">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="gender" class="form-label small fw-semibold text-dark">Gender</label>
+                                        <select class="form-select rounded-3" id="gender">
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="address" class="form-label small fw-semibold text-dark">Permanent Address</label>
+                                        <textarea class="form-control rounded-3" id="address" rows="2" placeholder="Street, City, State, ZIP"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Section 2: Academic Details -->
+                                <h5 class="section-title"><i class="bi bi-mortarboard-fill me-2 text-primary"></i>Academic Information</h5>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <label for="enrollment_number" class="form-label small fw-semibold text-dark">Enrollment Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control rounded-3" id="enrollment_number" required>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label for="department" class="form-label small fw-semibold text-dark">Department <span class="text-danger">*</span></label>
+                                        <select class="form-select rounded-3" id="department" required>
+                                            <option value="Computer Science">Computer Science</option>
+                                            <option value="Information Technology">Information Technology</option>
+                                            <option value="Electronics Engineering">Electronics Engineering</option>
+                                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                            <option value="Civil Engineering">Civil Engineering</option>
+                                            <option value="Electrical Engineering">Electrical Engineering</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="semester" class="form-label small fw-semibold text-dark">Semester <span class="text-danger">*</span></label>
+                                        <select class="form-select rounded-3" id="semester" required>
+                                            <option value="1">Semester 1</option>
+                                            <option value="2">Semester 2</option>
+                                            <option value="3">Semester 3</option>
+                                            <option value="4">Semester 4</option>
+                                            <option value="5">Semester 5</option>
+                                            <option value="6">Semester 6</option>
+                                            <option value="7">Semester 7</option>
+                                            <option value="8">Semester 8</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Section 3: Social & Professional -->
+                                <h5 class="section-title"><i class="bi bi-globe me-2 text-primary"></i>Social &amp; Professional Profile</h5>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-12">
+                                        <label for="bio" class="form-label small fw-semibold text-dark">Biography</label>
+                                        <textarea class="form-control rounded-3" id="bio" rows="3" placeholder="Brief statement about your career goals and accomplishments..."></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="skills" class="form-label small fw-semibold text-dark">Skills (Comma-separated)</label>
+                                        <input type="text" class="form-control rounded-3" id="skills" placeholder="e.g., HTML, CSS, JavaScript, Node.js, Python, Git">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="linkedin" class="form-label small fw-semibold text-dark">LinkedIn Profile URL</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text social-icon-addon rounded-start-3"><i class="bi bi-linkedin text-primary"></i></span>
+                                            <input type="url" class="form-control rounded-end-3" id="linkedin" placeholder="https://linkedin.com/in/username">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="github" class="form-label small fw-semibold text-dark">GitHub Profile URL</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text social-icon-addon rounded-start-3"><i class="bi bi-github text-dark"></i></span>
+                                            <input type="url" class="form-control rounded-end-3" id="github" placeholder="https://github.com/username">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-3 mt-4">
+                                    <button type="button" class="btn btn-light px-4 rounded-3" id="resetBtn">Cancel</button>
+                                    <button type="submit" class="btn btn-primary px-4 rounded-3 d-flex align-items-center gap-2" id="saveBtn">
+                                        <i class="bi bi-save"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer mt-5">
+                &copy; 2024 Smart University Internship Portal. All rights reserved.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let originalData = null;
+
+            // Load Student Profile Info
+            const loadProfile = async () => {
+                try {
+                    const response = await fetch('/api/student/profile');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.student) {
+                            const s = data.student;
+                            originalData = s;
+
+                            // Set dynamic text/images
+                            const fullName = `${s.first_name || ''} ${s.last_name || ''}`.trim() || 'Student';
+                            document.getElementById('navUserName').textContent = fullName;
+                            document.getElementById('cardUserName').textContent = fullName;
+                            document.getElementById('cardUserRoll').textContent = s.roll_number || 'No Roll Assigned';
+                            document.getElementById('cardUserDept').textContent = s.department || 'Not Assigned';
+                            document.getElementById('cardUserSem').textContent = s.semester || 'N/A';
+                            document.getElementById('cardUserEnroll').textContent = s.enrollment_number || 'N/A';
+                            document.getElementById('cardUserBio').textContent = s.bio || 'No biography provided yet. Add one in the profile editor.';
+
+                            if (s.profile_photo) {
+                                document.getElementById('navUserPhoto').src = s.profile_photo;
+                                document.getElementById('cardUserPhoto').src = s.profile_photo;
+                            }
+
+                            // Update social links
+                            const linkedinBtn = document.getElementById('linkedinLink');
+                            const githubBtn = document.getElementById('githubLink');
+                            
+                            if (s.linkedin) {
+                                linkedinBtn.href = s.linkedin;
+                                linkedinBtn.classList.remove('opacity-50', 'btn-outline-secondary');
+                                linkedinBtn.classList.add('btn-outline-primary');
+                            } else {
+                                linkedinBtn.href = '#';
+                                linkedinBtn.classList.remove('btn-outline-primary');
+                                linkedinBtn.classList.add('opacity-50', 'btn-outline-secondary');
+                            }
+
+                            if (s.github) {
+                                githubBtn.href = s.github;
+                                githubBtn.classList.remove('opacity-50', 'btn-outline-secondary');
+                                githubBtn.classList.add('btn-outline-dark');
+                            } else {
+                                githubBtn.href = '#';
+                                githubBtn.classList.remove('btn-outline-dark');
+                                githubBtn.classList.add('opacity-50', 'btn-outline-secondary');
+                            }
+
+                            // Fill form values
+                            document.getElementById('first_name').value = s.first_name || '';
+                            document.getElementById('last_name').value = s.last_name || '';
+                            document.getElementById('email').value = s.email || '';
+                            document.getElementById('phone').value = s.phone || '';
+                            document.getElementById('address').value = s.address || '';
+                            document.getElementById('gender').value = s.gender || 'Other';
+                            
+                            if (s.dob) {
+                                // Format to YYYY-MM-DD for date input
+                                const dobDate = new Date(s.dob);
+                                const year = dobDate.getFullYear();
+                                const month = String(dobDate.getMonth() + 1).padStart(2, '0');
+                                const day = String(dobDate.getDate()).padStart(2, '0');
+                                document.getElementById('dob').value = `${year}-${month}-${day}`;
+                            } else {
+                                document.getElementById('dob').value = '';
+                            }
+
+                            document.getElementById('enrollment_number').value = s.enrollment_number || '';
+                            document.getElementById('department').value = s.department || 'Computer Science';
+                            document.getElementById('semester').value = s.semester || '6';
+                            document.getElementById('bio').value = s.bio || '';
+                            document.getElementById('skills').value = s.skills || '';
+                            document.getElementById('linkedin').value = s.linkedin || '';
+                            document.getElementById('github').value = s.github || '';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading student profile details:', error);
+                    window.PortalUtils.showAlert('Failed to load profile details.', 'danger');
+                }
+            };
+
+            // Trigger photo upload on click
+            document.getElementById('avatarUploadTrigger').addEventListener('click', () => {
+                document.getElementById('profilePhotoInput').click();
+            });
+
+            // Handle photo upload
+            document.getElementById('profilePhotoInput').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Client-side validations
+                const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+                if (!allowedTypes.includes(file.type)) {
+                    window.PortalUtils.showAlert('Only JPG, JPEG, and PNG files are allowed.', 'danger');
+                    e.target.value = '';
+                    return;
+                }
+
+                if (file.size > 2 * 1024 * 1024) { // 2MB
+                    window.PortalUtils.showAlert('File size exceeds the 2MB limit.', 'danger');
+                    e.target.value = '';
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('profilePhoto', file);
+
+                try {
+                    const saveBtn = document.getElementById('saveBtn');
+                    saveBtn.disabled = true;
+                    
+                    const response = await fetch('/api/student/profile/photo', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        window.PortalUtils.showAlert('Profile photo updated successfully.', 'success');
+                        document.getElementById('navUserPhoto').src = data.photoPath;
+                        document.getElementById('cardUserPhoto').src = data.photoPath;
+                    } else {
+                        window.PortalUtils.showAlert(data.message || 'Failed to upload photo.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error uploading profile photo:', error);
+                    window.PortalUtils.showAlert('An error occurred during photo upload.', 'danger');
+                } finally {
+                    document.getElementById('saveBtn').disabled = false;
+                    e.target.value = '';
+                }
+            });
+
+            // Reset Form on Cancel
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                if (originalData) {
+                    loadProfile();
+                    window.PortalUtils.showAlert('Changes discarded.', 'info');
+                }
+            });
+
+            // Form Submit (Update Profile)
+            document.getElementById('profileForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Form validity checks
+                const form = e.target;
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    window.PortalUtils.showAlert('Please fill out all required fields correctly.', 'danger');
+                    return;
+                }
+
+                const payload = {
+                    first_name: document.getElementById('first_name').value.trim(),
+                    last_name: document.getElementById('last_name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    address: document.getElementById('address').value.trim(),
+                    gender: document.getElementById('gender').value,
+                    dob: document.getElementById('dob').value || null,
+                    enrollment_number: document.getElementById('enrollment_number').value.trim(),
+                    department: document.getElementById('department').value,
+                    semester: document.getElementById('semester').value,
+                    bio: document.getElementById('bio').value.trim(),
+                    skills: document.getElementById('skills').value.trim(),
+                    linkedin: document.getElementById('linkedin').value.trim(),
+                    github: document.getElementById('github').value.trim()
+                };
+
+                // Advanced Client-side validation regex checks
+                const phoneRegex = /^\+?[0-9\s-]{10,15}$/;
+                if (payload.phone && !phoneRegex.test(payload.phone)) {
+                    window.PortalUtils.showAlert('Please enter a valid phone number (10-15 digits).', 'danger');
+                    return;
+                }
+
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(payload.email)) {
+                    window.PortalUtils.showAlert('Please enter a valid email address.', 'danger');
+                    return;
+                }
+
+                try {
+                    const saveBtn = document.getElementById('saveBtn');
+                    const originalBtnHtml = saveBtn.innerHTML;
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+
+                    const response = await fetch('/api/student/profile', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        window.PortalUtils.showAlert('Profile updated successfully.', 'success');
+                        loadProfile(); // Refresh visual profile elements
+                        form.classList.remove('was-validated');
+                    } else {
+                        window.PortalUtils.showAlert(data.message || 'Failed to update profile.', 'danger');
+                    }
+                    
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalBtnHtml;
+                } catch (error) {
+                    console.error('Error updating student profile:', error);
+                    window.PortalUtils.showAlert('An error occurred while saving profile.', 'danger');
+                    document.getElementById('saveBtn').disabled = false;
+                    document.getElementById('saveBtn').innerHTML = '<i class="bi bi-save"></i> Save Changes';
+                }
+            });
+
+            // Run initial load
+            loadProfile();
+        });
+    </script>
+</body>
+</html>

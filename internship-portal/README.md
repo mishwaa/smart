@@ -206,6 +206,47 @@ To execute the tests:
    npx playwright test tests/auth.spec.js
    ```
 
+## Student Experience & Internship Lifecycle (Phase 3 Part 1)
+
+In Sprint 3, the Student Portal was fully implemented, offering a comprehensive, responsive, and secure experience for students to manage their profiles and track their placements.
+
+### 1. Student Dashboard (`/student/dashboard`)
+A professional, unified center for student activities.
+- **8 Statistics Cards**: High-level overview of core internship metrics (Attendance Rate, Internship Progress, Reports Submitted, Pending Reports, Documents Uploaded, Mentor Feedbacks, Days Completed, Certificate Status).
+- **Upcoming Tasks Widget**: Displays active action items (e.g. pending report submissions or required documents) with status badges.
+- **Timeline Widget**: Shows the student's journey through various program phases.
+- **Interactive Charts**: Developed using Chart.js, visualizing weekly progress trends, attendance rates, and document submissions.
+
+### 2. Student Profile (`/student/profile`)
+Provides self-service profile management with robust validation and security.
+- **Form Editor**: Allows students to view and update their full name, email, phone, DOB, gender, permanent address, enrollment number, department, semester, bio, skills, LinkedIn, and GitHub links.
+- **Security & Ownership**: Strong session-based authorization ensures students can only view and modify their own profiles (verifying `user_id` ownership).
+- **Secure Photo Upload**: Integrated profile picture upload.
+  - **File Restrictions**: Only JPG, JPEG, and PNG formats.
+  - **Size Limit**: Maximum of 2 MB.
+  - **Storage**: Saved securely in `uploads/profile_photos/` with automatic UUID-based renaming to prevent collisions.
+  - **Validation**: Strict file-type and file-size validation enforced on both the client-side and server-side (via Multer).
+
+### 3. Internship Details (`/student/internship`)
+Tracks the active internship placement in real-time.
+- **Headline Banner**: Displays current role, host company, and days remaining.
+- **Animated Progress Bar**: Calculates and renders the exact progress percentage of days completed relative to total days.
+- **Mentor Card**: Displays details of the assigned industry mentor, including feedback rating and communication channels.
+- **Bootstrap Badges**: Visualizes placement status (`Pending`, `Approved`, `Active`, `Completed`, `Rejected`) with matching color palettes.
+- **Fallback Capability**: Employs high-fidelity mock data if the student has no active DB placement yet, ensuring a complete and visually stunning first-time user experience.
+
+### 4. Routes & Endpoints
+The following student routes and JSON APIs are protected under `requireAuth` and `requireStudent` middleware:
+- `GET /student/dashboard` — Serves the Student Dashboard view
+- `GET /student/profile` — Serves the Student Profile view
+- `GET /student/internship` — Serves the Internship Details view
+- `GET /api/student/profile` — Retrieves the current student's profile data (with auto-initialization/self-seeding to prevent database crashes)
+- `POST /api/student/profile` — Updates profile fields with strict server-side validation
+- `POST /api/student/profile/photo` — Uploads and updates the student's profile photo
+- `GET /api/student/internship` — Retrieves active internship placement details
+
+---
+
 ## License
 
 ISC

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Internship Details">
+    <title>Internship Details - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .detail-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-top: 2px;
+        }
+        .mentor-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/student/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/profile">
+                            <i class="bi bi-person-circle"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/student/internship">
+                            <i class="bi bi-briefcase"></i> Internship
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled text-muted opacity-50" href="#">
+                            <i class="bi bi-calendar-check"></i> Attendance <span class="badge bg-secondary ms-1 small" style="font-size: 9px;">Soon</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled text-muted opacity-50" href="#">
+                            <i class="bi bi-journal-text"></i> Weekly Reports <span class="badge bg-secondary ms-1 small" style="font-size: 9px;">Soon</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled text-muted opacity-50" href="#">
+                            <i class="bi bi-folder"></i> Documents <span class="badge bg-secondary ms-1 small" style="font-size: 9px;">Soon</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Notifications -->
+                    <div class="dropdown">
+                        <button class="btn btn-light position-relative rounded-circle p-2" type="button" data-bs-toggle="dropdown" aria-label="Notifications">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px; padding: 3px 6px;">
+                                3
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 300px;">
+                            <li><h6 class="dropdown-header">Latest Notifications</h6></li>
+                            <li><a class="dropdown-item rounded-2 py-2" href="#"><div class="small fw-semibold">Internship Approved</div><div class="text-muted small">Your application to TechCorp was accepted.</div></a></li>
+                            <li><a class="dropdown-item rounded-2 py-2" href="#"><div class="small fw-semibold">Report Feedback</div><div class="text-muted small">Mentor reviewed Weekly Report 8.</div></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center small text-primary" href="#">View All Notifications</a></li>
+                        </ul>
+                    </div>
+                    <!-- User Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="/images/placeholder-avatar.png" id="navUserPhoto" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/icons/person-circle.svg'">
+                            <span id="navUserName" class="fw-semibold">Student</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="/student/profile"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="/change-password"><i class="bi bi-shield-lock me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 mb-0 fw-bold text-dark">Internship Details</h1>
+                    <span class="badge bg-primary px-3 py-2 rounded-pill"><i class="bi bi-briefcase-fill me-1"></i>Active Placement</span>
+                </div>
+
+                <!-- Internship Headline Card -->
+                <div class="card mb-4 bg-white border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-body p-4 position-relative">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8 mb-3 mb-lg-0">
+                                <span class="badge bg-success mb-2 px-3 py-2 rounded-3" id="internshipStatusBadge">Active</span>
+                                <h2 class="fw-bold mb-1 text-dark" id="internshipPosition">Frontend Developer Intern</h2>
+                                <h5 class="text-primary fw-semibold mb-0" id="internshipCompany">TechCorp Solutions</h5>
+                            </div>
+                            <div class="col-lg-4 text-lg-end">
+                                <div class="p-3 bg-light rounded-4 d-inline-block text-start" style="min-width: 200px;">
+                                    <div class="small text-muted fw-semibold mb-1">Time Remaining</div>
+                                    <div class="h4 fw-bold mb-0 text-dark" id="internshipDaysLeft">30 Days</div>
+                                    <div class="small text-muted" id="internshipDaysSubtitle">Out of 120 Total Working Days</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar Card -->
+                <div class="card mb-4 bg-white border-0 shadow-sm rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-activity text-primary me-2"></i>Internship Progress Tracker</h5>
+                        <span class="h4 fw-bold text-primary mb-0" id="progressPercentage">75%</span>
+                    </div>
+                    <div class="progress rounded-pill mb-3" style="height: 20px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" id="progressBar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="row text-center mt-3 g-2">
+                        <div class="col-6 col-md-3 border-end">
+                            <div class="h3 fw-bold text-dark mb-0" id="daysCompletedStat">90</div>
+                            <div class="small text-muted">Days Completed</div>
+                        </div>
+                        <div class="col-6 col-md-3 border-end-md border-end-0">
+                            <div class="h3 fw-bold text-dark mb-0" id="totalDaysStat">120</div>
+                            <div class="small text-muted">Total Work Days</div>
+                        </div>
+                        <div class="col-6 col-md-3 border-end">
+                            <div class="h3 fw-bold text-dark mb-0" id="daysRemainingStat">30</div>
+                            <div class="small text-muted">Days Remaining</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="h3 fw-bold text-success mb-0"><i class="bi bi-check-circle-fill"></i></div>
+                            <div class="small text-muted">Good Standing</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Column 1: Core Details -->
+                    <div class="col-lg-7">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+                            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Placement Information</h5>
+                            
+                            <div class="detail-item">
+                                <div class="info-label">Current Role / Position</div>
+                                <div class="info-value" id="internshipRole">Frontend Developer Intern</div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="info-label">Host Company</div>
+                                <div class="info-value" id="internshipHost">TechCorp Solutions</div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="info-label">Assigned Department</div>
+                                <div class="info-value" id="internshipDept">Software Engineering</div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="info-label">Internship Duration</div>
+                                <div class="info-value" id="internshipDuration">6 Months</div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="info-label">Timeframe</div>
+                                <div class="info-value">
+                                    <i class="bi bi-calendar-event text-primary me-1"></i> 
+                                    <span id="internshipDates">01 Jan 2026 - 30 Jun 2026</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Mentor Info & Guidelines -->
+                    <div class="col-lg-5">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 mb-4">
+                            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-person-badge text-primary me-2"></i>Industry Mentor</h5>
+                            <div class="d-flex align-items-center gap-3 mt-2">
+                                <img src="/images/placeholder-avatar.png" class="mentor-avatar" id="mentorPhoto" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/icons/person-workspace.svg'">
+                                <div>
+                                    <h5 class="fw-bold mb-1" id="mentorName">Sarah Connor</h5>
+                                    <p class="text-muted small mb-0" id="mentorTitle">Senior Engineering Manager</p>
+                                </div>
+                            </div>
+                            <hr class="my-3 text-muted opacity-25">
+                            <div class="small">
+                                <div class="mb-2"><strong class="text-dark">Feedback Rating:</strong> <span class="text-success"><i class="bi bi-star-fill me-1"></i>4.8 / 5.0</span></div>
+                                <div><strong class="text-dark">Communication:</strong> <span class="text-muted">Weekly Sync &amp; Slack</span></div>
+                            </div>
+                        </div>
+
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4">
+                            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-primary me-2"></i>Quick Tasks &amp; Milestones</h5>
+                            <ul class="list-unstyled mb-0 small">
+                                <li class="mb-2 d-flex align-items-start gap-2">
+                                    <i class="bi bi-check-circle-fill text-success mt-0.5"></i>
+                                    <div><strong>Submit Weekly Reports</strong> - File reports under Weekly Reports tab.</div>
+                                </li>
+                                <li class="mb-2 d-flex align-items-start gap-2">
+                                    <i class="bi bi-check-circle-fill text-success mt-0.5"></i>
+                                    <div><strong>Daily Attendance Logging</strong> - Track your attendance logs.</div>
+                                </li>
+                                <li class="d-flex align-items-start gap-2">
+                                    <i class="bi bi-clock-history text-warning mt-0.5"></i>
+                                    <div><strong>Final Evaluation</strong> - Unlocks after completing 120 days.</div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer mt-5">
+                &copy; 2024 Smart University Internship Portal. All rights reserved.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Load Student Profile Info for Navbar
+            const loadProfileHeader = async () => {
+                try {
+                    const response = await fetch('/api/student/profile');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.student) {
+                            const s = data.student;
+                            document.getElementById('navUserName').textContent = `${s.first_name} ${s.last_name}`;
+                            if (s.profile_photo) {
+                                document.getElementById('navUserPhoto').src = s.profile_photo;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading navbar details:', error);
+                }
+            };
+
+            // Load Internship Details
+            const loadInternshipDetails = async () => {
+                try {
+                    const response = await fetch('/api/student/internship');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.internship) {
+                            const intern = data.internship;
+                            
+                            // Fill fields
+                            document.getElementById('internshipPosition').textContent = intern.position || 'Developer Intern';
+                            document.getElementById('internshipRole').textContent = intern.position || 'Developer Intern';
+                            document.getElementById('internshipCompany').textContent = intern.company || 'Host Company';
+                            document.getElementById('internshipHost').textContent = intern.company || 'Host Company';
+                            document.getElementById('internshipDept').textContent = intern.department || 'Engineering';
+                            document.getElementById('internshipDuration').textContent = intern.duration || '6 Months';
+                            
+                            // Handle Dates
+                            const startStr = window.PortalUtils.formatDate(intern.startDate);
+                            const endStr = window.PortalUtils.formatDate(intern.endDate);
+                            document.getElementById('internshipDates').textContent = `${startStr} - ${endStr}`;
+                            
+                            // Handle Mentor
+                            if (intern.mentor) {
+                                const mentorParts = intern.mentor.split('(');
+                                document.getElementById('mentorName').textContent = mentorParts[0].trim();
+                                if (mentorParts[1]) {
+                                    document.getElementById('mentorTitle').textContent = mentorParts[1].replace(')', '').trim();
+                                } else {
+                                    document.getElementById('mentorTitle').textContent = 'Industry Mentor';
+                                }
+                            }
+                            
+                            // Handle Status Badge
+                            const status = intern.status || 'Active';
+                            const badge = document.getElementById('internshipStatusBadge');
+                            badge.textContent = status;
+                            
+                            // Reset badge styling classes
+                            badge.className = 'badge mb-2 px-3 py-2 rounded-3';
+                            if (status === 'Active') {
+                                badge.classList.add('bg-success');
+                            } else if (status === 'Completed') {
+                                badge.classList.add('bg-primary');
+                            } else if (status === 'Pending' || status === 'Approved') {
+                                badge.classList.add('bg-warning', 'text-dark');
+                            } else if (status === 'Rejected') {
+                                badge.classList.add('bg-danger');
+                            } else {
+                                badge.classList.add('bg-secondary');
+                            }
+                            
+                            // Handle Progress Metrics
+                            const totalDays = intern.workingDays || 120;
+                            const daysComp = intern.daysCompleted || 0;
+                            const percent = intern.percentage !== undefined ? intern.percentage : Math.round((daysComp / totalDays) * 100);
+                            const daysRemaining = Math.max(0, totalDays - daysComp);
+                            
+                            document.getElementById('progressPercentage').textContent = `${percent}%`;
+                            
+                            const pBar = document.getElementById('progressBar');
+                            pBar.style.width = `${percent}%`;
+                            pBar.setAttribute('aria-valuenow', percent);
+                            
+                            // Reset progress bar color depending on status
+                            pBar.className = 'progress-bar progress-bar-striped progress-bar-animated';
+                            if (status === 'Rejected') {
+                                pBar.classList.add('bg-danger');
+                            } else if (status === 'Completed') {
+                                pBar.classList.add('bg-success');
+                            } else {
+                                pBar.classList.add('bg-primary');
+                            }
+                            
+                            // Days Statistics
+                            document.getElementById('daysCompletedStat').textContent = daysComp;
+                            document.getElementById('totalDaysStat').textContent = totalDays;
+                            document.getElementById('daysRemainingStat').textContent = daysRemaining;
+                            document.getElementById('internshipDaysLeft').textContent = `${daysRemaining} Days`;
+                            document.getElementById('internshipDaysSubtitle').textContent = `Out of ${totalDays} Total Working Days`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading internship details:', error);
+                    window.PortalUtils.showAlert('Failed to load internship details.', 'danger');
+                }
+            };
+
+            // Run initial loads
+            loadProfileHeader();
+            loadInternshipDetails();
+        });
+    </script>
+</body>
+</html>

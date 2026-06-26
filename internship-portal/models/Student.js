@@ -47,17 +47,23 @@ const Student = {
    */
   async create(data) {
     const {
-      user_id, first_name, last_name, roll_number,
-      department, semester, phone, address, cgpa
+      user_id, first_name, last_name, roll_number, enrollment_number,
+      department, semester, phone, address, gender, dob, cgpa,
+      resume_path, profile_image, profile_photo, skills, bio,
+      linkedin, github
     } = data;
 
     const [result] = await pool.execute(
-      `INSERT INTO students (user_id, first_name, last_name, roll_number,
-        department, semester, phone, address, cgpa)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [user_id, first_name, last_name, roll_number,
+      `INSERT INTO students (user_id, first_name, last_name, roll_number, enrollment_number,
+        department, semester, phone, address, gender, dob, cgpa,
+        resume_path, profile_image, profile_photo, skills, bio,
+        linkedin, github)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [user_id, first_name, last_name, roll_number, enrollment_number || null,
        department || null, semester || null, phone || null,
-       address || null, cgpa || null]
+       address || null, gender || null, dob || null, cgpa || null,
+       resume_path || null, profile_image || null, profile_photo || null,
+       skills || null, bio || null, linkedin || null, github || null]
     );
     return { id: result.insertId, ...data };
   },
@@ -70,8 +76,10 @@ const Student = {
    */
   async update(id, fields) {
     const allowedFields = [
-      'first_name', 'last_name', 'roll_number', 'department',
-      'semester', 'phone', 'address', 'cgpa', 'resume_path', 'profile_image'
+      'first_name', 'last_name', 'roll_number', 'enrollment_number',
+      'department', 'semester', 'phone', 'address', 'gender', 'dob',
+      'cgpa', 'resume_path', 'profile_image', 'profile_photo',
+      'skills', 'bio', 'linkedin', 'github'
     ];
     const updates = [];
     const values = [];

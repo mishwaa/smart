@@ -1,6 +1,6 @@
 /**
  * Index Routes
- * Public-facing page routes and authentication endpoints
+ * Public-facing page routes, authentication endpoints, and student experience routes
  */
 
 'use strict';
@@ -10,7 +10,9 @@ const router = express.Router();
 const path = require('path');
 const indexController = require('../controllers/indexController');
 const authController = require('../controllers/authController');
+const studentController = require('../controllers/studentController');
 const { requireAuth, requireAdmin, requireFaculty, requireCompany, requireStudent, isGuest } = require('../middleware/auth');
+const { uploadProfilePhoto } = require('../config/upload');
 
 // ─── Public Routes ───────────────────────────────────────────────────────────
 router.get('/', indexController.getHomePage);
@@ -27,7 +29,7 @@ router.post('/logout', authController.logout);
 router.get('/change-password', requireAuth, authController.getChangePasswordPage);
 router.post('/change-password', requireAuth, authController.changePassword);
 
-// ─── Role-Specific Dashboard Placeholders ────────────────────────────────────
+// ─── Role-Specific Dashboard & Page Modules ──────────────────────────────────
 router.get('/admin/dashboard', requireAuth, requireAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, '../views/admin-dashboard.html'));
 });
@@ -36,9 +38,10 @@ router.get('/faculty/dashboard', requireAuth, requireFaculty, (req, res) => {
   res.sendFile(path.join(__dirname, '../views/faculty-dashboard.html'));
 });
 
-router.get('/student/dashboard', requireAuth, requireStudent, (req, res) => {
-  res.sendFile(path.join(__dirname, '../views/student-dashboard.html'));
-});
+// Student Portal Routes
+router.get('/student/dashboard', requireAuth, requireStudent, studentController.getDashboard);
+router.get('/student/profile', requireAuth, requireStudent, studentController.getProfilePage);
+router.get('/student/internship', requireAuth, requireStudent, studentController.getInternshipPage);
 
 router.get('/company/dashboard', requireAuth, requireCompany, (req, res) => {
   res.sendFile(path.join(__dirname, '../views/company-dashboard.html'));
@@ -56,5 +59,11 @@ router.get('/api/auth/me', requireAuth, (req, res) => {
     }
   });
 });
+
+// ─── Student Portal API Endpoints ───────────────────────────────────────────
+router.get('/api/student/profile', requireAuth, requireStudent, studentController.getProfileData);
+router.post('/api/student/profile', requireAuth, requireStudent, studentController.updateProfile);
+router.post('/api/student/profile/photo', requireAuth, requireStudent, uploadProfilePhoto.single('profilePhoto'), studentController.uploadPhoto);
+router.get('/api/student/internship', requireAuth, requireStudent, studentController.getInternshipData);
 
 module.exports = router;
