@@ -12,6 +12,7 @@ const indexController = require('../controllers/indexController');
 const authController = require('../controllers/authController');
 const studentController = require('../controllers/studentController');
 const facultyController = require('../controllers/facultyController');
+const companyController = require('../controllers/companyController');
 const { requireAuth, requireAdmin, requireFaculty, requireCompany, requireStudent, isGuest } = require('../middleware/auth');
 const { uploadProfilePhoto, uploadStudentDocument } = require('../config/upload');
 
@@ -40,6 +41,11 @@ router.get('/faculty/dashboard', requireAuth, requireFaculty, facultyController.
 router.get('/faculty/students', requireAuth, requireFaculty, facultyController.getStudentsPage);
 router.get('/faculty/students/:id/review', requireAuth, requireFaculty, facultyController.getStudentReviewPage);
 
+// Company Portal Views
+router.get('/company/dashboard', requireAuth, requireCompany, companyController.getDashboard);
+router.get('/company/interns', requireAuth, requireCompany, companyController.getInternsPage);
+router.get('/company/interns/:id/review', requireAuth, requireCompany, companyController.getInternReviewPage);
+
 // Student Portal Routes
 router.get('/student/dashboard', requireAuth, requireStudent, studentController.getDashboard);
 router.get('/student/profile', requireAuth, requireStudent, studentController.getProfilePage);
@@ -47,10 +53,6 @@ router.get('/student/internship', requireAuth, requireStudent, studentController
 router.get('/student/attendance', requireAuth, requireStudent, studentController.getAttendancePage);
 router.get('/student/reports', requireAuth, requireStudent, studentController.getReportsPage);
 router.get('/student/documents', requireAuth, requireStudent, studentController.getDocumentsPage);
-
-router.get('/company/dashboard', requireAuth, requireCompany, (req, res) => {
-  res.sendFile(path.join(__dirname, '../views/company-dashboard.html'));
-});
 
 // ─── Authentication API Endpoints ───────────────────────────────────────────
 router.get('/api/auth/me', requireAuth, (req, res) => {
@@ -127,5 +129,25 @@ router.post('/api/faculty/students/:id/feedback', requireAuth, requireFaculty, f
 
 // Secure Exports API
 router.get('/api/faculty/students/:id/export/:type', requireAuth, requireFaculty, facultyController.exportStudentData);
+
+// ─── Company Portal API Endpoints ───────────────────────────────────────────
+router.get('/api/company/profile', requireAuth, requireCompany, companyController.getProfileData);
+router.post('/api/company/profile', requireAuth, requireCompany, companyController.updateProfile);
+router.get('/api/company/stats', requireAuth, requireCompany, companyController.getDashboardStats);
+router.get('/api/company/charts', requireAuth, requireCompany, companyController.getDashboardCharts);
+router.get('/api/company/interns', requireAuth, requireCompany, companyController.getAssignedInterns);
+router.get('/api/company/interns/:id', requireAuth, requireCompany, companyController.getInternReviewData);
+
+// Reviews & Approvals Workflow API
+router.post('/api/company/reports/:reportId/review', requireAuth, requireCompany, companyController.reviewWeeklyReport);
+router.post('/api/company/leaves/:attendanceId/review', requireAuth, requireCompany, companyController.reviewLeaveRequest);
+router.post('/api/company/documents/:documentId/review', requireAuth, requireCompany, companyController.reviewDocument);
+router.post('/api/company/logs/:logId/verify', requireAuth, requireCompany, companyController.verifyDailyLog);
+
+// Feedback & Evaluation API
+router.post('/api/company/interns/:id/feedback', requireAuth, requireCompany, companyController.submitFeedback);
+
+// Secure Exports API
+router.get('/api/company/interns/:id/export/:type', requireAuth, requireCompany, companyController.exportInternData);
 
 module.exports = router;

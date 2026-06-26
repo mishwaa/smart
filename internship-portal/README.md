@@ -398,9 +398,69 @@ An extensive automated E2E test suite in `tests/faculty.spec.js` covering **9 re
 8.  *Performance Evaluations*: Tests star ratings, advisor comments, and history logs.
 9.  *Cross-Faculty Security boundaries*: Asserts that an unauthorized advisor attempting to access a student not assigned to their cohort is blocked with a `403 Forbidden` response.
 
-To run the complete test suite (all 80 tests passing successfully):
+To run the complete test suite:
 ```bash
-# Run the entire test suite (Authentication + Student + Faculty)
+# Run the entire test suite (Authentication + Student + Faculty + Company)
+npx playwright test
+```
+
+---
+
+## Company Management System (Company ERP) — (Phase 5)
+
+The Company Management System (Company ERP) provides a complete, production-grade placement supervision portal for university employer partners. Corporate mentors and recruiters can manage profiles, track active interns, verify daily hours/logs, approve weekly reports/leaves, grade competency domains, and export secure reports.
+
+### 1. Employer Dashboard (`/company/dashboard`)
+A modern command center summarizing corporate placement operations:
+- **Corporate Statistics**: Dynamic counters showing Active Interns count, Average Cohort Attendance Rate, Average Mentor Rating, and Pending Reviews.
+- **Pending Approvals Queue**: Tabulated stream of pending student submissions (weekly reports, leaves, documents) allowing recruiters to approve or reject with comments directly from the dashboard.
+- **Dynamic Chart.js Analytics**: Visualizes ratings distributions, report statuses, and department counts from real-time database values.
+- **Milestone Activity Feed**: Chronological list of recent intern actions and milestones.
+- **Upcoming Completions**: Tracks placements ending in the next 30 days.
+
+### 2. Cohort Catalog (`/company/interns`)
+A cohort directory with comprehensive searching, filtering, and paging:
+- **Search**: Real-time matching across student names and roll numbers.
+- **Filters**: Filter cohort by Department, Semester, and Attendance Rate.
+- **Low-Attendance Indicators**: Flags students with critically low attendance below 75% for immediate intervention.
+
+### 3. Student Dossier Detail Review (`/company/interns/:id/review`)
+A detailed, tabbed portfolio dossier providing read-only visibility over the intern's placement:
+1. **Intern Profile**: View student academic details (CGPA, roll number), bio, and technical skills.
+2. **Attendance & Leaves**: Full punch-card history. Approve or reject pending leave requests with remarks.
+3. **Daily Work Logs**: Detailed task log ledger. Introduces a verification action allowing mentors to verify hours and log remarks.
+4. **Weekly Reports**: Review and log comments on weekly progress reports.
+5. **Compliance Documents**: Securely download and approve/reject compliance documents (Offer Letter, NOC, Resume, Final Report).
+6. **Milestones Timeline**: Detailed chronological placement roadmap.
+7. **Mentor Evaluations**: Detailed 5-star competency grading matrix.
+
+### 4. Competency Evaluation Matrix
+Allows mentors to submit detailed performance evaluations:
+- **5-Star Competency Grading**: Rate students across Overall Performance, Technical Skills, Communication, Professionalism, and Punctuality.
+- **Constructive Comments**: Form for strengths and improvements.
+- **Academic Recommendations**: Checkboxes recommending internship completion and certificate release.
+- **Final Evaluation**: Flags graduation reviews to log milestones and lock grades.
+
+### 5. Security & Privilege Boundaries
+- **Role Validation**: Enforced by `requireAuth` and `requireCompany` middleware.
+- **Strict Cohort Boundaries**: The backend controller verifies placement ownership on every single query, detail review, document download, log verification, and export compilation. Company users are strictly prohibited from accessing interns placed at other companies and will receive a `403 Forbidden` response.
+- **Secure Exports**: Protects all PDF/CSV data exports behind ownership checks.
+
+### 6. Playwright E2E Test Suite (Company ERP)
+An automated E2E test suite in `tests/company.spec.js` covering **10 release-quality tests**:
+1. *Employer Login*: Verifies successful login and redirection.
+2. *Dashboard Loads*: Checks stats, Chart.js, and pending tables.
+3. *Cohort Directory*: Validates search query matching, resetting, and paging.
+4. *Dossier Tabs*: Verifies read-only tabs rendering.
+5. *Daily Log Verification*: Tests daily log hour approvals.
+6. *Weekly Report Review*: Tests report reviews and status transitions.
+7. *Leave Request Reviews*: Tests leave approvals and attendance updates.
+8. *Compliance Document Reviews*: Tests document rejections and correction requests.
+9. *Performance Evaluations*: Tests star ratings, advisor comments, and final evaluations.
+10. *Cross-Company Security*: Asserts that an unauthorized company recruiter attempting to access another company's intern is blocked with a `403 Forbidden` response.
+
+To run the complete test suite:
+```bash
 npx playwright test
 ```
 
@@ -409,3 +469,4 @@ npx playwright test
 ## License
 
 ISC
+

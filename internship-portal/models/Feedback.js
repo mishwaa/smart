@@ -22,16 +22,28 @@ const Feedback = {
   },
 
   /**
-   * Create a new feedback record
+   * Create a new feedback record (supports detailed advisor/mentor ratings)
    * @param {Object} data
    * @returns {Promise<Object>}
    */
   async create(data) {
-    const { from_user_id, to_user_id, internship_id, rating, comments, feedback_type } = data;
+    const { 
+      from_user_id, to_user_id, internship_id, rating, comments, feedback_type,
+      technical_rating = null, communication_rating = null, professionalism_rating = null, punctuality_rating = null,
+      recommend_completion = false, recommend_certificate = false, is_final = false
+    } = data;
+
     const [result] = await pool.execute(
-      `INSERT INTO feedback (from_user_id, to_user_id, internship_id, rating, comments, feedback_type)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [from_user_id, to_user_id, internship_id || null, rating || null, comments || null, feedback_type]
+      `INSERT INTO feedback (
+         from_user_id, to_user_id, internship_id, rating, comments, feedback_type,
+         technical_rating, communication_rating, professionalism_rating, punctuality_rating,
+         recommend_completion, recommend_certificate, is_final
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        from_user_id, to_user_id, internship_id || null, rating || null, comments || null, feedback_type,
+        technical_rating, communication_rating, professionalism_rating, punctuality_rating,
+        recommend_completion ? 1 : 0, recommend_certificate ? 1 : 0, is_final ? 1 : 0
+      ]
     );
     return { id: result.insertId, ...data };
   },

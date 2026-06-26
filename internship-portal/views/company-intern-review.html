@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Intern Dossier & Review Panel">
+    <title>Intern Review Dossier - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .student-header {
+            border-radius: 16px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            border-left: 4px solid #0ea5e9;
+        }
+        .nav-tabs-custom .nav-link {
+            border: none;
+            color: #64748b;
+            padding: 12px 20px;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .nav-tabs-custom .nav-link:hover {
+            color: #0ea5e9;
+            background: rgba(14, 165, 233, 0.05);
+        }
+        .nav-tabs-custom .nav-link.active {
+            color: #0ea5e9;
+            border-bottom-color: #0ea5e9;
+            background: transparent;
+        }
+        .tab-content-container {
+            background: white;
+            border-radius: 0 0 16px 16px;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            padding: 30px;
+        }
+        .card-custom {
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .timeline-container {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 5px;
+            bottom: 5px;
+            width: 2px;
+            background: #e2e8f0;
+        }
+        .timeline-card-item {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        .timeline-card-item::before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 8px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #0ea5e9;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+        .timeline-card-item.application::before { background: #6b7280; box-shadow: none; }
+        .timeline-card-item.offer_letter::before { background: #3b82f6; }
+        .timeline-card-item.attendance::before { background: #ef4444; }
+        .timeline-card-item.weekly_reports::before { background: #f59e0b; }
+        .timeline-card-item.mentor_feedback::before { background: #10b981; }
+        .timeline-card-item.completion::before { background: #6366f1; }
+        
+        .star-rating-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .star-rating-group label.rating-label {
+            width: 160px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0;
+        }
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating label {
+            font-size: 24px;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: color 0.15s ease;
+        }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/company/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/company/dashboard">
+                            <i class="bi bi-speedometer2"></i> Company Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/company/interns">
+                            <i class="bi bi-people"></i> Active Interns
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <a href="/company/interns" class="btn btn-light btn-sm rounded-3"><i class="bi bi-arrow-left me-1"></i> Back to Roster</a>
+                </div>
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle text-info"></i> <span id="navUserName">Loading Rep...</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/change-password"><i class="bi bi-key me-2"></i>Change Password</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+
+                <!-- Student Header Block -->
+                <div class="student-header p-4 shadow-sm mb-4">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-auto text-center">
+                            <div class="bg-white text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold fs-2 shadow-sm" style="width: 70px; height: 70px;" id="hdrAvatar">
+                                --
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <h3 class="fw-bold mb-1" id="hdrStudentName">Loading Intern Dossier...</h3>
+                            <p class="mb-2 opacity-75" id="hdrStudentDetails">Roll Number: -- | Department: --</p>
+                            <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1 fw-normal" id="hdrPlacementCompany">Position: --</span>
+                        </div>
+                        <div class="col-md-auto">
+                            <div class="d-flex gap-3 text-center">
+                                <div class="px-3 border-end border-white border-opacity-20">
+                                    <small class="d-block opacity-75 small">Attendance</small>
+                                    <strong class="fs-5" id="hdrAttendance">--%</strong>
+                                </div>
+                                <div class="px-3 border-end border-white border-opacity-20">
+                                    <small class="d-block opacity-75 small">Reports Approved</small>
+                                    <strong class="fs-5" id="hdrReportsCount">0/16</strong>
+                                </div>
+                                <div class="px-3">
+                                    <small class="d-block opacity-75 small">Documents Valid</small>
+                                    <strong class="fs-5" id="hdrDocsCount">0/4</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabbed Dossier System -->
+                <div>
+                    <!-- Tabs Nav -->
+                    <ul class="nav nav-tabs nav-tabs-custom border-bottom bg-white rounded-top-4 shadow-sm px-3 pt-2" id="dossierTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-panel" type="button" role="tab">Intern Profile</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="attendance-tab" data-bs-toggle="tab" data-bs-target="#attendance-panel" type="button" role="tab">Attendance & Leaves</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs-panel" type="button" role="tab">Daily Logs & Verification</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-panel" type="button" role="tab">Weekly Reports</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="docs-tab" data-bs-toggle="tab" data-bs-target="#docs-panel" type="button" role="tab">Compliance Documents</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline-panel" type="button" role="tab">Milestones Timeline</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-primary" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback-panel" type="button" role="tab"><i class="bi bi-patch-check-fill me-1"></i> Mentor Evaluations</button>
+                        </li>
+                    </ul>
+
+                    <!-- Tabs Content -->
+                    <div class="tab-content tab-content-container shadow-sm bg-white" id="dossierTabsContent">
+
+                        <!-- Profile Panel -->
+                        <div class="tab-pane fade show active" id="profile-panel" role="tabpanel">
+                            <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-person-bounding-box me-2 text-info"></i>Student Academic Profile</h5>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card card-custom bg-light p-4 mb-3">
+                                        <h6 class="fw-bold text-dark mb-3">Academic Credentials</h6>
+                                        <table class="table table-sm table-borderless align-middle mb-0">
+                                            <tr><td class="text-muted py-2">Enrollment No:</td><td class="fw-semibold text-dark" id="profEnrollment">--</td></tr>
+                                            <tr><td class="text-muted py-2">Roll Number:</td><td class="fw-semibold text-dark" id="profRoll">--</td></tr>
+                                            <tr><td class="text-muted py-2">CGPA:</td><td class="fw-semibold text-dark" id="profCgpa">--</td></tr>
+                                            <tr><td class="text-muted py-2">Department:</td><td class="fw-semibold text-dark" id="profDept">--</td></tr>
+                                            <tr><td class="text-muted py-2">Current Semester:</td><td class="fw-semibold text-dark" id="profSem">--</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="card card-custom bg-light p-4">
+                                        <h6 class="fw-bold text-dark mb-3">Contact Details</h6>
+                                        <table class="table table-sm table-borderless align-middle mb-0">
+                                            <tr><td class="text-muted py-2">Email Address:</td><td class="fw-semibold text-dark" id="profEmail">--</td></tr>
+                                            <tr><td class="text-muted py-2">Phone Number:</td><td class="fw-semibold text-dark" id="profPhone">--</td></tr>
+                                            <tr><td class="text-muted py-2">Gender:</td><td class="fw-semibold text-dark" id="profGender">--</td></tr>
+                                            <tr><td class="text-muted py-2">Date of Birth:</td><td class="fw-semibold text-dark" id="profDob">--</td></tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card card-custom bg-light p-4 mb-3">
+                                        <h6 class="fw-bold text-dark mb-3">Professional Summary</h6>
+                                        <p class="text-muted mb-0 italic" id="profBio">No biography logged.</p>
+                                    </div>
+                                    <div class="card card-custom bg-light p-4 mb-3">
+                                        <h6 class="fw-bold text-dark mb-3">Technical Skills</h6>
+                                        <div id="profSkills" class="d-flex flex-wrap gap-1">--</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attendance Panel -->
+                        <div class="tab-pane fade" id="attendance-panel" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar-check me-2 text-danger"></i>Attendance Logs & Leaves</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-secondary btn-sm rounded-3" onclick="exportData('attendance', 'csv')"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
+                                    <button class="btn btn-outline-danger btn-sm rounded-3" onclick="exportData('attendance', 'pdf')"><i class="bi bi-file-pdf me-1"></i> Export PDF Ledger</button>
+                                </div>
+                            </div>
+                            <!-- Attendance KPI block -->
+                            <div class="row g-3 mb-4 text-center">
+                                <div class="col-sm-3">
+                                    <div class="p-3 bg-light rounded-3">
+                                        <span class="text-muted small d-block mb-1">Present Days</span>
+                                        <h3 class="fw-bold text-success mb-0" id="attPresentDays">0</h3>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="p-3 bg-light rounded-3">
+                                        <span class="text-muted small d-block mb-1">Absent Days</span>
+                                        <h3 class="fw-bold text-danger mb-0" id="attAbsentDays">0</h3>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="p-3 bg-light rounded-3">
+                                        <span class="text-muted small d-block mb-1">Leaves Approved</span>
+                                        <h3 class="fw-bold text-primary mb-0" id="attApprovedLeaves">0</h3>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="p-3 bg-light rounded-3">
+                                        <span class="text-muted small d-block mb-1">Hours Logged</span>
+                                        <h3 class="fw-bold text-dark mb-0" id="attHoursLogged">0.0h</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Table of leaves and logs -->
+                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-envelope-open me-2 text-primary"></i>Leave Requests Workflow</h5>
+                            <div class="table-responsive mb-4">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Leave Reason</th>
+                                            <th>Workflow Status</th>
+                                            <th>Remarks</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaveTableBody">
+                                        <tr><td colspan="5" class="text-center text-muted small py-3">No leaves logged for this student.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h6 class="fw-bold text-dark mb-3"><i class="bi bi-list-task me-2 text-primary"></i>Full Attendance History</h5>
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-hover table-striped align-middle">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Check-In</th>
+                                            <th>Check-Out</th>
+                                            <th>Hours</th>
+                                            <th>Remarks / Location</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="attendanceLogsBody">
+                                        <tr><td colspan="6" class="text-center text-muted small py-3">No attendance logs available.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Daily Logs Panel -->
+                        <div class="tab-pane fade" id="logs-panel" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-journal-text me-2 text-primary"></i>Daily Work Logs & Verification</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-secondary btn-sm rounded-3" onclick="exportData('logs', 'csv')"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
+                                    <button class="btn btn-outline-danger btn-sm rounded-3" onclick="exportData('logs', 'pdf')"><i class="bi bi-file-pdf me-1"></i> Export PDF Ledger</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Hours</th>
+                                            <th>Tech</th>
+                                            <th>Tasks Completed</th>
+                                            <th>Problems & Learning Outcomes</th>
+                                            <th>Verification Remarks</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dailyLogsBody">
+                                        <tr><td colspan="7" class="text-center text-muted small py-3">No daily logs submitted.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Weekly Reports Panel -->
+                        <div class="tab-pane fade" id="reports-panel" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-journal-check me-2 text-warning"></i>Weekly Progress Reports</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-secondary btn-sm rounded-3" onclick="exportData('reports', 'csv')"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
+                                    <button class="btn btn-outline-danger btn-sm rounded-3" onclick="exportData('reports', 'pdf')"><i class="bi bi-file-pdf me-1"></i> Export PDF Ledger</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Week</th>
+                                            <th>Date Range</th>
+                                            <th>Hours Logged</th>
+                                            <th>Status</th>
+                                            <th>Details / Remarks</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="weeklyReportsBody">
+                                        <tr><td colspan="6" class="text-center text-muted small py-3">No weekly reports found.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Documents Panel -->
+                        <div class="tab-pane fade" id="docs-panel" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-folder-check me-2 text-info"></i>Compliance Document Center</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-secondary btn-sm rounded-3" onclick="exportData('documents', 'csv')"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
+                                    <button class="btn btn-outline-danger btn-sm rounded-3" onclick="exportData('documents', 'pdf')"><i class="bi bi-file-pdf me-1"></i> Export PDF Ledger</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Category</th>
+                                            <th>Filename</th>
+                                            <th>Size</th>
+                                            <th>Upload Date</th>
+                                            <th>Status</th>
+                                            <th>Remarks</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="documentsTableBody">
+                                        <tr><td colspan="7" class="text-center text-muted small py-3">No compliance documents uploaded.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Panel -->
+                        <div class="tab-pane fade" id="timeline-panel" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-activity me-2 text-primary"></i>Internship Milestones Timeline</h5>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-secondary btn-sm rounded-3" onclick="exportData('timeline', 'csv')"><i class="bi bi-filetype-csv me-1"></i> Export CSV</button>
+                                    <button class="btn btn-outline-danger btn-sm rounded-3" onclick="exportData('timeline', 'pdf')"><i class="bi bi-file-pdf me-1"></i> Export PDF Ledger</button>
+                                </div>
+                            </div>
+                            <div class="timeline-container" id="timelineContainer">
+                                <div class="text-center text-muted py-3">No milestones recorded.</div>
+                            </div>
+                        </div>
+
+                        <!-- Evaluations & Feedback Panel -->
+                        <div class="tab-pane fade" id="feedback-panel" role="tabpanel">
+                            <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-patch-check-fill me-2 text-success"></i>Mentor Performance Evaluations</h5>
+                            <div class="row g-4">
+                                <div class="col-md-5">
+                                    <div class="card card-custom bg-light p-4">
+                                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-star-fill me-2 text-warning"></i>Submit Performance Review</h6>
+                                        <form id="feedbackForm" onsubmit="submitMentorFeedback(event)">
+                                            <!-- Star ratings matrix -->
+                                            <div class="star-rating-group">
+                                                <label class="rating-label">Overall Rating</label>
+                                                <div class="star-rating">
+                                                    <input type="radio" id="rating5" name="rating" value="5" required/><label for="rating5">★</label>
+                                                    <input type="radio" id="rating4" name="rating" value="4"/><label for="rating4">★</label>
+                                                    <input type="radio" id="rating3" name="rating" value="3"/><label for="rating3">★</label>
+                                                    <input type="radio" id="rating2" name="rating" value="2"/><label for="rating2">★</label>
+                                                    <input type="radio" id="rating1" name="rating" value="1"/><label for="rating1">★</label>
+                                                </div>
+                                            </div>
+                                            <div class="star-rating-group">
+                                                <label class="rating-label">Technical Skills</label>
+                                                <div class="star-rating">
+                                                    <input type="radio" id="tech5" name="technical_rating" value="5" required/><label for="tech5">★</label>
+                                                    <input type="radio" id="tech4" name="technical_rating" value="4"/><label for="tech4">★</label>
+                                                    <input type="radio" id="tech3" name="technical_rating" value="3"/><label for="tech3">★</label>
+                                                    <input type="radio" id="tech2" name="technical_rating" value="2"/><label for="tech2">★</label>
+                                                    <input type="radio" id="tech1" name="technical_rating" value="1"/><label for="tech1">★</label>
+                                                </div>
+                                            </div>
+                                            <div class="star-rating-group">
+                                                <label class="rating-label">Communication</label>
+                                                <div class="star-rating">
+                                                    <input type="radio" id="comm5" name="communication_rating" value="5" required/><label for="comm5">★</label>
+                                                    <input type="radio" id="comm4" name="communication_rating" value="4"/><label for="comm4">★</label>
+                                                    <input type="radio" id="comm3" name="communication_rating" value="3"/><label for="comm3">★</label>
+                                                    <input type="radio" id="comm2" name="communication_rating" value="2"/><label for="comm2">★</label>
+                                                    <input type="radio" id="comm1" name="communication_rating" value="1"/><label for="comm1">★</label>
+                                                </div>
+                                            </div>
+                                            <div class="star-rating-group">
+                                                <label class="rating-label">Professionalism</label>
+                                                <div class="star-rating">
+                                                    <input type="radio" id="prof5" name="professionalism_rating" value="5" required/><label for="prof5">★</label>
+                                                    <input type="radio" id="prof4" name="professionalism_rating" value="4"/><label for="prof4">★</label>
+                                                    <input type="radio" id="prof3" name="professionalism_rating" value="3"/><label for="prof3">★</label>
+                                                    <input type="radio" id="prof2" name="professionalism_rating" value="2"/><label for="prof2">★</label>
+                                                    <input type="radio" id="prof1" name="professionalism_rating" value="1"/><label for="prof1">★</label>
+                                                </div>
+                                            </div>
+                                            <div class="star-rating-group">
+                                                <label class="rating-label">Punctuality</label>
+                                                <div class="star-rating">
+                                                    <input type="radio" id="punc5" name="punctuality_rating" value="5" required/><label for="punc5">★</label>
+                                                    <input type="radio" id="punc4" name="punctuality_rating" value="4"/><label for="punc4">★</label>
+                                                    <input type="radio" id="punc3" name="punctuality_rating" value="3"/><label for="punc3">★</label>
+                                                    <input type="radio" id="punc2" name="punctuality_rating" value="2"/><label for="punc2">★</label>
+                                                    <input type="radio" id="punc1" name="punctuality_rating" value="1"/><label for="punc1">★</label>
+                                                </div>
+                                            </div>
+
+                                            <!-- Form comments -->
+                                            <div class="mb-3 mt-4">
+                                                <label for="feedbackComments" class="form-label fw-semibold text-dark">Detailed Mentor Comments & Feedback</label>
+                                                <textarea class="form-control rounded-3" id="feedbackComments" rows="4" placeholder="Summarize intern strengths, learning milestones, punctuality, and areas for professional improvement..." required></textarea>
+                                            </div>
+
+                                            <!-- Recommendations -->
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="recommendCompletion" value="true">
+                                                <label class="form-check-label fw-semibold text-dark small" for="recommendCompletion">
+                                                    Recommend Internship Term Completion
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-3">
+                                                <input class="form-check-input" type="checkbox" id="recommendCertificate" value="true">
+                                                <label class="form-check-label fw-semibold text-dark small" for="recommendCertificate">
+                                                    Recommend Smart Certificate Release
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-3 border-top pt-3">
+                                                <input class="form-check-input" type="checkbox" id="isFinalEvaluation" value="true">
+                                                <label class="form-check-label fw-bold text-danger small" for="isFinalEvaluation">
+                                                    Mark as FINAL Evaluation (Graduation)
+                                                </label>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary rounded-3 px-4 w-100 py-2">Submit Mentor Evaluation</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <!-- History logs -->
+                                    <div class="card card-custom bg-light p-4 mb-3">
+                                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history me-2 text-primary"></i>Mentor Review History</h6>
+                                        <div class="table-responsive" style="max-height: 320px; overflow-y: auto;">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Ratings</th>
+                                                        <th>Feedback / Remarks</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="companyHistoryBody">
+                                                    <tr><td colspan="4" class="text-center text-muted small py-3">No evaluations logged yet.</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Faculty evaluation references -->
+                                    <div class="card card-custom bg-light p-4 h-50">
+                                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-mortarboard me-2 text-primary"></i>Faculty Advisor Evaluations</h6>
+                                        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Rating</th>
+                                                        <th>Advisor Recommendations</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="facultyHistoryBody">
+                                                    <tr><td colspan="3" class="text-center text-muted small py-3">No faculty evaluations found.</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer mt-auto">
+                &copy; 2026 Smart University Internship Portal. Confidential ERP.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Review Modal (Approvals Workflow) -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="reviewModalLabel">Review Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="reviewDetailsContainer" class="mb-4"></div>
+                    <form id="reviewForm">
+                        <input type="hidden" id="reviewItemId">
+                        <input type="hidden" id="reviewItemType">
+                        <div class="mb-3">
+                            <label for="reviewRemarks" class="form-label fw-semibold text-dark">Mentor Remarks / Feedback</label>
+                            <textarea class="form-control rounded-3" id="reviewRemarks" rows="4" placeholder="Write constructive comments or required corrections..." required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-danger px-4 py-2 rounded-3" onclick="processReview('rejected')">Reject / Request Fix</button>
+                            <button type="button" class="btn btn-success px-4 py-2 rounded-3" onclick="processReview('approved')">Approve / Validate</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verify Log Modal (Daily Log Verification) -->
+    <div class="modal fade" id="verifyLogModal" tabindex="-1" aria-labelledby="verifyLogModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0 p-4">
+                    <h5 class="modal-title fw-bold text-dark" id="verifyLogModalLabel">Verify Daily Log</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="verifyLogDetailsContainer" class="mb-3 p-3 bg-light rounded-3 small text-secondary">
+                        <!-- Log info -->
+                    </div>
+                    <form id="verifyLogForm" onsubmit="submitLogVerification(event)">
+                        <input type="hidden" id="verifyLogId">
+                        <div class="mb-3">
+                            <label for="verifyLogRemarks" class="form-label fw-semibold text-dark">Verification Remarks / Mentor Remarks</label>
+                            <textarea class="form-control rounded-3" id="verifyLogRemarks" rows="3" placeholder="Enter optional verification remarks (e.g., Tasks completed satisfactorily, verified hours)..."></textarea>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <button type="button" class="btn btn-light px-4 py-2 rounded-3" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success px-4 py-2 rounded-3">Verify & Approve Hours</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const internId = parseInt(window.location.pathname.split('/')[3], 10);
+        let internUserId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load Profile Name
+            try {
+                const response = await fetch('/api/company/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.company) {
+                        const name = data.company.company_name;
+                        const contact = data.company.contact_person || 'Representative';
+                        document.getElementById('navUserName').innerText = `${contact} (${name})`;
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching company profile:', err);
+            }
+
+            // Load complete student dossier data
+            await loadInternDossier();
+
+            // Setup Mobile Sidebar Toggle
+            const sidebarToggle = document.querySelector('.btn-sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (sidebarToggle && sidebar && overlay) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.add('show');
+                    overlay.classList.add('show');
+                });
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                });
+            }
+        });
+
+        async function loadInternDossier() {
+            try {
+                const response = await fetch(`/api/company/interns/${internId}`);
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        alert('Security Access Denied. This intern is not assigned to your company.');
+                        window.location.href = '/company/dashboard';
+                        return;
+                    }
+                    throw new Error('Failed to load intern dossier.');
+                }
+                const data = await response.json();
+                if (data.success) {
+                    const { student, internship, attendance, dailyLogs, weeklyReports, documents, timeline, facultyFeedback, companyFeedback } = data;
+                    internUserId = student.user_id;
+
+                    // 1. Header Information
+                    document.getElementById('hdrAvatar').innerText = `${student.first_name[0]}${student.last_name[0]}`;
+                    document.getElementById('hdrStudentName').innerText = `${student.first_name} ${student.last_name}`;
+                    document.getElementById('hdrStudentDetails').innerText = `Roll Number: ${student.roll_number || 'N/A'} | Department: ${student.department || 'N/A'} | Semester: ${student.semester || 'N/A'}`;
+                    
+                    const attRate = attendance.stats.attendancePercentage || 100.0;
+                    document.getElementById('hdrAttendance').innerText = `${attRate}%`;
+                    
+                    // Filter weekly reports to count ones approved by faculty or verified by company
+                    const approvedCount = weeklyReports.logs.filter(f => f.status === 'approved' || f.status === 'reviewed').length;
+                    document.getElementById('hdrReportsCount').innerText = `${approvedCount}/${weeklyReports.logs.length}`;
+                    
+                    const coreApproved = documents.files.filter(f => f.status === 'approved').length;
+                    document.getElementById('hdrDocsCount').innerText = `${coreApproved}/${documents.files.length}`;
+
+                    if (internship) {
+                        document.getElementById('hdrPlacementCompany').innerText = `Intern Position: ${internship.title} (Placement Period: ${new Date(internship.start_date).toLocaleDateString('en-GB')} - ${new Date(internship.end_date).toLocaleDateString('en-GB')})`;
+                    } else {
+                        document.getElementById('hdrPlacementCompany').innerText = 'Placement: Unplaced';
+                    }
+
+                    // 2. Profile Tab Details
+                    document.getElementById('profEnrollment').innerText = student.enrollment_number || 'N/A';
+                    document.getElementById('profRoll').innerText = student.roll_number || 'N/A';
+                    document.getElementById('profCgpa').innerText = student.cgpa ? parseFloat(student.cgpa).toFixed(2) : 'N/A';
+                    document.getElementById('profDept').innerText = student.department || 'N/A';
+                    document.getElementById('profSem').innerText = student.semester || 'N/A';
+                    document.getElementById('profEmail').innerText = student.email || 'N/A';
+                    document.getElementById('profPhone').innerText = student.phone || 'N/A';
+                    document.getElementById('profGender').innerText = student.gender || 'N/A';
+                    document.getElementById('profDob').innerText = student.dob ? new Date(student.dob).toLocaleDateString('en-GB') : 'N/A';
+                    document.getElementById('profBio').innerText = student.bio || 'No personal biography logged.';
+                    
+                    const skillsContainer = document.getElementById('profSkills');
+                    if (student.skills) {
+                        skillsContainer.innerHTML = student.skills.split(',').map(s => `<span class="badge bg-secondary rounded-pill px-2 py-1 mb-1 me-1">${s.trim()}</span>`).join('');
+                    } else {
+                        skillsContainer.innerHTML = '<span class="text-muted small italic">No skills listed.</span>';
+                    }
+
+                    // 3. Attendance Tab Details
+                    document.getElementById('attPresentDays').innerText = attendance.stats.presentDays || 0;
+                    document.getElementById('attAbsentDays').innerText = attendance.stats.absentDays || 0;
+                    document.getElementById('attApprovedLeaves').innerText = attendance.stats.approvedLeaves || 0;
+                    document.getElementById('attHoursLogged').innerText = `${attendance.stats.totalHoursWorked || 0.0}h`;
+
+                    const leaveTableBody = document.getElementById('leaveTableBody');
+                    const leaves = attendance.logs.filter(l => l.status === 'leave');
+                    if (leaves.length > 0) {
+                        leaveTableBody.innerHTML = leaves.map(lv => {
+                            const dateStr = new Date(lv.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                            let badge = '';
+                            let action = '';
+                            if (lv.leave_status === 'pending') {
+                                badge = '<span class="badge bg-warning text-dark">PENDING</span>';
+                                action = `<button class="btn btn-outline-primary btn-xs rounded-3" onclick="openReviewModal('leave', ${lv.id}, 'Leave Request on ${dateStr}', '${escapeHtml(lv.leave_reason)}')">Review</button>`;
+                            } else if (lv.leave_status === 'approved') {
+                                badge = '<span class="badge bg-success">APPROVED</span>';
+                            } else {
+                                badge = '<span class="badge bg-danger">REJECTED</span>';
+                            }
+                            return `
+                                <tr>
+                                    <td>${dateStr}</td>
+                                    <td>${lv.leave_reason || 'Personal'}</td>
+                                    <td>${badge}</td>
+                                    <td class="text-secondary small">${lv.remarks || 'None'}</td>
+                                    <td class="text-end">${action}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        leaveTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted small py-3">No leave requests logged.</td></tr>';
+                    }
+
+                    const attendanceLogsBody = document.getElementById('attendanceLogsBody');
+                    if (attendance.logs.length > 0) {
+                        attendanceLogsBody.innerHTML = attendance.logs.map(log => {
+                            const dateStr = new Date(log.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                            let statusBadge = '';
+                            if (log.status === 'present') statusBadge = '<span class="badge bg-success bg-opacity-10 text-success">PRESENT</span>';
+                            else if (log.status === 'absent') statusBadge = '<span class="badge bg-danger bg-opacity-10 text-danger">ABSENT</span>';
+                            else statusBadge = '<span class="badge bg-info bg-opacity-10 text-info">LEAVE</span>';
+
+                            return `
+                                <tr>
+                                    <td>${dateStr}</td>
+                                    <td>${statusBadge}</td>
+                                    <td>${log.check_in_time || '--'}</td>
+                                    <td>${log.check_out_time || '--'}</td>
+                                    <td>${log.working_hours ? log.working_hours + 'h' : '--'}</td>
+                                    <td class="text-secondary small">${log.remarks || log.location || 'None'}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        attendanceLogsBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted small py-3">No attendance logs available.</td></tr>';
+                    }
+
+                    // 4. Daily Logs Tab Details (supports Verification remarks)
+                    const dailyLogsBody = document.getElementById('dailyLogsBody');
+                    if (dailyLogs && dailyLogs.length > 0) {
+                        dailyLogsBody.innerHTML = dailyLogs.map(dl => {
+                            const dateStr = new Date(dl.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                            const verifiedLabel = dl.verified_by 
+                                ? `<span class="badge bg-success rounded-pill small"><i class="bi bi-check-circle me-1"></i>Verified</span>`
+                                : `<span class="badge bg-light text-secondary rounded-pill small">Pending</span>`;
+                            const verifyAction = dl.verified_by
+                                ? `<span class="text-muted small">Done</span>`
+                                : `<button class="btn btn-outline-success btn-xs rounded-3" onclick="openVerifyLogModal(${dl.id}, '${dateStr}', '${escapeHtml(dl.tasks_completed)}')">Verify</button>`;
+
+                            return `
+                                <tr>
+                                    <td><strong>${dateStr}</strong></td>
+                                    <td>${dl.hours_worked}h</td>
+                                    <td><span class="badge bg-light text-dark border">${dl.technology_used || 'N/A'}</span></td>
+                                    <td class="small text-dark">${dl.tasks_completed}</td>
+                                    <td class="small text-secondary">
+                                        <strong>Problems:</strong> ${dl.problems_faced || 'None'}<br>
+                                        <strong>Learning:</strong> ${dl.learning_outcome || 'None'}
+                                    </td>
+                                    <td class="small text-primary">
+                                        <div class="mb-1">${verifiedLabel}</div>
+                                        <div>${dl.remarks || ''}</div>
+                                    </td>
+                                    <td class="text-end">${verifyAction}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        dailyLogsBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted small py-3">No daily work logs submitted.</td></tr>';
+                    }
+
+                    // 5. Weekly Reports Tab Details (reviewed by company, approved by faculty)
+                    const weeklyReportsBody = document.getElementById('weeklyReportsBody');
+                    if (weeklyReports.logs.length > 0) {
+                        weeklyReportsBody.innerHTML = weeklyReports.logs.map(wr => {
+                            let statusBadge = '';
+                            let action = '';
+                            if (wr.status === 'submitted') {
+                                statusBadge = '<span class="badge bg-warning text-dark">SUBMITTED</span>';
+                                action = `<button class="btn btn-outline-primary btn-sm rounded-3" onclick="openReviewModal('report', ${wr.id}, 'Weekly Progress Report Week ${wr.week_number}', '${escapeHtml(wr.report_content)}')">Review</button>`;
+                            } else if (wr.status === 'reviewed') {
+                                statusBadge = '<span class="badge bg-info text-dark">REVIEWED BY MENTOR</span>';
+                            } else if (wr.status === 'approved') {
+                                statusBadge = '<span class="badge bg-success">APPROVED BY FACULTY</span>';
+                            } else if (wr.status === 'rejected') {
+                                statusBadge = '<span class="badge bg-danger">REJECTED / FIX REQ</span>';
+                            } else {
+                                statusBadge = '<span class="badge bg-secondary">DRAFT</span>';
+                            }
+
+                            return `
+                                <tr>
+                                    <td><strong>Week ${wr.week_number}</strong></td>
+                                    <td class="small text-secondary">${wr.date_range || 'N/A'}</td>
+                                    <td>${wr.hours_worked || 0}h</td>
+                                    <td>${statusBadge}</td>
+                                    <td>
+                                        <div class="small fw-semibold text-dark mb-1">Tasks Completed:</div>
+                                        <div class="small text-muted mb-2" style="white-space: pre-line;">${wr.report_content || ''}</div>
+                                        ${wr.mentor_remarks ? `<div class="small text-info mt-2 p-2 bg-light rounded border-start border-info border-3"><strong>Mentor Remarks:</strong> ${wr.mentor_remarks}</div>` : ''}
+                                        ${wr.faculty_remarks ? `<div class="small text-primary mt-2 p-2 bg-light rounded border-start border-primary border-3"><strong>Faculty Coordinator Remarks:</strong> ${wr.faculty_remarks}</div>` : ''}
+                                    </td>
+                                    <td class="text-end">${action}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        weeklyReportsBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted small py-3">No weekly reports found.</td></tr>';
+                    }
+
+                    // 6. Documents Tab Details
+                    const documentsTableBody = document.getElementById('documentsTableBody');
+                    if (documents.files.length > 0) {
+                        documentsTableBody.innerHTML = documents.files.map(doc => {
+                            const dateStr = new Date(doc.uploaded_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                            const sizeKB = (doc.file_size / 1024).toFixed(0);
+                            let statusBadge = '';
+                            let action = '';
+                            if (doc.status === 'pending') {
+                                statusBadge = '<span class="badge bg-warning text-dark">PENDING</span>';
+                                action = `<button class="btn btn-outline-primary btn-xs rounded-3" onclick="openReviewModal('document', ${doc.id}, 'Compliance Document ${doc.document_type.toUpperCase()}', '${doc.file_name}')">Review</button>`;
+                            } else if (doc.status === 'approved') {
+                                statusBadge = '<span class="badge bg-success">APPROVED</span>';
+                            } else {
+                                statusBadge = '<span class="badge bg-danger">REJECTED</span>';
+                            }
+
+                            return `
+                                <tr>
+                                    <td><span class="badge bg-light text-dark border">${doc.document_type.replace('_', ' ').toUpperCase()}</span></td>
+                                    <td><a href="/api/student/documents/${doc.id}/download" target="_blank" class="fw-semibold text-primary"><i class="bi bi-file-earmark-pdf me-1"></i>${doc.file_name}</a></td>
+                                    <td class="small text-muted">${sizeKB} KB</td>
+                                    <td class="small text-muted">${dateStr}</td>
+                                    <td>${statusBadge}</td>
+                                    <td class="small text-secondary">${doc.remarks || 'None'}</td>
+                                    <td class="text-end">
+                                        <div class="d-flex gap-1 justify-content-end">
+                                            <a href="/api/student/documents/${doc.id}/download" target="_blank" class="btn btn-outline-secondary btn-xs rounded-3" title="View Document"><i class="bi bi-eye"></i></a>
+                                            ${action}
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        documentsTableBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted small py-3">No compliance documents uploaded.</td></tr>';
+                    }
+
+                    // 7. Timeline Tab Details
+                    const timelineContainer = document.getElementById('timelineContainer');
+                    if (timeline && timeline.length > 0) {
+                        timelineContainer.innerHTML = timeline.map(event => {
+                            const dateStr = new Date(event.event_date || event.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                            return `
+                                <div class="timeline-card-item ${event.event_type}">
+                                    <div class="card card-custom p-3 bg-light border-0 shadow-xs">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <strong class="text-dark">${event.title}</strong>
+                                            <span class="text-muted small">${dateStr}</span>
+                                        </div>
+                                        <p class="text-secondary mb-0 small">${event.description || ''}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        timelineContainer.innerHTML = '<div class="text-center text-muted py-3">No milestones recorded.</div>';
+                    }
+
+                    // 8. Company Evaluation History Tab
+                    const companyHistoryBody = document.getElementById('companyHistoryBody');
+                    if (companyFeedback && companyFeedback.length > 0) {
+                        companyHistoryBody.innerHTML = companyFeedback.map(fb => {
+                            const dateStr = new Date(fb.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                            const stars = '★'.repeat(fb.rating) + '☆'.repeat(5 - fb.rating);
+                            const completionBadge = fb.recommend_completion 
+                                ? `<span class="badge bg-success rounded-pill d-block mb-1">Completed</span>`
+                                : `<span class="badge bg-secondary rounded-pill d-block mb-1">In Progress</span>`;
+                            const finalBadge = fb.is_final 
+                                ? `<span class="badge bg-danger rounded-pill d-block">FINAL GRADUATION</span>`
+                                : '';
+
+                            return `
+                                <tr>
+                                    <td class="small text-muted">${dateStr}</td>
+                                    <td>
+                                        <div class="fw-bold mb-1">Overall: ${stars}</div>
+                                        <div class="small text-muted" style="font-size:0.75rem;">
+                                            Tech: ${fb.technical_rating || 0}/5 | Comm: ${fb.communication_rating || 0}/5 | Prof: ${fb.professionalism_rating || 0}/5 | Punc: ${fb.punctuality_rating || 0}/5
+                                        </div>
+                                    </td>
+                                    <td class="small text-dark" style="max-width: 250px; white-space: pre-line;">${fb.comments}</td>
+                                    <td>
+                                        ${completionBadge}
+                                        ${finalBadge}
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        companyHistoryBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted small py-3">No evaluation records found.</td></tr>';
+                    }
+
+                    // 9. Faculty Feedback History Tab
+                    const facultyHistoryBody = document.getElementById('facultyHistoryBody');
+                    if (facultyFeedback && facultyFeedback.length > 0) {
+                        facultyHistoryBody.innerHTML = facultyFeedback.map(fb => {
+                            const dateStr = new Date(fb.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                            const stars = '★'.repeat(fb.rating) + '☆'.repeat(5 - fb.rating);
+                            return `
+                                <tr>
+                                    <td class="small text-muted">${dateStr}</td>
+                                    <td><span class="text-warning fw-bold">${stars}</span> (${fb.rating}/5)</td>
+                                    <td class="small text-secondary" style="max-width: 250px; white-space: pre-line;">${fb.comments}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        facultyHistoryBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted small py-3">No faculty advisor reviews recorded.</td></tr>';
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading student dossier:', err);
+                alert('Error loading student details.');
+            }
+        }
+
+        function openReviewModal(type, id, title, contentText) {
+            document.getElementById('reviewItemId').value = id;
+            document.getElementById('reviewItemType').value = type;
+            document.getElementById('reviewRemarks').value = '';
+            document.getElementById('reviewModalLabel').innerText = `Approve / Reject ${type.toUpperCase()}`;
+
+            let detailsHtml = `
+                <div class="p-3 bg-light rounded-3 mb-3">
+                    <span class="text-muted small d-block mb-1">Submission Title:</span>
+                    <strong class="text-dark d-block mb-2">${title}</strong>
+                    <span class="text-muted small d-block mb-1">Submission Content / Description:</span>
+                    <div class="p-2 bg-white rounded border small text-secondary" style="max-height: 150px; overflow-y: auto; white-space: pre-line;">
+                        ${contentText || 'No descriptive content provided.'}
+                    </div>
+                </div>
+            `;
+            document.getElementById('reviewDetailsContainer').innerHTML = detailsHtml;
+
+            const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+            modal.show();
+        }
+
+        async function processReview(status) {
+            const id = document.getElementById('reviewItemId').value;
+            const type = document.getElementById('reviewItemType').value;
+            const remarks = document.getElementById('reviewRemarks').value;
+
+            if (!remarks || remarks.trim() === '') {
+                alert('Please write comments or remarks for this review.');
+                return;
+            }
+
+            let endpoint = '';
+            let finalStatus = status;
+            if (type === 'report') {
+                endpoint = `/api/company/reports/${id}/review`;
+                finalStatus = (status === 'approved') ? 'reviewed' : 'rejected';
+            } else if (type === 'leave') {
+                endpoint = `/api/company/leaves/${id}/review`;
+            } else if (type === 'document') {
+                endpoint = `/api/company/documents/${id}/review`;
+            }
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: finalStatus, remarks })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const modalEl = document.getElementById('reviewModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    await loadInternDossier();
+                } else {
+                    alert(data.message || 'Error processing review.');
+                }
+            } catch (err) {
+                console.error('Error processing review:', err);
+                alert('Internal server error occurred.');
+            }
+        }
+
+        function openVerifyLogModal(logId, dateStr, tasks) {
+            document.getElementById('verifyLogId').value = logId;
+            document.getElementById('verifyLogRemarks').value = '';
+            
+            document.getElementById('verifyLogDetailsContainer').innerHTML = `
+                <strong>Date:</strong> ${dateStr}<br>
+                <strong>Logged Tasks:</strong> ${tasks}
+            `;
+
+            const modal = new bootstrap.Modal(document.getElementById('verifyLogModal'));
+            modal.show();
+        }
+
+        async function submitLogVerification(event) {
+            event.preventDefault();
+            const logId = document.getElementById('verifyLogId').value;
+            const remarks = document.getElementById('verifyLogRemarks').value;
+
+            try {
+                const response = await fetch(`/api/company/logs/${logId}/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ remarks })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    const modalEl = document.getElementById('verifyLogModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+
+                    await loadInternDossier();
+                } else {
+                    alert(data.message || 'Failed to verify log.');
+                }
+            } catch (err) {
+                console.error('Error verifying log:', err);
+                alert('Internal server error occurred.');
+            }
+        }
+
+        async function submitMentorFeedback(event) {
+            event.preventDefault();
+            const comments = document.getElementById('feedbackComments').value;
+            
+            const overallRating = document.querySelector('input[name="rating"]:checked');
+            const techRating = document.querySelector('input[name="technical_rating"]:checked');
+            const commRating = document.querySelector('input[name="communication_rating"]:checked');
+            const profRating = document.querySelector('input[name="professionalism_rating"]:checked');
+            const puncRating = document.querySelector('input[name="punctuality_rating"]:checked');
+            
+            if (!overallRating || !techRating || !commRating || !profRating || !puncRating) {
+                alert('Please select star ratings for all five performance metrics.');
+                return;
+            }
+
+            const recommendCompletion = document.getElementById('recommendCompletion').checked;
+            const recommendCertificate = document.getElementById('recommendCertificate').checked;
+            const isFinal = document.getElementById('isFinalEvaluation').checked;
+
+            try {
+                const response = await fetch(`/api/company/interns/${internId}/feedback`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        rating: overallRating.value,
+                        technical_rating: techRating.value,
+                        communication_rating: commRating.value,
+                        professionalism_rating: profRating.value,
+                        punctuality_rating: puncRating.value,
+                        comments,
+                        recommend_completion: recommendCompletion,
+                        recommend_certificate: recommendCertificate,
+                        is_final: isFinal
+                    })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    alert('Detailed employer performance evaluation submitted successfully.');
+                    document.getElementById('feedbackForm').reset();
+                    await loadInternDossier();
+                } else {
+                    alert(data.message || 'Failed to submit evaluation.');
+                }
+            } catch (err) {
+                console.error('Error submitting evaluation:', err);
+                alert('Internal server error occurred.');
+            }
+        }
+
+        function exportData(type, format) {
+            const url = `/api/company/interns/${internId}/export/${type}?format=${format}`;
+            window.open(url, '_blank');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>
