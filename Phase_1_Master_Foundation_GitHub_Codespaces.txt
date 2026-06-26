@@ -1,0 +1,171 @@
+
+PROMPT 1 — PHASE 1: MASTER FOUNDATION (GitHub Codespaces Edition)
+
+ROLE
+You are an expert Senior Full Stack Engineer, Solution Architect, UI/UX Engineer, Database Architect, QA Engineer and Technical Lead.
+
+OBJECTIVE
+Build a production-quality Smart University Internship & Placement Management Portal using ONLY the technologies listed below.
+
+MANDATORY TECH STACK
+Frontend:
+- HTML5
+- CSS3
+- Bootstrap 5
+- Vanilla JavaScript
+
+Backend:
+- Node.js (LTS)
+- Express.js
+
+Database:
+- MySQL
+
+Authentication:
+- express-session
+- bcrypt
+
+Uploads:
+- multer
+
+PDF:
+- pdfkit
+
+Environment:
+- GitHub Codespaces
+- VS Code
+- npm
+
+NEVER USE
+React, Next.js, TypeScript, MongoDB, Prisma, Docker for the application, Tailwind, GraphQL.
+
+FIRST ACTIONS
+1. Inspect the repository.
+2. Detect existing files.
+3. Do not overwrite working code.
+4. Create only missing files or safely update existing ones.
+5. Keep architecture consistent.
+
+PROJECT STRUCTURE
+
+internship-portal/
+ public/
+   css/
+   js/
+   images/
+ uploads/
+   resumes/
+   reports/
+   certificates/
+   offer_letters/
+ routes/
+ controllers/
+ models/
+ middleware/
+ config/
+ database/
+ views/
+ .devcontainer/
+ .env.example
+ .gitignore
+ package.json
+ server.js
+ README.md
+
+GITHUB CODESPACES
+- Detect Codespaces automatically.
+- Verify Node and npm.
+- Configure forwarded port 3000.
+- Create .devcontainer if missing.
+- Explain any manual command before expecting the user to run it.
+
+DEPENDENCIES
+Install only:
+express
+mysql2
+express-session
+bcrypt
+multer
+pdfkit
+dotenv
+nodemon (dev)
+
+PACKAGE.JSON
+Create clean scripts:
+npm run dev
+npm start
+
+DATABASE
+Create MySQL connection configuration.
+Create SQL schema file only (do not invent sample data yet).
+
+Tables:
+users
+students
+faculty
+companies
+attendance
+weekly_reports
+documents
+feedback
+certificates
+
+Use:
+- Primary keys
+- Foreign keys
+- Indexes
+- Proper datatypes
+- Prepared queries in code
+
+SECURITY
+Hash passwords.
+Never store plain passwords.
+Validate input.
+Restrict routes by role.
+Protect uploaded files.
+Store secrets in .env.
+
+UI
+Bootstrap 5 only.
+Responsive.
+Professional admin dashboard style.
+Reusable header, sidebar and footer.
+
+CODING STANDARDS
+- Modular structure
+- Meaningful names
+- Separate routes/controllers/models
+- Reusable helper functions
+- Graceful error handling
+- No duplicated logic
+
+IMPLEMENTATION ORDER
+1. Scaffold folders.
+2. Generate package.json.
+3. Install dependencies.
+4. Configure Express.
+5. Configure sessions.
+6. Configure MySQL.
+7. Create .env.example.
+8. Create server.js.
+9. Create README with setup instructions.
+10. Verify server starts successfully.
+
+VERIFICATION
+Before finishing:
+- npm install succeeds.
+- Server starts without errors.
+- Database connection is validated (or clearly reports configuration needed).
+- No syntax errors.
+- No broken imports.
+- Project structure matches specification.
+
+OUTPUT
+Produce real files, not pseudocode.
+If an error occurs, fix it before continuing.
+At the end provide:
+- Files created
+- Packages installed
+- Commands for me to run
+- Remaining manual setup (if any)
+Then STOP and wait for Phase 2.

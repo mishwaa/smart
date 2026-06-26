@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+
+# Uploads (user-generated content)
+uploads/resumes/*
+uploads/reports/*
+uploads/certificates/*
+uploads/offer_letters/*
+!uploads/resumes/.gitkeep
+!uploads/reports/.gitkeep
+!uploads/certificates/.gitkeep
+!uploads/offer_letters/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
