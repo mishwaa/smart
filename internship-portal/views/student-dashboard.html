@@ -55,6 +55,10 @@
         .timeline-item.pending::before {
             background: var(--warning);
         }
+        .timeline-item.active::before {
+            background: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -84,18 +88,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link disabled text-muted opacity-50" href="#">
-                            <i class="bi bi-calendar-check"></i> Attendance <span class="badge bg-secondary ms-1 small" style="font-size: 9px;">Soon</span>
+                        <a class="nav-link" href="/student/attendance">
+                            <i class="bi bi-calendar-check"></i> Attendance
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link disabled text-muted opacity-50" href="#">
-                            <i class="bi bi-journal-text"></i> Weekly Reports <span class="badge bg-secondary ms-1 small" style="font-size: 9px;">Soon</span>
+                        <a class="nav-link" href="/student/reports">
+                            <i class="bi bi-journal-text"></i> Weekly Reports
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link disabled text-muted opacity-50" href="#">
-                            <i class="bi bi-folder"></i> Documents <span class="badge bg-secondary ms-1 small" style="font-size: 9px;">Soon</span>
+                        <a class="nav-link" href="/student/documents">
+                            <i class="bi bi-folder"></i> Documents
                         </a>
                     </li>
                     <li class="nav-item">
@@ -121,7 +125,7 @@
                     </button>
                 </div>
                 <div class="d-flex align-items-center gap-3">
-                    <!-- Notifications -->
+                    <!-- Notifications Dropdown -->
                     <div class="dropdown">
                         <button class="btn btn-light position-relative rounded-circle p-2" type="button" data-bs-toggle="dropdown" aria-label="Notifications">
                             <i class="bi bi-bell"></i>
@@ -181,8 +185,8 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
                                     <div class="text-muted small fw-semibold">Attendance Rate</div>
-                                    <h3 class="fw-bold mt-1 mb-0">94.5%</h3>
-                                    <div class="text-success small mt-1"><i class="bi bi-arrow-up-short"></i> Meets target</div>
+                                    <h3 class="fw-bold mt-1 mb-0" id="valAttendanceRate">0%</h3>
+                                    <div class="text-success small mt-1" id="lblAttendanceStanding"><i class="bi bi-arrow-up-short"></i> Meets target</div>
                                 </div>
                                 <div class="bg-success bg-opacity-10 p-3 rounded-3 text-success"><i class="bi bi-calendar-check" style="font-size: 24px;"></i></div>
                             </div>
@@ -194,8 +198,8 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
                                     <div class="text-muted small fw-semibold">Internship Progress</div>
-                                    <h3 class="fw-bold mt-1 mb-0">75%</h3>
-                                    <div class="text-primary small mt-1"><i class="bi bi-clock-history"></i> Phase 3 active</div>
+                                    <h3 class="fw-bold mt-1 mb-0" id="valInternshipProgress">0%</h3>
+                                    <div class="text-primary small mt-1"><i class="bi bi-clock-history"></i> Days tracking</div>
                                 </div>
                                 <div class="bg-primary bg-opacity-10 p-3 rounded-3 text-primary"><i class="bi bi-hourglass-split" style="font-size: 24px;"></i></div>
                             </div>
@@ -207,8 +211,8 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
                                     <div class="text-muted small fw-semibold">Reports Submitted</div>
-                                    <h3 class="fw-bold mt-1 mb-0">8</h3>
-                                    <div class="text-muted small mt-1">out of 12 total</div>
+                                    <h3 class="fw-bold mt-1 mb-0" id="valReportsSubmitted">0</h3>
+                                    <div class="text-muted small mt-1">out of 16 weeks</div>
                                 </div>
                                 <div class="bg-info bg-opacity-10 p-3 rounded-3 text-info"><i class="bi bi-journal-check" style="font-size: 24px;"></i></div>
                             </div>
@@ -220,8 +224,8 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
                                     <div class="text-muted small fw-semibold">Pending Reports</div>
-                                    <h3 class="fw-bold mt-1 mb-0">1</h3>
-                                    <div class="text-warning small mt-1"><i class="bi bi-exclamation-circle"></i> Due this Friday</div>
+                                    <h3 class="fw-bold mt-1 mb-0" id="valPendingReports">0</h3>
+                                    <div class="text-warning small mt-1"><i class="bi bi-exclamation-circle"></i> Drafts/Awaiting</div>
                                 </div>
                                 <div class="bg-warning bg-opacity-10 p-3 rounded-3 text-warning"><i class="bi bi-journal-text" style="font-size: 24px;"></i></div>
                             </div>
@@ -233,8 +237,8 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
                                     <div class="text-muted small fw-semibold">Documents Uploaded</div>
-                                    <h3 class="fw-bold mt-1 mb-0">3</h3>
-                                    <div class="text-muted small mt-1">Resume, Offer Letter</div>
+                                    <h3 class="fw-bold mt-1 mb-0" id="valDocumentsUploaded">0</h3>
+                                    <div class="text-muted small mt-1">Compliance files</div>
                                 </div>
                                 <div class="bg-purple bg-opacity-10 p-3 rounded-3" style="color: #8b5cf6; background: rgba(139, 92, 246, 0.1);"><i class="bi bi-folder-check" style="font-size: 24px;"></i></div>
                             </div>
@@ -246,8 +250,8 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
                                     <div class="text-muted small fw-semibold">Mentor Feedbacks</div>
-                                    <h3 class="fw-bold mt-1 mb-0">4</h3>
-                                    <div class="text-success small mt-1">Average rating: 4.8/5</div>
+                                    <h3 class="fw-bold mt-1 mb-0" id="valMentorFeedbacks">0</h3>
+                                    <div class="text-success small mt-1">Average: 4.8 / 5.0</div>
                                 </div>
                                 <div class="bg-teal bg-opacity-10 p-3 rounded-3" style="color: #0d9488; background: rgba(13, 148, 136, 0.1);"><i class="bi bi-chat-heart" style="font-size: 24px;"></i></div>
                             </div>
@@ -259,8 +263,8 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
                                     <div class="text-muted small fw-semibold">Days Completed</div>
-                                    <h3 class="fw-bold mt-1 mb-0">90 / 120</h3>
-                                    <div class="text-muted small mt-1">30 days remaining</div>
+                                    <h3 class="fw-bold mt-1 mb-0" id="valDaysCompleted">0 / 0</h3>
+                                    <div class="text-muted small mt-1" id="valDaysRemaining">0 days remaining</div>
                                 </div>
                                 <div class="bg-indigo bg-opacity-10 p-3 rounded-3" style="color: #4f46e5; background: rgba(79, 70, 229, 0.1);"><i class="bi bi-calendar3" style="font-size: 24px;"></i></div>
                             </div>
@@ -272,10 +276,10 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
                                     <div class="text-muted small fw-semibold">Certificate Status</div>
-                                    <h5 class="fw-bold mt-2 mb-0 text-muted">Locked</h5>
-                                    <div class="text-muted small mt-1">Requires 100% progress</div>
+                                    <h5 class="fw-bold mt-2 mb-0 text-muted" id="valCertificateStatus">Locked</h5>
+                                    <div class="text-muted small mt-1" id="lblCertCondition">Requires 100% progress</div>
                                 </div>
-                                <div class="bg-secondary bg-opacity-10 p-3 rounded-3 text-secondary"><i class="bi bi-lock-fill" style="font-size: 24px;"></i></div>
+                                <div class="bg-secondary bg-opacity-10 p-3 rounded-3 text-secondary" id="valCertificateIcon"><i class="bi bi-lock-fill" style="font-size: 24px;"></i></div>
                             </div>
                         </div>
                     </div>
@@ -303,42 +307,12 @@
 
                 <!-- Widgets Section -->
                 <div class="row g-4">
-                    <!-- Widget 1: Upcoming Tasks & Activity -->
+                    <!-- Widget 1: Recent Activity History -->
                     <div class="col-lg-8">
                         <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
-                            <h5 class="fw-bold text-dark mb-4"><i class="bi bi-check2-circle text-primary me-2"></i>Upcoming Tasks &amp; Activity</h5>
-                            
-                            <div class="widget-list-item">
-                                <div class="bg-warning bg-opacity-15 p-2 rounded-circle text-warning d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="bi bi-journal-text"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-semibold small">Submit Weekly Report 9</div>
-                                    <div class="text-muted small">Due by Friday, 5:00 PM</div>
-                                </div>
-                                <span class="badge bg-warning text-dark px-2 py-1 rounded small">Pending</span>
-                            </div>
-
-                            <div class="widget-list-item">
-                                <div class="bg-success bg-opacity-15 p-2 rounded-circle text-success d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="bi bi-chat-square-text"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-semibold small">Mid-term Evaluation Review</div>
-                                    <div class="text-muted small">Scheduled with Prof. John Smith</div>
-                                </div>
-                                <span class="badge bg-success px-2 py-1 rounded small">Scheduled</span>
-                            </div>
-
-                            <div class="widget-list-item">
-                                <div class="bg-info bg-opacity-15 p-2 rounded-circle text-info d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="bi bi-file-earmark-arrow-up"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="fw-semibold small">Upload Signed Offer Letter</div>
-                                    <div class="text-muted small">Required for program records</div>
-                                </div>
-                                <span class="badge bg-danger px-2 py-1 rounded small">Required</span>
+                            <h5 class="fw-bold text-dark mb-4"><i class="bi bi-clock-history text-primary me-2"></i>Recent Activity Logs</h5>
+                            <div id="recentActivitiesContainer" class="d-flex flex-column gap-1">
+                                <div class="text-center text-muted py-4">No recent activities found.</div>
                             </div>
                         </div>
                     </div>
@@ -346,25 +320,10 @@
                     <!-- Widget 2: Internship Timeline -->
                     <div class="col-lg-4">
                         <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
-                            <h5 class="fw-bold text-dark mb-4"><i class="bi bi-hourglass-split text-primary me-2"></i>Internship Timeline</h5>
+                            <h5 class="fw-bold text-dark mb-4"><i class="bi bi-hourglass-split text-primary me-2"></i>Placement Milestones</h5>
                             
-                            <div class="timeline-widget">
-                                <div class="timeline-item completed">
-                                    <div class="fw-semibold small mb-0">Phase 1: Orientation &amp; Setup</div>
-                                    <div class="text-muted small">Completed (Weeks 1-4)</div>
-                                </div>
-                                <div class="timeline-item completed">
-                                    <div class="fw-semibold small mb-0">Phase 2: Mid-term Execution</div>
-                                    <div class="text-muted small">Completed (Weeks 5-8)</div>
-                                </div>
-                                <div class="timeline-item pending">
-                                    <div class="fw-semibold small mb-0">Phase 3: Deep Project Dev</div>
-                                    <div class="text-muted small text-primary fw-semibold">Active (Weeks 9-12)</div>
-                                </div>
-                                <div class="timeline-item">
-                                    <div class="fw-semibold small mb-0">Phase 4: Final Evaluation</div>
-                                    <div class="text-muted small">Locked (Weeks 13-16)</div>
-                                </div>
+                            <div class="timeline-widget" id="timelineContainer">
+                                <div class="text-center text-muted py-4">Loading timeline...</div>
                             </div>
                         </div>
                     </div>
@@ -390,93 +349,324 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            let chartsData = {
+                reportsSubmitted: 8,
+                feedbackCount: 4,
+                docsCount: 3
+            };
+
             // Load Student Profile Info
-            try {
-                const response = await fetch('/api/student/profile');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.student) {
-                        const s = data.student;
-                        document.getElementById('navUserName').innerText = `${s.first_name} ${s.last_name}`;
-                        document.getElementById('welcomeUserName').innerText = s.first_name;
-                        
-                        if (s.profile_photo) {
-                            document.getElementById('navUserPhoto').src = s.profile_photo;
-                            document.getElementById('welcomeUserPhoto').src = s.profile_photo;
+            const loadProfile = async () => {
+                try {
+                    const response = await fetch('/api/student/profile');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.student) {
+                            const s = data.student;
+                            document.getElementById('navUserName').textContent = `${s.first_name} ${s.last_name}`;
+                            document.getElementById('welcomeUserName').textContent = s.first_name;
+                            
+                            if (s.profile_photo) {
+                                document.getElementById('navUserPhoto').src = s.profile_photo;
+                                document.getElementById('welcomeUserPhoto').src = s.profile_photo;
+                            }
                         }
                     }
+                } catch (error) {
+                    console.error('Error loading student profile details:', error);
                 }
-            } catch (error) {
-                console.error('Error loading student dashboard details:', error);
-            }
+            };
 
-            // --- Chart 1: Progress & Attendance Trend ---
-            const progressCtx = document.getElementById('progressChart').getContext('2d');
-            new Chart(progressCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'],
-                    datasets: [
-                        {
-                            label: 'Weekly Reports Grade (%)',
-                            data: [85, 90, 88, 92, 95, 91, 94, 95],
-                            borderColor: '#2563eb',
-                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                            fill: true,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'Attendance rate (%)',
-                            data: [100, 100, 95, 100, 90, 95, 100, 100],
-                            borderColor: '#10b981',
-                            backgroundColor: 'transparent',
-                            borderDash: [5, 5],
-                            tension: 0.1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            min: 60,
-                            max: 100
+            // Load ERP Statistics and Progress
+            const loadERPStats = async () => {
+                try {
+                    // Fetch Internship Info for completed/remaining days
+                    const internRes = await fetch('/api/student/internship');
+                    let workingDays = 120;
+                    let daysCompleted = 90;
+                    if (internRes.ok) {
+                        const internData = await internRes.json();
+                        if (internData.success && internData.internship) {
+                            const i = internData.internship;
+                            workingDays = i.workingDays || 120;
+                            daysCompleted = i.daysCompleted || 0;
+                            
+                            document.getElementById('valDaysCompleted').textContent = `${daysCompleted} / ${workingDays}`;
+                            const remaining = Math.max(0, workingDays - daysCompleted);
+                            document.getElementById('valDaysRemaining').textContent = `${remaining} days remaining`;
+                            
+                            document.getElementById('valInternshipProgress').textContent = `${i.percentage}%`;
                         }
                     }
-                }
-            });
 
-            // --- Chart 2: Document Statistics & Benchmark ---
-            const docsCtx = document.getElementById('documentsChart').getContext('2d');
-            new Chart(docsCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Resume', 'Offer Letter', 'Weekly Reports', 'Feedback Logs', 'Certificates'],
-                    datasets: [{
-                        label: 'Submitted Documents Count',
-                        data: [1, 1, 8, 4, 0],
-                        backgroundColor: [
-                            'rgba(37, 99, 235, 0.7)',
-                            'rgba(168, 85, 247, 0.7)',
-                            'rgba(16, 185, 129, 0.7)',
-                            'rgba(13, 148, 136, 0.7)',
-                            'rgba(209, 213, 219, 0.7)'
-                        ],
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 12
+                    // Fetch Attendance Stats
+                    const attRes = await fetch('/api/student/attendance');
+                    let attPercent = 94.5;
+                    if (attRes.ok) {
+                        const attData = await attRes.json();
+                        if (attData.success) {
+                            attPercent = attData.statistics.attendancePercentage;
+                            document.getElementById('valAttendanceRate').textContent = `${attPercent}%`;
+                            
+                            const standing = document.getElementById('lblAttendanceStanding');
+                            if (attPercent >= 90) {
+                                standing.className = 'text-success small mt-1';
+                                standing.innerHTML = '<i class="bi bi-arrow-up-short"></i> Meets target';
+                            } else {
+                                standing.className = 'text-danger small mt-1';
+                                standing.innerHTML = '<i class="bi bi-arrow-down-short"></i> Below target';
+                            }
                         }
                     }
+
+                    // Fetch Weekly Reports Stats
+                    const repRes = await fetch('/api/student/reports');
+                    let submittedCount = 0;
+                    let draftCount = 0;
+                    if (repRes.ok) {
+                        const repData = await repRes.json();
+                        if (repData.success) {
+                            const stats = repData.statistics;
+                            submittedCount = stats.submittedCount + stats.approvedCount;
+                            draftCount = stats.draftCount + stats.rejectedCount;
+                            
+                            document.getElementById('valReportsSubmitted').textContent = stats.approvedCount + stats.submittedCount;
+                            document.getElementById('valPendingReports').textContent = draftCount;
+                            chartsData.reportsSubmitted = stats.approvedCount + stats.submittedCount;
+                        }
+                    }
+
+                    // Fetch Documents Stats
+                    const docRes = await fetch('/api/student/documents');
+                    let docsUploaded = 0;
+                    if (docRes.ok) {
+                        const docData = await docRes.json();
+                        if (docData.success) {
+                            docsUploaded = docData.statistics.totalDocuments;
+                            document.getElementById('valDocumentsUploaded').textContent = docsUploaded;
+                            chartsData.docsCount = docsUploaded;
+                        }
+                    }
+
+                    // Fetch Overall Progress
+                    const progRes = await fetch('/api/student/progress');
+                    if (progRes.ok) {
+                        const progData = await progRes.json();
+                        if (progData.success) {
+                            const overall = progData.progress.overallCompletionPercentage;
+                            
+                            const certStatus = document.getElementById('valCertificateStatus');
+                            const certIcon = document.getElementById('valCertificateIcon');
+                            const certCond = document.getElementById('lblCertCondition');
+                            
+                            if (overall >= 100) {
+                                certStatus.textContent = 'Unlocked';
+                                certStatus.className = 'fw-bold mt-2 mb-0 text-success';
+                                certIcon.className = 'bg-success bg-opacity-10 p-3 rounded-3 text-success';
+                                certIcon.innerHTML = '<i class="bi bi-award" style="font-size: 24px;"></i>';
+                                certCond.textContent = 'Ready for download';
+                            } else {
+                                certStatus.textContent = 'Locked';
+                                certStatus.className = 'fw-bold mt-2 mb-0 text-muted';
+                                certIcon.className = 'bg-secondary bg-opacity-10 p-3 rounded-3 text-secondary';
+                                certIcon.innerHTML = '<i class="bi bi-lock-fill" style="font-size: 24px;"></i>';
+                                certCond.textContent = `Requires 100% progress (${overall}% now)`;
+                            }
+                        }
+                    }
+
+                    // Refresh Charts & Timeline
+                    initializeCharts(attPercent);
+                    loadTimeline();
+                    loadRecentActivities();
+
+                } catch (error) {
+                    console.error('Error loading ERP Dashboard stats:', error);
                 }
-            });
+            };
+
+            // Load Timeline Milestones
+            const loadTimeline = async () => {
+                try {
+                    const response = await fetch('/api/student/timeline');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.timeline) {
+                            const container = document.getElementById('timelineContainer');
+                            container.innerHTML = '';
+
+                            if (data.timeline.length === 0) {
+                                container.innerHTML = '<div class="text-center text-muted py-4">No milestones logged yet.</div>';
+                                return;
+                            }
+
+                            data.timeline.forEach(event => {
+                                const item = document.createElement('div');
+                                item.className = 'timeline-item completed'; // Standard visual style
+                                
+                                const eventDate = window.PortalUtils.formatDate(event.event_date);
+
+                                item.innerHTML = `
+                                    <div class="fw-semibold small mb-0">${event.title}</div>
+                                    <div class="text-muted small" style="font-size: 11px;">${eventDate}</div>
+                                    <div class="text-muted small mt-1" style="font-size: 11px;">${event.description || ''}</div>
+                                `;
+                                container.appendChild(item);
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading timeline milestones:', error);
+                }
+            };
+
+            // Load Recent Activity Log
+            const loadRecentActivities = async () => {
+                try {
+                    const response = await fetch('/api/student/history');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.history) {
+                            const container = document.getElementById('recentActivitiesContainer');
+                            container.innerHTML = '';
+
+                            if (data.history.length === 0) {
+                                container.innerHTML = '<div class="text-center text-muted py-4">No recent activities found.</div>';
+                                return;
+                            }
+
+                            data.history.forEach(act => {
+                                const item = document.createElement('div');
+                                item.className = 'widget-list-item';
+                                
+                                // Color / Icon mapping based on event type
+                                let iconClass = 'bi-activity text-primary';
+                                let bgClass = 'bg-primary';
+                                if (act.event_type === 'attendance') {
+                                    iconClass = 'bi-calendar-check text-success';
+                                    bgClass = 'bg-success';
+                                } else if (act.event_type === 'weekly_reports') {
+                                    iconClass = 'bi-journal-text text-info';
+                                    bgClass = 'bg-info';
+                                } else if (act.event_type === 'offer_letter') {
+                                    iconClass = 'bi-file-earmark-arrow-up text-purple';
+                                    bgClass = 'bg-purple';
+                                }
+
+                                const actTime = new Date(act.created_at).toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                const actDate = window.PortalUtils.formatDate(act.event_date);
+
+                                item.innerHTML = `
+                                    <div class="${bgClass} bg-opacity-15 p-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; min-width: 36px;">
+                                        <i class="bi ${iconClass}"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold small text-dark">${act.title}</div>
+                                        <div class="text-muted small" style="font-size: 11px;">${act.description || ''}</div>
+                                    </div>
+                                    <div class="text-muted small text-end" style="font-size: 11px; min-width: 80px;">
+                                        <div>${actDate}</div>
+                                        <div>${actTime}</div>
+                                    </div>
+                                `;
+                                container.appendChild(item);
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading activity logs:', error);
+                }
+            };
+
+            // Initialize Dynamic Chart.js visualizations
+            const initializeCharts = (attendanceRate) => {
+                // --- Chart 1: Progress & Attendance Trend ---
+                const progressCtx = document.getElementById('progressChart').getContext('2d');
+                
+                // Clear old chart if exists
+                if (window.myProgressChart) window.myProgressChart.destroy();
+
+                window.myProgressChart = new Chart(progressCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'],
+                        datasets: [
+                            {
+                                label: 'Weekly Reports Grade (%)',
+                                data: [85, 90, 88, 92, 95, 91, 94, 95],
+                                borderColor: '#2563eb',
+                                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                                fill: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Attendance rate (%)',
+                                data: [100, 100, 95, 100, 90, 95, parseFloat(attendanceRate) || 94.5, 100],
+                                borderColor: '#10b981',
+                                backgroundColor: 'transparent',
+                                borderDash: [5, 5],
+                                tension: 0.1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                min: 60,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+
+                // --- Chart 2: Document Statistics & Benchmark ---
+                const docsCtx = document.getElementById('documentsChart').getContext('2d');
+                
+                // Clear old chart if exists
+                if (window.myDocsChart) window.myDocsChart.destroy();
+
+                window.myDocsChart = new Chart(docsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Resume', 'Offer Letter', 'Weekly Reports', 'Other Docs'],
+                        datasets: [{
+                            label: 'Submitted Documents Count',
+                            data: [
+                                chartsData.docsCount > 0 ? 1 : 0, 
+                                chartsData.docsCount > 1 ? 1 : 0, 
+                                chartsData.reportsSubmitted, 
+                                Math.max(0, chartsData.docsCount - 2)
+                            ],
+                            backgroundColor: [
+                                'rgba(37, 99, 235, 0.7)',
+                                'rgba(168, 85, 247, 0.7)',
+                                'rgba(16, 185, 129, 0.7)',
+                                'rgba(13, 148, 136, 0.7)'
+                            ],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 16
+                            }
+                        }
+                    }
+                });
+            };
+
+            // Run initial loading calls
+            await loadProfile();
+            await loadERPStats();
         });
     </script>
 </body>

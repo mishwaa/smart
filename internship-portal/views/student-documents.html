@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Document Center">
+    <title>Document Center - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+        .checklist-icon {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+        .dropzone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .dropzone:hover {
+            border-color: var(--primary);
+            background-color: rgba(37, 99, 235, 0.02);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/student/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/profile">
+                            <i class="bi bi-person-circle"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/internship">
+                            <i class="bi bi-briefcase"></i> Internship
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/attendance">
+                            <i class="bi bi-calendar-check"></i> Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/reports">
+                            <i class="bi bi-journal-text"></i> Weekly Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/student/documents">
+                            <i class="bi bi-folder"></i> Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Notifications -->
+                    <div class="dropdown">
+                        <button class="btn btn-light position-relative rounded-circle p-2" type="button" data-bs-toggle="dropdown" aria-label="Notifications">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px; padding: 3px 6px;">
+                                3
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 300px;">
+                            <li><h6 class="dropdown-header">Latest Notifications</h6></li>
+                            <li><a class="dropdown-item rounded-2 py-2" href="#"><div class="small fw-semibold">Internship Approved</div><div class="text-muted small">Your application to TechCorp was accepted.</div></a></li>
+                            <li><a class="dropdown-item rounded-2 py-2" href="#"><div class="small fw-semibold">Report Feedback</div><div class="text-muted small">Mentor reviewed Weekly Report 8.</div></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center small text-primary" href="#">View All Notifications</a></li>
+                        </ul>
+                    </div>
+                    <!-- User Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="/images/placeholder-avatar.png" id="navUserPhoto" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/icons/person-circle.svg'">
+                            <span id="navUserName" class="fw-semibold">Student</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="/student/profile"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="/change-password"><i class="bi bi-shield-lock me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 mb-0 fw-bold text-dark">Document Center</h1>
+                    <span class="badge bg-primary px-3 py-2 rounded-pill"><i class="bi bi-folder-fill me-1"></i>Secure Repository</span>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Left Column: Upload Form & Required Checklist -->
+                    <div class="col-lg-4">
+                        
+                        <!-- Upload Document Card -->
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 mb-4">
+                            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-cloud-upload text-primary me-2"></i>Upload Document</h5>
+                            <form id="documentUploadForm" novalidate>
+                                <div class="mb-3">
+                                    <label for="docType" class="form-label small fw-semibold text-dark">Document Type <span class="text-danger">*</span></label>
+                                    <select class="form-select rounded-3" id="docType" required>
+                                        <option value="">Select Document Type</option>
+                                        <option value="resume">Resume / CV</option>
+                                        <option value="offer_letter">Offer Letter</option>
+                                        <option value="noc">No Objection Certificate (NOC)</option>
+                                        <option value="weekly_report_pdf">Weekly Report PDF</option>
+                                        <option value="presentation">Mid-Term Presentation</option>
+                                        <option value="final_report">Final Project Report</option>
+                                        <option value="certificate">Internship Certificate</option>
+                                        <option value="other">Other / Support Document</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-dark">Select File <span class="text-danger">*</span></label>
+                                    <div class="dropzone" id="fileDropzone">
+                                        <i class="bi bi-file-earmark-arrow-up text-primary" style="font-size: 2.5rem;"></i>
+                                        <div class="small fw-semibold mt-2" id="selectedFilename">Click or Drag File Here</div>
+                                        <div class="text-muted small" style="font-size: 11px;">PDF, PNG, JPG, JPEG, or DOCX (Max 10MB)</div>
+                                    </div>
+                                    <!-- Hidden Input -->
+                                    <input type="file" id="documentFileInput" accept=".pdf,.png,.jpg,.jpeg,.docx" style="display: none;" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 rounded-3 py-2 fw-semibold" id="uploadBtn">
+                                    <i class="bi bi-upload me-1"></i> Upload Securely
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Required Documents Checklist -->
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4">
+                            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-card-checklist text-primary me-2"></i>Program Compliance</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small text-muted fw-semibold">Required Uploads Checklist</span>
+                                <span class="badge bg-primary px-2 py-1 rounded small" id="checklistProgressText">0 / 4</span>
+                            </div>
+                            <div class="progress rounded-pill mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" id="checklistProgressBar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            
+                            <div class="d-flex flex-column" id="checklistItemsContainer">
+                                <div class="checklist-item">
+                                    <div><span class="fw-semibold small">1. Resume / CV</span></div>
+                                    <span id="chkResume" class="checklist-icon text-muted"><i class="bi bi-circle"></i></span>
+                                </div>
+                                <div class="checklist-item">
+                                    <div><span class="fw-semibold small">2. Signed Offer Letter</span></div>
+                                    <span id="chkOfferLetter" class="checklist-icon text-muted"><i class="bi bi-circle"></i></span>
+                                </div>
+                                <div class="checklist-item">
+                                    <div><span class="fw-semibold small">3. No Objection Certificate (NOC)</span></div>
+                                    <span id="chkNoc" class="checklist-icon text-muted"><i class="bi bi-circle"></i></span>
+                                </div>
+                                <div class="checklist-item">
+                                    <div><span class="fw-semibold small">4. Final Project Report</span></div>
+                                    <span id="chkFinalReport" class="checklist-icon text-muted"><i class="bi bi-circle"></i></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Document Repository -->
+                    <div class="col-lg-8">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+                            
+                            <!-- Search & Type Filter Controls -->
+                            <div class="row g-2 mb-4">
+                                <div class="col-md-7">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                                        <input type="text" class="form-control border-start-0 search-box rounded-end-3" id="docSearchInput" placeholder="Search by filename...">
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <select class="form-select rounded-3" id="docTypeFilter">
+                                        <option value="">All Categories</option>
+                                        <option value="resume">Resume / CV</option>
+                                        <option value="offer_letter">Offer Letter</option>
+                                        <option value="noc">NOC</option>
+                                        <option value="weekly_report_pdf">Weekly Reports</option>
+                                        <option value="presentation">Presentations</option>
+                                        <option value="final_report">Final Reports</option>
+                                        <option value="certificate">Certificates</option>
+                                        <option value="other">Others</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-files me-2"></i>My File Repository</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle small text-start">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Filename</th>
+                                            <th>Category</th>
+                                            <th>Uploaded Date</th>
+                                            <th>Size</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="documentsTableBody">
+                                        <tr><td colspan="5" class="text-center text-muted">Loading files...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Hidden Input for Replace Action -->
+            <input type="file" id="replaceFileInput" accept=".pdf,.png,.jpg,.jpeg,.docx" style="display: none;">
+
+            <!-- Footer -->
+            <footer class="footer mt-5">
+                &copy; 2024 Smart University Internship Portal. All rights reserved.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let documentRecords = [];
+            let replaceTargetId = null;
+
+            // Load header info (profile)
+            const loadProfileHeader = async () => {
+                try {
+                    const response = await fetch('/api/student/profile');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.student) {
+                            const s = data.student;
+                            document.getElementById('navUserName').textContent = `${s.first_name} ${s.last_name}`;
+                            if (s.profile_photo) {
+                                document.getElementById('navUserPhoto').src = s.profile_photo;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading navbar details:', error);
+                }
+            };
+
+            // Trigger file select on dropzone click
+            const fileInput = document.getElementById('documentFileInput');
+            const dropzone = document.getElementById('fileDropzone');
+            
+            dropzone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    document.getElementById('selectedFilename').textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+                } else {
+                    document.getElementById('selectedFilename').textContent = 'Click or Drag File Here';
+                }
+            });
+
+            // Drag and drop events
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'var(--primary)';
+                dropzone.style.backgroundColor = 'rgba(37, 99, 235, 0.05)';
+            });
+
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.style.borderColor = '#cbd5e1';
+                dropzone.style.backgroundColor = '#f8fafc';
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = '#cbd5e1';
+                dropzone.style.backgroundColor = '#f8fafc';
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    const file = files[0];
+                    document.getElementById('selectedFilename').textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+                }
+            });
+
+            // Load documents list from API
+            const loadDocuments = async () => {
+                const search = document.getElementById('docSearchInput').value.trim();
+                const type = document.getElementById('docTypeFilter').value;
+
+                let url = `/api/student/documents?`;
+                if (search) url += `&search=${encodeURIComponent(search)}`;
+                if (type) url += `&documentType=${type}`;
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Failed to load documents.');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        documentRecords = data.documents;
+                        renderDocumentsTable();
+                        updateChecklist(data.statistics);
+                    }
+                } catch (error) {
+                    console.error('Error loading documents:', error);
+                    window.PortalUtils.showAlert('Failed to load documents.', 'danger');
+                }
+            };
+
+            // Format File Size
+            const formatBytes = (bytes) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const dm = 1;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            };
+
+            // Render Documents Table
+            const renderDocumentsTable = () => {
+                const tbody = document.getElementById('documentsTableBody');
+                tbody.innerHTML = '';
+
+                if (documentRecords.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No documents found in your repository.</td></tr>';
+                    return;
+                }
+
+                documentRecords.forEach(doc => {
+                    const tr = document.createElement('tr');
+                    
+                    const uploadDate = window.PortalUtils.formatDate(doc.uploaded_at);
+                    const docSize = formatBytes(doc.file_size);
+
+                    // Category Badge color mapping
+                    let badgeClass = 'bg-secondary';
+                    const categoryLabel = doc.document_type.replace('_', ' ').toUpperCase();
+                    if (doc.document_type === 'resume') badgeClass = 'bg-primary';
+                    else if (doc.document_type === 'offer_letter') badgeClass = 'bg-purple';
+                    else if (doc.document_type === 'noc') badgeClass = 'bg-info';
+                    else if (doc.document_type === 'weekly_report_pdf') badgeClass = 'bg-teal';
+                    else if (doc.document_type === 'final_report') badgeClass = 'bg-success';
+                    else if (doc.document_type === 'certificate') badgeClass = 'bg-warning text-dark';
+
+                    tr.innerHTML = `
+                        <td><strong class="text-dark"><i class="bi bi-file-earmark-check-fill text-primary me-2"></i>${doc.file_name}</strong></td>
+                        <td><span class="badge ${badgeClass} small" style="font-size: 9px; padding: 4px 8px;">${categoryLabel}</span></td>
+                        <td><span class="text-muted small">${uploadDate}</span></td>
+                        <td><span class="text-muted small">${docSize}</span></td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <a href="/api/student/documents/${doc.id}/download" class="btn btn-outline-secondary btn-sm rounded-start-3" title="Secure Download"><i class="bi bi-download"></i></a>
+                                <button class="btn btn-outline-secondary btn-sm btn-replace" data-id="${doc.id}" title="Replace Document"><i class="bi bi-arrow-repeat"></i></button>
+                                <button class="btn btn-outline-danger btn-sm btn-delete rounded-end-3" data-id="${doc.id}" title="Delete Document"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Attach event listeners for delete and replace
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const id = btn.getAttribute('data-id');
+                        const confirm = await window.PortalUtils.confirmAction('Are you sure you want to delete this document from the repository?');
+                        if (!confirm) return;
+
+                        try {
+                            const response = await fetch(`/api/student/documents/${id}`, { method: 'DELETE' });
+                            const data = await response.json();
+                            if (response.ok && data.success) {
+                                window.PortalUtils.showAlert('Document deleted successfully.', 'success');
+                                loadDocuments();
+                            } else {
+                                window.PortalUtils.showAlert(data.message || 'Failed to delete document.', 'danger');
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            window.PortalUtils.showAlert('An error occurred during deletion.', 'danger');
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.btn-replace').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        replaceTargetId = btn.getAttribute('data-id');
+                        document.getElementById('replaceFileInput').click();
+                    });
+                });
+            };
+
+            // Handle Document Replacement
+            document.getElementById('replaceFileInput').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file || !replaceTargetId) return;
+
+                // Client-side validations
+                const allowedTypes = [
+                    'application/pdf',
+                    'image/png',
+                    'image/jpeg',
+                    'image/jpg',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                ];
+                
+                const fileExt = file.name.split('.').pop().toLowerCase();
+                const allowedExts = ['pdf', 'png', 'jpg', 'jpeg', 'docx'];
+
+                if (!allowedTypes.includes(file.type) && !allowedExts.includes(fileExt)) {
+                    window.PortalUtils.showAlert('Only PDF, PNG, JPG, JPEG, and DOCX files are allowed.', 'danger');
+                    e.target.value = '';
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) { // 10MB
+                    window.PortalUtils.showAlert('File size exceeds the 10MB limit.', 'danger');
+                    e.target.value = '';
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('document', file);
+
+                try {
+                    const response = await fetch(`/api/student/documents/${replaceTargetId}/replace`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        window.PortalUtils.showAlert('Document replaced successfully.', 'success');
+                        loadDocuments();
+                    } else {
+                        window.PortalUtils.showAlert(data.message || 'Failed to replace document.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Replacement error:', error);
+                    window.PortalUtils.showAlert('An error occurred while replacing document.', 'danger');
+                } finally {
+                    e.target.value = '';
+                    replaceTargetId = null;
+                }
+            });
+
+            // Handle Document Upload Form
+            document.getElementById('documentUploadForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target;
+
+                const docType = document.getElementById('docType').value;
+                const file = fileInput.files[0];
+
+                if (!docType || !file) {
+                    window.PortalUtils.showAlert('Please select both a document category and a file.', 'danger');
+                    return;
+                }
+
+                // Client-side validations
+                const allowedTypes = [
+                    'application/pdf',
+                    'image/png',
+                    'image/jpeg',
+                    'image/jpg',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                ];
+                const fileExt = file.name.split('.').pop().toLowerCase();
+                const allowedExts = ['pdf', 'png', 'jpg', 'jpeg', 'docx'];
+
+                if (!allowedTypes.includes(file.type) && !allowedExts.includes(fileExt)) {
+                    window.PortalUtils.showAlert('Only PDF, PNG, JPG, JPEG, and DOCX files are allowed.', 'danger');
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) { // 10MB
+                    window.PortalUtils.showAlert('File size exceeds the 10MB limit.', 'danger');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('document', file);
+                formData.append('document_type', docType);
+
+                try {
+                    const uploadBtn = document.getElementById('uploadBtn');
+                    const originalBtnHtml = uploadBtn.innerHTML;
+                    uploadBtn.disabled = true;
+                    uploadBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
+
+                    const response = await fetch('/api/student/documents', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        window.PortalUtils.showAlert('Document uploaded and encrypted in repository.', 'success');
+                        form.reset();
+                        document.getElementById('selectedFilename').textContent = 'Click or Drag File Here';
+                        loadDocuments();
+                    } else {
+                        window.PortalUtils.showAlert(data.message || 'Upload failed.', 'danger');
+                    }
+                    
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = originalBtnHtml;
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    window.PortalUtils.showAlert('An error occurred during document upload.', 'danger');
+                    document.getElementById('uploadBtn').disabled = false;
+                    document.getElementById('uploadBtn').innerHTML = '<i class="bi bi-upload me-1"></i> Upload Securely';
+                }
+            });
+
+            // Update Checklist UI
+            const updateChecklist = (stats) => {
+                const chkResume = document.getElementById('chkResume');
+                const chkOfferLetter = document.getElementById('chkOfferLetter');
+                const chkNoc = document.getElementById('chkNoc');
+                const chkFinalReport = document.getElementById('chkFinalReport');
+
+                let count = 0;
+
+                const setChecked = (el, isDone) => {
+                    if (isDone) {
+                        el.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+                        el.className = 'checklist-icon';
+                        count++;
+                    } else {
+                        el.innerHTML = '<i class="bi bi-circle text-muted"></i>';
+                        el.className = 'checklist-icon text-muted';
+                    }
+                };
+
+                setChecked(chkResume, stats.resumeCount > 0);
+                setChecked(chkOfferLetter, stats.offerLetterCount > 0);
+                setChecked(chkNoc, stats.nocCount > 0);
+                setChecked(chkFinalReport, stats.finalReportCount > 0);
+
+                document.getElementById('checklistProgressText').textContent = `${count} / 4`;
+                document.getElementById('checklistProgressBar').style.width = `${(count / 4) * 100}%`;
+                document.getElementById('checklistProgressBar').setAttribute('aria-valuenow', (count / 4) * 100);
+            };
+
+            // Trigger search & filters
+            const docSearch = document.getElementById('docSearchInput');
+            const docFilter = document.getElementById('docTypeFilter');
+
+            docSearch.addEventListener('input', window.PortalUtils.debounce(loadDocuments, 400));
+            docFilter.addEventListener('change', loadDocuments);
+
+            // Run Initial Loads
+            loadProfileHeader();
+            loadDocuments();
+        });
+    </script>
+</body>
+</html>

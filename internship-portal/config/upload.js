@@ -13,7 +13,8 @@ const uploadDirs = [
   'uploads/reports',
   'uploads/certificates',
   'uploads/offer_letters',
-  'uploads/profile_photos'
+  'uploads/profile_photos',
+  'uploads/documents'
 ];
 
 uploadDirs.forEach(dir => {
@@ -101,12 +102,32 @@ const uploadProfilePhoto = multer({
   }
 });
 
+const uploadStudentDocument = multer({
+  storage: createStorage('documents'),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      'application/pdf',
+      'image/png',
+      'image/jpeg',
+      'image/jpg',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PDF, PNG, JPG, JPEG, and DOCX files are allowed.'), false);
+    }
+  }
+});
+
 module.exports = {
   uploadResume,
   uploadReport,
   uploadCertificate,
   uploadOfferLetter,
   uploadProfilePhoto,
+  uploadStudentDocument,
   fileFilter,
   FILE_SIZE_LIMIT
 };

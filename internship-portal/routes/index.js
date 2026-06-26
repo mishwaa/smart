@@ -12,7 +12,7 @@ const indexController = require('../controllers/indexController');
 const authController = require('../controllers/authController');
 const studentController = require('../controllers/studentController');
 const { requireAuth, requireAdmin, requireFaculty, requireCompany, requireStudent, isGuest } = require('../middleware/auth');
-const { uploadProfilePhoto } = require('../config/upload');
+const { uploadProfilePhoto, uploadStudentDocument } = require('../config/upload');
 
 // ─── Public Routes ───────────────────────────────────────────────────────────
 router.get('/', indexController.getHomePage);
@@ -42,6 +42,9 @@ router.get('/faculty/dashboard', requireAuth, requireFaculty, (req, res) => {
 router.get('/student/dashboard', requireAuth, requireStudent, studentController.getDashboard);
 router.get('/student/profile', requireAuth, requireStudent, studentController.getProfilePage);
 router.get('/student/internship', requireAuth, requireStudent, studentController.getInternshipPage);
+router.get('/student/attendance', requireAuth, requireStudent, studentController.getAttendancePage);
+router.get('/student/reports', requireAuth, requireStudent, studentController.getReportsPage);
+router.get('/student/documents', requireAuth, requireStudent, studentController.getDocumentsPage);
 
 router.get('/company/dashboard', requireAuth, requireCompany, (req, res) => {
   res.sendFile(path.join(__dirname, '../views/company-dashboard.html'));
@@ -65,5 +68,34 @@ router.get('/api/student/profile', requireAuth, requireStudent, studentControlle
 router.post('/api/student/profile', requireAuth, requireStudent, studentController.updateProfile);
 router.post('/api/student/profile/photo', requireAuth, requireStudent, uploadProfilePhoto.single('profilePhoto'), studentController.uploadPhoto);
 router.get('/api/student/internship', requireAuth, requireStudent, studentController.getInternshipData);
+
+// Attendance & Leave API
+router.get('/api/student/attendance', requireAuth, requireStudent, studentController.getAttendanceData);
+router.post('/api/student/attendance/check-in', requireAuth, requireStudent, studentController.checkIn);
+router.post('/api/student/attendance/check-out', requireAuth, requireStudent, studentController.checkOut);
+router.post('/api/student/attendance/leave', requireAuth, requireStudent, studentController.requestLeave);
+
+// Daily Logs API
+router.get('/api/student/logs', requireAuth, requireStudent, studentController.getDailyLogs);
+router.post('/api/student/logs', requireAuth, requireStudent, studentController.submitDailyLog);
+
+// Weekly Reports API
+router.get('/api/student/reports', requireAuth, requireStudent, studentController.getWeeklyReports);
+router.post('/api/student/reports', requireAuth, requireStudent, studentController.createWeeklyReport);
+router.put('/api/student/reports/:id', requireAuth, requireStudent, studentController.updateWeeklyReport);
+router.delete('/api/student/reports/:id', requireAuth, requireStudent, studentController.deleteWeeklyReport);
+router.post('/api/student/reports/:id/submit', requireAuth, requireStudent, studentController.submitWeeklyReport);
+
+// Document Center API
+router.get('/api/student/documents', requireAuth, requireStudent, studentController.getDocuments);
+router.post('/api/student/documents', requireAuth, requireStudent, uploadStudentDocument.single('document'), studentController.uploadDocument);
+router.get('/api/student/documents/:id/download', requireAuth, requireStudent, studentController.downloadDocument);
+router.delete('/api/student/documents/:id', requireAuth, requireStudent, studentController.deleteDocument);
+router.post('/api/student/documents/:id/replace', requireAuth, requireStudent, uploadStudentDocument.single('document'), studentController.replaceDocument);
+
+// Timeline & Progress API
+router.get('/api/student/timeline', requireAuth, requireStudent, studentController.getTimelineData);
+router.get('/api/student/history', requireAuth, requireStudent, studentController.getActivityHistory);
+router.get('/api/student/progress', requireAuth, requireStudent, studentController.getProgressData);
 
 module.exports = router;

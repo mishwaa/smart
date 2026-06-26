@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Attendance & Daily Logs">
+    <title>Attendance & Daily Logs - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 15px;
+        }
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #64748b;
+            padding: 8px 0;
+            text-transform: uppercase;
+        }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #334155;
+            transition: all 0.2s ease;
+            position: relative;
+            border: 1px solid #e2e8f0;
+        }
+        .calendar-day:hover {
+            transform: scale(1.03);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .calendar-day.empty {
+            background-color: transparent;
+            border: none;
+            cursor: default;
+        }
+        .calendar-day.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        .calendar-day.present {
+            background-color: rgba(34, 197, 94, 0.15);
+            border-color: #22c55e;
+            color: #15803d;
+        }
+        .calendar-day.absent {
+            background-color: rgba(239, 68, 68, 0.15);
+            border-color: #ef4444;
+            color: #b91c1c;
+        }
+        .calendar-day.leave {
+            background-color: rgba(245, 158, 11, 0.15);
+            border-color: #f59e0b;
+            color: #b45309;
+        }
+        .calendar-day.weekend {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #64748b;
+        }
+        .calendar-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: block;
+            margin-top: 2px;
+        }
+        .calendar-indicator.present { background-color: #22c55e; }
+        .calendar-indicator.absent { background-color: #ef4444; }
+        .calendar-indicator.leave { background-color: #f59e0b; }
+        
+        .time-display {
+            font-family: monospace;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--dark);
+        }
+        .tab-btn.active {
+            border-bottom: 3px solid var(--primary) !important;
+            color: var(--primary) !important;
+            font-weight: 600;
+        }
+        .search-box:focus {
+            box-shadow: none;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/student/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/profile">
+                            <i class="bi bi-person-circle"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/internship">
+                            <i class="bi bi-briefcase"></i> Internship
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/student/attendance">
+                            <i class="bi bi-calendar-check"></i> Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/reports">
+                            <i class="bi bi-journal-text"></i> Weekly Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/documents">
+                            <i class="bi bi-folder"></i> Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Notifications -->
+                    <div class="dropdown">
+                        <button class="btn btn-light position-relative rounded-circle p-2" type="button" data-bs-toggle="dropdown" aria-label="Notifications">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px; padding: 3px 6px;">
+                                3
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 300px;">
+                            <li><h6 class="dropdown-header">Latest Notifications</h6></li>
+                            <li><a class="dropdown-item rounded-2 py-2" href="#"><div class="small fw-semibold">Internship Approved</div><div class="text-muted small">Your application to TechCorp was accepted.</div></a></li>
+                            <li><a class="dropdown-item rounded-2 py-2" href="#"><div class="small fw-semibold">Report Feedback</div><div class="text-muted small">Mentor reviewed Weekly Report 8.</div></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center small text-primary" href="#">View All Notifications</a></li>
+                        </ul>
+                    </div>
+                    <!-- User Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="/images/placeholder-avatar.png" id="navUserPhoto" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/icons/person-circle.svg'">
+                            <span id="navUserName" class="fw-semibold">Student</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="/student/profile"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="/change-password"><i class="bi bi-shield-lock me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 mb-0 fw-bold text-dark">Attendance &amp; Work Logs</h1>
+                    <span class="badge bg-primary px-3 py-2 rounded-pill"><i class="bi bi-calendar-check-fill me-1"></i>Internship ERP</span>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Left Column: Clock In/Out & Leaves -->
+                    <div class="col-lg-4">
+                        
+                        <!-- Check In / Check Out Card -->
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 text-center mb-4">
+                            <h5 class="fw-bold text-start mb-3 text-dark"><i class="bi bi-clock text-primary me-2"></i>Punch Clock</h5>
+                            
+                            <div class="text-muted small fw-semibold" id="todayDateStr">Friday, 26 June 2026</div>
+                            <div class="time-display my-2" id="liveTime">09:48 AM</div>
+                            
+                            <hr class="my-3 text-muted opacity-25">
+
+                            <!-- Status Banner -->
+                            <div id="punchStatusText" class="alert alert-secondary small py-2 rounded-3 mb-3">
+                                <i class="bi bi-info-circle me-1"></i> Not Checked In Today
+                            </div>
+
+                            <!-- Check-In Form fields -->
+                            <div id="checkInFormFields">
+                                <div class="mb-3 text-start">
+                                    <label for="checkInLocation" class="form-label small fw-semibold text-dark">Work Location</label>
+                                    <input type="text" class="form-control form-control-sm rounded-3" id="checkInLocation" placeholder="e.g., Remote / Office Desk 4">
+                                </div>
+                                <div class="mb-3 text-start">
+                                    <label for="checkInRemarks" class="form-label small fw-semibold text-dark">Check-In Remarks</label>
+                                    <textarea class="form-control form-control-sm rounded-3" id="checkInRemarks" rows="2" placeholder="Tasks planned for today..."></textarea>
+                                </div>
+                                <button class="btn btn-primary w-100 rounded-3 py-2 fw-semibold" id="checkInBtn">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Check In
+                                </button>
+                            </div>
+
+                            <!-- Check-Out Form fields (hidden initially) -->
+                            <div id="checkOutFormFields" style="display: none;">
+                                <div class="mb-3 text-start">
+                                    <label for="checkOutRemarks" class="form-label small fw-semibold text-dark">Check-Out Remarks</label>
+                                    <textarea class="form-control form-control-sm rounded-3" id="checkOutRemarks" rows="2" placeholder="Tasks completed, issues faced..."></textarea>
+                                </div>
+                                <button class="btn btn-danger w-100 rounded-3 py-2 fw-semibold" id="checkOutBtn">
+                                    <i class="bi bi-box-arrow-out-left me-1"></i> Check Out
+                                </button>
+                            </div>
+
+                            <!-- Completed state (hidden initially) -->
+                            <div id="completedPunchState" style="display: none;" class="alert alert-success small py-3 rounded-3 mb-0">
+                                <i class="bi bi-check-circle-fill text-success d-block mb-1" style="font-size: 20px;"></i>
+                                <strong>Checked Out!</strong>
+                                <div class="mt-2">Check-In: <span id="lblCheckInTime" class="fw-semibold">--</span></div>
+                                <div>Check-Out: <span id="lblCheckOutTime" class="fw-semibold">--</span></div>
+                                <div class="fw-bold text-dark mt-1">Total Hours: <span id="lblTotalHours">0</span> hrs</div>
+                            </div>
+                        </div>
+
+                        <!-- Leave Request Card -->
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4">
+                            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-envelope-open text-primary me-2"></i>Apply for Leave</h5>
+                            <form id="leaveForm">
+                                <div class="mb-3">
+                                    <label for="leaveDate" class="form-label small fw-semibold text-dark">Leave Date <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control rounded-3" id="leaveDate" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="leaveReason" class="form-label small fw-semibold text-dark">Reason <span class="text-danger">*</span></label>
+                                    <textarea class="form-control rounded-3" id="leaveReason" rows="3" placeholder="Reason for leave request..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-warning w-100 rounded-3 py-2 fw-semibold text-dark" id="leaveSubmitBtn">
+                                    <i class="bi bi-send-fill me-1"></i> Submit Leave Request
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Tabs (Attendance Records & Daily Logs) -->
+                    <div class="col-lg-8">
+                        
+                        <!-- Navigation Tabs -->
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4">
+                            <ul class="nav nav-tabs border-0 mb-3 d-flex gap-3" id="attendanceTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link tab-btn border-0 bg-transparent text-muted active py-2 px-1" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar-pane" type="button" role="tab" aria-selected="true">
+                                        <i class="bi bi-calendar3 me-2"></i>Calendar &amp; Stats
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link tab-btn border-0 bg-transparent text-muted py-2 px-1" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs-pane" type="button" role="tab" aria-selected="false">
+                                        <i class="bi bi-file-earmark-text me-2"></i>Daily Work Logs
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="attendanceTabsContent">
+                                
+                                <!-- Tab 1: Calendar & Stats -->
+                                <div class="tab-pane fade show active" id="calendar-pane" role="tabpanel" aria-labelledby="calendar-tab">
+                                    
+                                    <!-- Mini stats row -->
+                                    <div class="row g-3 mb-4 text-center">
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-3 bg-light rounded-4">
+                                                <h3 class="fw-bold text-success mb-0" id="statPresentDays">0</h3>
+                                                <div class="text-muted small fw-semibold">Days Present</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-3 bg-light rounded-4">
+                                                <h3 class="fw-bold text-danger mb-0" id="statAbsentDays">0</h3>
+                                                <div class="text-muted small fw-semibold">Days Absent</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-3 bg-light rounded-4">
+                                                <h3 class="fw-bold text-warning mb-0" id="statLeaves">0</h3>
+                                                <div class="text-muted small fw-semibold">Approved Leaves</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-3 bg-light rounded-4">
+                                                <h3 class="fw-bold text-primary mb-0" id="statAttendancePercent">0%</h3>
+                                                <div class="text-muted small fw-semibold">Attendance Rate</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Monthly Navigator and Grid Calendar -->
+                                    <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+                                        <h5 class="fw-bold mb-0 text-dark" id="calendarMonthYear">June 2026</h5>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-outline-secondary btn-sm rounded-circle p-1" id="prevMonthBtn" aria-label="Previous Month"><i class="bi bi-chevron-left"></i></button>
+                                            <button class="btn btn-outline-secondary btn-sm rounded-circle p-1" id="nextMonthBtn" aria-label="Next Month"><i class="bi bi-chevron-right"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="calendar-grid">
+                                        <div class="calendar-day-header">Sun</div>
+                                        <div class="calendar-day-header">Mon</div>
+                                        <div class="calendar-day-header">Tue</div>
+                                        <div class="calendar-day-header">Wed</div>
+                                        <div class="calendar-day-header">Thu</div>
+                                        <div class="calendar-day-header">Fri</div>
+                                        <div class="calendar-day-header">Sat</div>
+                                    </div>
+                                    <div class="calendar-grid" id="calendarDaysContainer">
+                                        <!-- Days are rendered here dynamically -->
+                                    </div>
+
+                                    <div class="d-flex flex-wrap gap-3 mt-3 justify-content-center small text-muted">
+                                        <div class="d-flex align-items-center gap-1"><span class="calendar-indicator present"></span> Present</div>
+                                        <div class="d-flex align-items-center gap-1"><span class="calendar-indicator absent"></span> Absent</div>
+                                        <div class="d-flex align-items-center gap-1"><span class="calendar-indicator leave"></span> Leave</div>
+                                        <div class="d-flex align-items-center gap-1"><span class="calendar-indicator" style="background-color: #cbd5e1;"></span> Weekend</div>
+                                    </div>
+
+                                    <!-- Table list of recent records -->
+                                    <h5 class="fw-bold mt-4 mb-3 text-dark"><i class="bi bi-list-check me-2"></i>Attendance Ledger</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle small text-start">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Status</th>
+                                                    <th>Check In</th>
+                                                    <th>Check Out</th>
+                                                    <th>Hours</th>
+                                                    <th>Location</th>
+                                                    <th>Remarks</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="attendanceTableBody">
+                                                <tr><td colspan="7" class="text-center text-muted">Loading attendance logs...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+
+                                <!-- Tab 2: Daily Work Logs -->
+                                <div class="tab-pane fade" id="logs-pane" role="tabpanel" aria-labelledby="logs-tab">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-list-task me-2"></i>Daily Task Submissions</h5>
+                                        <button class="btn btn-primary btn-sm rounded-3 px-3 py-2 d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#submitLogModal">
+                                            <i class="bi bi-plus-lg"></i> Submit Log
+                                        </button>
+                                    </div>
+
+                                    <!-- Search & Date Filters for Logs -->
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-md-5">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                                                <input type="text" class="form-control border-start-0 search-box rounded-end-3" id="logSearchInput" placeholder="Search tasks, tech, learning...">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="date" class="form-control form-control-sm rounded-3" id="logFilterStartDate" placeholder="Start Date" title="Filter Start Date">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="date" class="form-control form-control-sm rounded-3" id="logFilterEndDate" placeholder="End Date" title="Filter End Date">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button class="btn btn-light btn-sm w-100 rounded-3" id="clearLogFiltersBtn" title="Clear Filters"><i class="bi bi-x-lg"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Work Logs list -->
+                                    <div id="logsContainer" class="d-flex flex-column gap-3">
+                                        <!-- Daily logs loaded dynamically -->
+                                        <div class="text-center text-muted py-4">Loading daily work logs...</div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer mt-5">
+                &copy; 2024 Smart University Internship Portal. All rights reserved.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Modal: Submit Daily Work Log -->
+    <div class="modal fade" id="submitLogModal" tabindex="-1" aria-labelledby="submitLogModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                    <h5 class="modal-title fw-bold" id="submitLogModalLabel"><i class="bi bi-plus-circle-fill me-2"></i>Daily Work Log Submitter</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="dailyLogForm" class="needs-validation" novalidate>
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="logDate" class="form-label small fw-semibold text-dark">Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control rounded-3" id="logDate" required>
+                                <div class="invalid-feedback">Please provide a valid date.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="logHours" class="form-label small fw-semibold text-dark">Hours Worked <span class="text-danger">*</span></label>
+                                <input type="number" step="0.1" class="form-control rounded-3" id="logHours" min="0.1" max="24" placeholder="0.0 - 24.0" required>
+                                <div class="invalid-feedback">Please provide a number of hours between 0.1 and 24.</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="logTech" class="form-label small fw-semibold text-dark">Technologies Used</label>
+                                <input type="text" class="form-control rounded-3" id="logTech" placeholder="e.g., HTML, CSS, React, Node.js">
+                            </div>
+                            <div class="col-12">
+                                <label for="logTasks" class="form-label small fw-semibold text-dark">Tasks Completed <span class="text-danger">*</span></label>
+                                <textarea class="form-control rounded-3" id="logTasks" rows="3" placeholder="Detail the work accomplished today..." maxlength="1000" required></textarea>
+                                <div class="form-text small text-end" id="logTasksCount">0/1000 characters</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="logProblems" class="form-label small fw-semibold text-dark">Problems Faced</label>
+                                <textarea class="form-control rounded-3" id="logProblems" rows="2" placeholder="Blockers, technical difficulties..." maxlength="1000"></textarea>
+                                <div class="form-text small text-end" id="logProblemsCount">0/1000 characters</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="logLearning" class="form-label small fw-semibold text-dark">Learning Outcomes</label>
+                                <textarea class="form-control rounded-3" id="logLearning" rows="2" placeholder="New concepts learned, skills improved..." maxlength="1000"></textarea>
+                                <div class="form-text small text-end" id="logLearningCount">0/1000 characters</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="logRemarks" class="form-label small fw-semibold text-dark">Remarks / Extra Notes</label>
+                                <textarea class="form-control rounded-3" id="logRemarks" rows="2" placeholder="Any additional information..." maxlength="1000"></textarea>
+                                <div class="form-text small text-end" id="logRemarksCount">0/1000 characters</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-3 px-4" id="logSubmitBtn">Submit Log</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let attendanceRecords = [];
+            let dailyLogs = [];
+            let currentCalendarDate = new Date();
+
+            // Setup character counts for Textareas
+            const wireCharCount = (inputEl, countEl) => {
+                inputEl.addEventListener('input', () => {
+                    countEl.textContent = `${inputEl.value.length}/1000 characters`;
+                });
+            };
+            wireCharCount(document.getElementById('logTasks'), document.getElementById('logTasksCount'));
+            wireCharCount(document.getElementById('logProblems'), document.getElementById('logProblemsCount'));
+            wireCharCount(document.getElementById('logLearning'), document.getElementById('logLearningCount'));
+            wireCharCount(document.getElementById('logRemarks'), document.getElementById('logRemarksCount'));
+
+            // Live punch clock update
+            const updateClock = () => {
+                const now = new Date();
+                document.getElementById('liveTime').textContent = now.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                });
+                document.getElementById('todayDateStr').textContent = now.toLocaleDateString('en-GB', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+            };
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // Load header info (profile)
+            const loadProfileHeader = async () => {
+                try {
+                    const response = await fetch('/api/student/profile');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.student) {
+                            const s = data.student;
+                            document.getElementById('navUserName').textContent = `${s.first_name} ${s.last_name}`;
+                            if (s.profile_photo) {
+                                document.getElementById('navUserPhoto').src = s.profile_photo;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading navbar details:', error);
+                }
+            };
+
+            // ─── Attendance Core Module ──────────────────────────────────────
+            const loadAttendance = async () => {
+                try {
+                    const response = await fetch('/api/student/attendance');
+                    if (!response.ok) throw new Error('Failed to load attendance.');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        attendanceRecords = data.records;
+                        
+                        // Populate Statistics
+                        const stats = data.statistics;
+                        document.getElementById('statPresentDays').textContent = stats.presentDays;
+                        document.getElementById('statAbsentDays').textContent = stats.absentDays;
+                        document.getElementById('statLeaves').textContent = stats.approvedLeaves;
+                        document.getElementById('statAttendancePercent').textContent = `${stats.attendancePercentage}%`;
+                        
+                        // Today Check-In Status
+                        const today = data.today;
+                        const statusBox = document.getElementById('punchStatusText');
+                        const checkInFields = document.getElementById('checkInFormFields');
+                        const checkOutFields = document.getElementById('checkOutFormFields');
+                        const completedState = document.getElementById('completedPunchState');
+
+                        if (today.checkedIn && !today.checkedOut) {
+                            // Checked In but not Checked Out
+                            statusBox.className = 'alert alert-primary small py-2 rounded-3 mb-3';
+                            statusBox.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Checked In Today at <strong>${today.checkInTime}</strong>`;
+                            checkInFields.style.display = 'none';
+                            checkOutFields.style.display = 'block';
+                            completedState.style.display = 'none';
+                        } else if (today.checkedIn && today.checkedOut) {
+                            // Punch lifecycle completed for today
+                            statusBox.style.display = 'none';
+                            checkInFields.style.display = 'none';
+                            checkOutFields.style.display = 'none';
+                            completedState.style.display = 'block';
+                            document.getElementById('lblCheckInTime').textContent = today.checkInTime;
+                            document.getElementById('lblCheckOutTime').textContent = today.checkOutTime;
+                            
+                            // Parse hours
+                            const [inH, inM] = today.checkInTime.split(':').map(Number);
+                            const [outH, outM] = today.checkOutTime.split(':').map(Number);
+                            const elapsedHours = parseFloat(((outH * 60 + outM - (inH * 60 + inM)) / 60).toFixed(2));
+                            document.getElementById('lblTotalHours').textContent = Math.max(0.1, elapsedHours);
+                        } else if (today.status === 'leave') {
+                            // Leave requested
+                            statusBox.className = 'alert alert-warning small py-2 rounded-3 mb-3';
+                            statusBox.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> Today: Leave Request (<strong>${today.leaveStatus.toUpperCase()}</strong>)`;
+                            checkInFields.style.display = 'none';
+                            checkOutFields.style.display = 'none';
+                            completedState.style.display = 'none';
+                        } else {
+                            // Default state: not checked in
+                            statusBox.className = 'alert alert-secondary small py-2 rounded-3 mb-3';
+                            statusBox.innerHTML = '<i class="bi bi-info-circle me-1"></i> Not Checked In Today';
+                            checkInFields.style.display = 'block';
+                            checkOutFields.style.display = 'none';
+                            completedState.style.display = 'none';
+                        }
+
+                        // Render Calendar & Table
+                        renderCalendar();
+                        renderAttendanceTable();
+                    }
+                } catch (error) {
+                    console.error(error);
+                    window.PortalUtils.showAlert('Failed to load attendance records.', 'danger');
+                }
+            };
+
+            // Check-In Action Submit
+            document.getElementById('checkInBtn').addEventListener('click', async () => {
+                const remarks = document.getElementById('checkInRemarks').value.trim();
+                const location = document.getElementById('checkInLocation').value.trim();
+                
+                try {
+                    const response = await fetch('/api/student/attendance/check-in', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ location, remarks })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        window.PortalUtils.showAlert('Successfully checked in.', 'success');
+                        loadAttendance();
+                    } else {
+                        window.PortalUtils.showAlert(data.message || 'Check-in failed.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Check-in error:', error);
+                    window.PortalUtils.showAlert('An error occurred during check-in.', 'danger');
+                }
+            });
+
+            // Check-Out Action Submit
+            document.getElementById('checkOutBtn').addEventListener('click', async () => {
+                const remarks = document.getElementById('checkOutRemarks').value.trim();
+                
+                try {
+                    const response = await fetch('/api/student/attendance/check-out', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ remarks })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        window.PortalUtils.showAlert('Successfully checked out.', 'success');
+                        loadAttendance();
+                    } else {
+                        window.PortalUtils.showAlert(data.message || 'Check-out failed.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Check-out error:', error);
+                    window.PortalUtils.showAlert('An error occurred during check-out.', 'danger');
+                }
+            });
+
+            // Leave Request Submit
+            document.getElementById('leaveForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const date = document.getElementById('leaveDate').value;
+                const reason = document.getElementById('leaveReason').value.trim();
+
+                if (!date || !reason) {
+                    window.PortalUtils.showAlert('Date and reason are required.', 'danger');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/student/attendance/leave', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ date, reason })
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        window.PortalUtils.showAlert('Leave request submitted successfully.', 'success');
+                        document.getElementById('leaveForm').reset();
+                        loadAttendance();
+                    } else {
+                        window.PortalUtils.showAlert(data.message || 'Failed to submit leave request.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Leave request error:', error);
+                    window.PortalUtils.showAlert('An error occurred while submitting leave.', 'danger');
+                }
+            });
+
+            // Calendar Renderer
+            const renderCalendar = () => {
+                const container = document.getElementById('calendarDaysContainer');
+                container.innerHTML = '';
+
+                const year = currentCalendarDate.getFullYear();
+                const month = currentCalendarDate.getMonth();
+
+                document.getElementById('calendarMonthYear').textContent = currentCalendarDate.toLocaleString('en-GB', {
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                // Get first day of month and number of days in month
+                const firstDayIndex = new Date(year, month, 1).getDay();
+                const numDays = new Date(year, month + 1, 0).getDate();
+
+                // Add empty days at the beginning
+                for (let i = 0; i < firstDayIndex; i++) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'calendar-day empty';
+                    container.appendChild(emptyDiv);
+                }
+
+                // Add calendar days
+                for (let day = 1; day <= numDays; day++) {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'calendar-day';
+                    
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    dayDiv.textContent = day;
+
+                    // Highlight based on attendance records
+                    const record = attendanceRecords.find(r => {
+                        const recDate = new Date(r.date).toISOString().slice(0,10);
+                        return recDate === dateStr;
+                    });
+
+                    // Check if weekend
+                    const dayOfWeek = new Date(year, month, day).getDay();
+                    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+                    if (record) {
+                        if (record.status === 'present') {
+                            dayDiv.classList.add('present');
+                            dayDiv.setAttribute('title', `Present: ${record.working_hours || 0} hrs`);
+                        } else if (record.status === 'absent') {
+                            dayDiv.classList.add('absent');
+                            dayDiv.setAttribute('title', 'Absent');
+                        } else if (record.status === 'leave') {
+                            dayDiv.classList.add('leave');
+                            dayDiv.setAttribute('title', `Leave Request: ${record.leave_status}`);
+                        }
+                    } else if (isWeekend) {
+                        dayDiv.classList.add('weekend');
+                        dayDiv.setAttribute('title', 'Weekend');
+                    } else {
+                        dayDiv.setAttribute('title', 'No log recorded');
+                    }
+
+                    container.appendChild(dayDiv);
+                }
+            };
+
+            // Previous and Next month navigators
+            document.getElementById('prevMonthBtn').addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+                renderCalendar();
+            });
+            document.getElementById('nextMonthBtn').addEventListener('click', () => {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+            // Attendance Table Renderer
+            const renderAttendanceTable = () => {
+                const tbody = document.getElementById('attendanceTableBody');
+                tbody.innerHTML = '';
+
+                if (attendanceRecords.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No attendance logs found.</td></tr>';
+                    return;
+                }
+
+                attendanceRecords.forEach(r => {
+                    const tr = document.createElement('tr');
+                    
+                    // Format Date
+                    const dateStr = window.PortalUtils.formatDate(r.date);
+                    
+                    // Status Badge
+                    let badgeClass = 'bg-secondary';
+                    let statusLabel = r.status.toUpperCase();
+                    if (r.status === 'present') {
+                        badgeClass = 'bg-success';
+                    } else if (r.status === 'absent') {
+                        badgeClass = 'bg-danger';
+                    } else if (r.status === 'leave') {
+                        badgeClass = 'bg-warning text-dark';
+                        statusLabel = `LEAVE (${r.leave_status.toUpperCase()})`;
+                    }
+                    const statusBadge = `<span class="badge ${badgeClass} small">${statusLabel}</span>`;
+
+                    tr.innerHTML = `
+                        <td><strong>${dateStr}</strong></td>
+                        <td>${statusBadge}</td>
+                        <td>${r.check_in_time || '--'}</td>
+                        <td>${r.check_out_time || '--'}</td>
+                        <td><span class="badge bg-light text-dark border">${r.working_hours !== null ? r.working_hours + 'h' : '--'}</span></td>
+                        <td><span class="small text-muted">${r.location || '--'}</span></td>
+                        <td><span class="small text-muted text-wrap">${r.remarks || r.leave_reason || '--'}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            };
+
+
+            // ─── Daily Logs Module ───────────────────────────────────────────
+            const loadDailyLogs = async () => {
+                const search = document.getElementById('logSearchInput').value.trim();
+                const startDate = document.getElementById('logFilterStartDate').value;
+                const endDate = document.getElementById('logFilterEndDate').value;
+
+                let url = `/api/student/logs?`;
+                if (search) url += `&search=${encodeURIComponent(search)}`;
+                if (startDate) url += `&startDate=${startDate}`;
+                if (endDate) url += `&endDate=${endDate}`;
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Failed to load logs.');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        dailyLogs = data.logs;
+                        renderLogsList();
+                    }
+                } catch (error) {
+                    console.error('Error loading logs:', error);
+                }
+            };
+
+            const renderLogsList = () => {
+                const container = document.getElementById('logsContainer');
+                container.innerHTML = '';
+
+                if (dailyLogs.length === 0) {
+                    container.innerHTML = '<div class="text-center text-muted py-4">No daily work logs match the search/filters.</div>';
+                    return;
+                }
+
+                dailyLogs.forEach(log => {
+                    const card = document.createElement('div');
+                    card.className = 'card bg-white border border-light shadow-sm rounded-4 p-3 mb-1';
+                    
+                    const logDate = window.PortalUtils.formatDate(log.date);
+
+                    card.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="h6 mb-0 fw-bold text-dark"><i class="bi bi-calendar-event text-primary me-2"></i>${logDate}</span>
+                            <span class="badge bg-primary px-3 py-1.5 rounded-pill"><i class="bi bi-clock-history me-1"></i>${log.hours_worked} Hours</span>
+                        </div>
+                        <div class="small">
+                            <div class="mb-2"><strong class="text-dark">Tasks Completed:</strong> <span class="text-muted text-wrap">${log.tasks_completed}</span></div>
+                            ${log.technology_used ? `<div class="mb-2"><strong class="text-dark">Technologies:</strong> <span class="badge bg-light text-secondary border px-2 py-1">${log.technology_used.split(',').join('</span> <span class="badge bg-light text-secondary border px-2 py-1">')}</span></div>` : ''}
+                            ${log.problems_faced ? `<div class="mb-2"><strong class="text-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i>Problems Faced:</strong> <span class="text-danger text-wrap">${log.problems_faced}</span></div>` : ''}
+                            ${log.learning_outcome ? `<div class="mb-0"><strong class="text-success"><i class="bi bi-lightbulb-fill me-1"></i>Learning Outcomes:</strong> <span class="text-success text-wrap">${log.learning_outcome}</span></div>` : ''}
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            };
+
+            // Trigger log search & filters
+            const logSearchInput = document.getElementById('logSearchInput');
+            const logFilterStartDate = document.getElementById('logFilterStartDate');
+            const logFilterEndDate = document.getElementById('logFilterEndDate');
+
+            logSearchInput.addEventListener('input', window.PortalUtils.debounce(loadDailyLogs, 400));
+            logFilterStartDate.addEventListener('change', loadDailyLogs);
+            logFilterEndDate.addEventListener('change', loadDailyLogs);
+
+            document.getElementById('clearLogFiltersBtn').addEventListener('click', () => {
+                logSearchInput.value = '';
+                logFilterStartDate.value = '';
+                logFilterEndDate.value = '';
+                loadDailyLogs();
+            });
+
+            // Daily Log Submit Form
+            document.getElementById('dailyLogForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target;
+
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                const payload = {
+                    date: document.getElementById('logDate').value,
+                    hours_worked: document.getElementById('logHours').value,
+                    technology_used: document.getElementById('logTech').value.trim(),
+                    tasks_completed: document.getElementById('logTasks').value.trim(),
+                    problems_faced: document.getElementById('logProblems').value.trim(),
+                    learning_outcome: document.getElementById('logLearning').value.trim(),
+                    remarks: document.getElementById('logRemarks').value.trim()
+                };
+
+                try {
+                    const response = await fetch('/api/student/logs', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        window.PortalUtils.showAlert('Daily work log submitted successfully.', 'success');
+                        
+                        // Close modal and reset form
+                        const modalEl = document.getElementById('submitLogModal');
+                        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                        modalInstance.hide();
+                        form.reset();
+                        form.classList.remove('was-validated');
+
+                        // Reset character counts labels
+                        document.getElementById('logTasksCount').textContent = '0/1000 characters';
+                        document.getElementById('logProblemsCount').textContent = '0/1000 characters';
+                        document.getElementById('logLearningCount').textContent = '0/1000 characters';
+                        document.getElementById('logRemarksCount').textContent = '0/1000 characters';
+
+                        // Reload data
+                        loadDailyLogs();
+                        loadAttendance();
+                    } else {
+                        window.PortalUtils.showAlert(data.message || 'Failed to submit log.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Submit log error:', error);
+                    window.PortalUtils.showAlert('An error occurred while submitting log.', 'danger');
+                }
+            });
+
+            // Run Initial Loads
+            loadProfileHeader();
+            loadAttendance();
+            loadDailyLogs();
+        });
+    </script>
+</body>
+</html>

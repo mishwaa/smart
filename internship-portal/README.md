@@ -206,44 +206,70 @@ To execute the tests:
    npx playwright test tests/auth.spec.js
    ```
 
-## Student Experience & Internship Lifecycle (Phase 3 Part 1)
+## Student Experience & Internship Lifecycle (Phase 3)
 
-In Sprint 3, the Student Portal was fully implemented, offering a comprehensive, responsive, and secure experience for students to manage their profiles and track their placements.
+The Student Portal provides a comprehensive, responsive, and secure Enterprise Resource Planning (ERP) environment for students to manage their internship lifecycle.
 
 ### 1. Student Dashboard (`/student/dashboard`)
-A professional, unified center for student activities.
-- **8 Statistics Cards**: High-level overview of core internship metrics (Attendance Rate, Internship Progress, Reports Submitted, Pending Reports, Documents Uploaded, Mentor Feedbacks, Days Completed, Certificate Status).
-- **Upcoming Tasks Widget**: Displays active action items (e.g. pending report submissions or required documents) with status badges.
-- **Timeline Widget**: Shows the student's journey through various program phases.
-- **Interactive Charts**: Developed using Chart.js, visualizing weekly progress trends, attendance rates, and document submissions.
+A unified, real-time center for student activities:
+- **8 Statistics Cards**: High-fidelity cards displaying dynamic values from the database (Attendance Rate, Internship Progress, Reports Submitted, Pending Reports, Documents Uploaded, Mentor Feedbacks, Days Completed, and Certificate Status).
+- **Compliance Visualizer**: Evaluates the overall student status and automatically unlocks the certificate when completion hits 100%.
+- **Milestones Timeline**: Renders a vertical roadmap of student placements (Application, Offer Letter, Coordinator Approval, Internship Started, etc.).
+- **Recent Activity Logs**: Tracks the student's actions (check-ins, report submissions, document uploads) in reverse chronological order.
+- **Dynamic Charts**: Two interactive Chart.js charts visualizing weekly report progress trends and document submission benchmarks.
 
 ### 2. Student Profile (`/student/profile`)
-Provides self-service profile management with robust validation and security.
-- **Form Editor**: Allows students to view and update their full name, email, phone, DOB, gender, permanent address, enrollment number, department, semester, bio, skills, LinkedIn, and GitHub links.
-- **Security & Ownership**: Strong session-based authorization ensures students can only view and modify their own profiles (verifying `user_id` ownership).
-- **Secure Photo Upload**: Integrated profile picture upload.
-  - **File Restrictions**: Only JPG, JPEG, and PNG formats.
-  - **Size Limit**: Maximum of 2 MB.
-  - **Storage**: Saved securely in `uploads/profile_photos/` with automatic UUID-based renaming to prevent collisions.
-  - **Validation**: Strict file-type and file-size validation enforced on both the client-side and server-side (via Multer).
+Provides self-service profile settings with robust validation and security:
+- **Form Editor**: Full name, email, phone, dob, gender, permanent address, enrollment number, department, semester, bio, skills, LinkedIn, and GitHub links.
+- **Profile Security**: Strict session checks verify `user_id` ownership, blocking students from editing other users' profiles.
+- **Secure Photo Upload**: Restricts uploads to JPG/JPEG/PNG (max 2MB), saves to `uploads/profile_photos/`, and automatically sanitizes/renames filenames to prevent collisions.
 
 ### 3. Internship Details (`/student/internship`)
-Tracks the active internship placement in real-time.
-- **Headline Banner**: Displays current role, host company, and days remaining.
-- **Animated Progress Bar**: Calculates and renders the exact progress percentage of days completed relative to total days.
-- **Mentor Card**: Displays details of the assigned industry mentor, including feedback rating and communication channels.
-- **Bootstrap Badges**: Visualizes placement status (`Pending`, `Approved`, `Active`, `Completed`, `Rejected`) with matching color palettes.
-- **Fallback Capability**: Employs high-fidelity mock data if the student has no active DB placement yet, ensuring a complete and visually stunning first-time user experience.
+Tracks placement info in real-time, showing:
+- Headline banner with role, company, and remaining days.
+- Animated progress bar calculating completed vs total days.
+- Mentor card with rating and communication channels.
+- Status badges mapping placement states (`Pending`, `Approved`, `Active`, `Completed`, `Rejected`).
 
-### 4. Routes & Endpoints
-The following student routes and JSON APIs are protected under `requireAuth` and `requireStudent` middleware:
-- `GET /student/dashboard` — Serves the Student Dashboard view
-- `GET /student/profile` — Serves the Student Profile view
-- `GET /student/internship` — Serves the Internship Details view
-- `GET /api/student/profile` — Retrieves the current student's profile data (with auto-initialization/self-seeding to prevent database crashes)
-- `POST /api/student/profile` — Updates profile fields with strict server-side validation
-- `POST /api/student/profile/photo` — Uploads and updates the student's profile photo
-- `GET /api/student/internship` — Retrieves active internship placement details
+### 4. Attendance & Leaves Module (`/student/attendance`)
+Tracks attendance in real-time with an ERP-style dashboard:
+- **Check-In**: Students can punch in once per day. Stores date, time, location, and remarks.
+- **Check-Out**: Students can punch out after checking in. Automatically calculates working hours and logs check-out time.
+- **Attendance Validation**: Prevents double check-in, double check-out, checking out without checking in, future date punch-ins, and invalid dates.
+- **Calendar Grid**: A monthly grid displaying present (green), absent (red), leave (yellow), weekend (gray), and holiday statuses.
+- **Leave Requests**: Allows students to submit leave requests with dates, reasons, and pending/approved/rejected status.
+
+### 5. Daily Work Logs (`/student/attendance`)
+Allows logging daily hours and progress descriptions:
+- Fields: Date, hours worked (0-24), tech used, tasks completed, problems faced, and learning outcomes.
+- Input constraints: Maximum 1000 characters per text field to protect against buffer overflow.
+- Filtering & Search: Live text search and date range filters for instant lookups.
+
+### 6. Weekly Progress Reports (`/student/reports`)
+A complete weekly reporting and grading module:
+- **Workflow**: Draft → Submitted → Coordinator Review → Approved / Rejected.
+- **Actions**: Students can create, edit, and delete reports while in `draft` status. Once submitted, editing and deleting are strictly blocked.
+- **Visual Step Tracker**: A visual timeline showing the status of the weekly report.
+- **Feedback Callouts**: Distinct boxes highlighting industry mentor remarks and academic coordinator remarks.
+
+### 7. Document Center (`/student/documents`)
+A secure file repository for academic and compliance documents:
+- **Uploader**: Supports uploads of Resume, Offer Letter, NOC, report PDFs, presentations, and certificates.
+- **Compliance Checklist**: A required documents checklist (Resume, Offer Letter, NOC, Final Project Report) displaying a compliance progress bar.
+- **Secure Downloads**: Files are stored in a top-level `uploads/documents/` folder outside the public web root. The server streams files securely via `/api/student/documents/:id/download` after verifying student ownership, completely preventing directory traversal, executable uploads, and direct access bypasses.
+- **Actions**: Supports upload, delete, replace, and secure download.
+
+### 8. Protected Endpoints
+The following endpoints are protected under `requireAuth` and `requireStudent` middlewares:
+- **Pages**: `/student/dashboard`, `/student/profile`, `/student/internship`, `/student/attendance`, `/student/reports`, `/student/documents`.
+- **APIs**:
+  - Profile: `GET /api/student/profile`, `POST /api/student/profile`, `POST /api/student/profile/photo`.
+  - Placement: `GET /api/student/internship`.
+  - Attendance: `GET /api/student/attendance`, `POST /api/student/attendance/check-in`, `POST /api/student/attendance/check-out`, `POST /api/student/attendance/leave`.
+  - Logs: `GET /api/student/logs`, `POST /api/student/logs`.
+  - Reports: `GET /api/student/reports`, `POST /api/student/reports`, `PUT /api/student/reports/:id`, `DELETE /api/student/reports/:id`, `POST /api/student/reports/:id/submit`.
+  - Documents: `GET /api/student/documents`, `POST /api/student/documents`, `GET /api/student/documents/:id/download`, `DELETE /api/student/documents/:id`, `POST /api/student/documents/:id/replace`.
+  - Timeline & Progress: `GET /api/student/timeline`, `GET /api/student/history`, `GET /api/student/progress`.
 
 ---
 

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart University Internship Portal - Weekly Reports">
+    <title>Weekly Reports - Smart University Portal</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .workflow-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding: 10px 0;
+        }
+        .workflow-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 3px;
+            background-color: #cbd5e1;
+            z-index: 1;
+            transform: translateY(-50%);
+        }
+        .workflow-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #e2e8f0;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px auto;
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 2px solid white;
+        }
+        .workflow-step.active .workflow-circle {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+        }
+        .workflow-step.active .workflow-label {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .workflow-step.completed .workflow-circle {
+            background-color: var(--success);
+            color: white;
+        }
+        .workflow-step.completed:not(:last-child)::after {
+            background-color: var(--success);
+        }
+        .workflow-step.rejected .workflow-circle {
+            background-color: var(--danger);
+            color: white;
+        }
+        .workflow-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #64748b;
+            position: relative;
+            z-index: 2;
+        }
+        .remarks-box {
+            border-left: 4px solid #cbd5e1;
+            background-color: #f8fafc;
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 10px;
+        }
+        .remarks-box.mentor {
+            border-left-color: #a855f7;
+            background-color: rgba(168, 85, 247, 0.04);
+        }
+        .remarks-box.faculty {
+            border-left-color: #0d9488;
+            background-color: rgba(13, 148, 136, 0.04);
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: rgba(37, 99, 235, 0.05);
+            color: var(--primary);
+        }
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/student/dashboard" class="sidebar-brand">
+                <i class="bi bi-mortarboard me-2"></i>Smart University
+            </a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/profile">
+                            <i class="bi bi-person-circle"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/internship">
+                            <i class="bi bi-briefcase"></i> Internship
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/attendance">
+                            <i class="bi bi-calendar-check"></i> Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/student/reports">
+                            <i class="bi bi-journal-text"></i> Weekly Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/student/documents">
+                            <i class="bi bi-folder"></i> Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="/logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div>
+                    <button class="btn btn-sidebar-toggle btn-light" type="button" aria-label="Toggle sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Notifications -->
+                    <div class="dropdown">
+                        <button class="btn btn-light position-relative rounded-circle p-2" type="button" data-bs-toggle="dropdown" aria-label="Notifications">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px; padding: 3px 6px;">
+                                3
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end p-2" style="width: 300px;">
+                            <li><h6 class="dropdown-header">Latest Notifications</h6></li>
+                            <li><a class="dropdown-item rounded-2 py-2" href="#"><div class="small fw-semibold">Internship Approved</div><div class="text-muted small">Your application to TechCorp was accepted.</div></a></li>
+                            <li><a class="dropdown-item rounded-2 py-2" href="#"><div class="small fw-semibold">Report Feedback</div><div class="text-muted small">Mentor reviewed Weekly Report 8.</div></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center small text-primary" href="#">View All Notifications</a></li>
+                        </ul>
+                    </div>
+                    <!-- User Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="/images/placeholder-avatar.png" id="navUserPhoto" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/icons/person-circle.svg'">
+                            <span id="navUserName" class="fw-semibold">Student</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item" href="/student/profile"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="/change-password"><i class="bi bi-shield-lock me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 mb-0 fw-bold text-dark">Weekly Progress Reports</h1>
+                    <span class="badge bg-primary px-3 py-2 rounded-pill"><i class="bi bi-journal-richtext me-1"></i>Report Center</span>
+                </div>
+
+                <!-- Step-by-Step Workflow Visualization -->
+                <div class="card bg-white border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="bi bi-diagram-3 text-primary me-2"></i>Weekly Report Life-Cycle</h5>
+                    <div class="d-flex align-items-center justify-content-between" id="workflowVisualizer">
+                        <div class="workflow-step completed" id="stepDraft">
+                            <div class="workflow-circle"><i class="bi bi-pencil"></i></div>
+                            <div class="workflow-label">Draft Saved</div>
+                        </div>
+                        <div class="workflow-step" id="stepSubmitted">
+                            <div class="workflow-circle"><i class="bi bi-send"></i></div>
+                            <div class="workflow-label">Submitted</div>
+                        </div>
+                        <div class="workflow-step" id="stepReview">
+                            <div class="workflow-circle"><i class="bi bi-eye"></i></div>
+                            <div class="workflow-label">Under Coordinator Review</div>
+                        </div>
+                        <div class="workflow-step" id="stepApproved">
+                            <div class="workflow-circle"><i class="bi bi-check-lg"></i></div>
+                            <div class="workflow-label">Approved</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Left Column: Draft Creator & Editor -->
+                    <div class="col-lg-5">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4">
+                            <h5 class="fw-bold mb-3 text-dark" id="formHeaderTitle"><i class="bi bi-plus-circle text-primary me-2"></i>Draft New Report</h5>
+                            <form id="reportForm" class="needs-validation" novalidate>
+                                <input type="hidden" id="reportId" value="">
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="weekNumber" class="form-label small fw-semibold text-dark">Week Number <span class="text-danger">*</span></label>
+                                        <select class="form-select rounded-3" id="weekNumber" required>
+                                            <!-- Options generated dynamically -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="hoursWorked" class="form-label small fw-semibold text-dark">Hours Logged <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control rounded-3" id="hoursWorked" min="0" max="168" placeholder="e.g. 40" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="dateRange" class="form-label small fw-semibold text-dark">Date Range <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control rounded-3" id="dateRange" placeholder="e.g., 01 Jun - 07 Jun" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="tasksCompleted" class="form-label small fw-semibold text-dark">Tasks Completed <span class="text-danger">*</span></label>
+                                        <textarea class="form-control rounded-3" id="tasksCompleted" rows="3" placeholder="Bullet points of completed tasks..." required></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="skillsLearned" class="form-label small fw-semibold text-dark">Skills &amp; Concepts Learned</label>
+                                        <textarea class="form-control rounded-3" id="skillsLearned" rows="2" placeholder="New frameworks, soft skills, techniques..."></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="problemsFaced" class="form-label small fw-semibold text-dark">Blockers &amp; Problems Faced</label>
+                                        <textarea class="form-control rounded-3" id="problemsFaced" rows="2" placeholder="Technical hurdles, dependencies..."></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="achievements" class="form-label small fw-semibold text-dark">Achievements &amp; Milestones</label>
+                                        <textarea class="form-control rounded-3" id="achievements" rows="2" placeholder="Tasks done ahead of schedule, praise received..."></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="futurePlan" class="form-label small fw-semibold text-dark">Action Plan for Next Week</label>
+                                        <textarea class="form-control rounded-3" id="futurePlan" rows="2" placeholder="What are the goals for next week?..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <button type="button" class="btn btn-light rounded-3 px-3 d-none" id="cancelEditBtn">Cancel</button>
+                                    <button type="submit" class="btn btn-primary rounded-3 px-4" id="saveDraftBtn">Save Draft</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Reports Browser -->
+                    <div class="col-lg-7">
+                        <div class="card bg-white border-0 shadow-sm rounded-4 p-4 h-100">
+                            
+                            <!-- Search & Filter Controls -->
+                            <div class="row g-2 mb-4">
+                                <div class="col-md-7">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                                        <input type="text" class="form-control border-start-0 search-box rounded-end-3" id="reportSearchInput" placeholder="Search report contents, skills...">
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <select class="form-select rounded-3" id="reportStatusFilter">
+                                        <option value="">All Statuses</option>
+                                        <option value="draft">Draft</option>
+                                        <option value="submitted">Submitted</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Accordion list of reports -->
+                            <h5 class="fw-bold mb-3 text-dark"><i class="bi bi-folder-symlink me-2"></i>My Progress Reports</h5>
+                            <div class="accordion" id="reportsAccordion">
+                                <div class="text-center text-muted py-5">Loading progress reports...</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer mt-5">
+                &copy; 2024 Smart University Internship Portal. All rights reserved.
+            </footer>
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let reportsList = [];
+            let editMode = false;
+
+            // Load header info (profile)
+            const loadProfileHeader = async () => {
+                try {
+                    const response = await fetch('/api/student/profile');
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.student) {
+                            const s = data.student;
+                            document.getElementById('navUserName').textContent = `${s.first_name} ${s.last_name}`;
+                            if (s.profile_photo) {
+                                document.getElementById('navUserPhoto').src = s.profile_photo;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading navbar details:', error);
+                }
+            };
+
+            // Generate Week Number Dropdown (1 to 16)
+            const weekSelect = document.getElementById('weekNumber');
+            for (let w = 1; w <= 16; w++) {
+                const opt = document.createElement('option');
+                opt.value = w;
+                opt.textContent = `Week ${w}`;
+                weekSelect.appendChild(opt);
+            }
+
+            // Load Weekly Reports from API
+            const loadReports = async () => {
+                const search = document.getElementById('reportSearchInput').value.trim();
+                const status = document.getElementById('reportStatusFilter').value;
+
+                let url = `/api/student/reports?`;
+                if (search) url += `&search=${encodeURIComponent(search)}`;
+                if (status) url += `&status=${status}`;
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Failed to fetch reports.');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        reportsList = data.reports;
+                        renderReportsList();
+                        updateWorkflowVisualizer();
+                    }
+                } catch (error) {
+                    console.error('Error loading reports:', error);
+                    window.PortalUtils.showAlert('Failed to load progress reports.', 'danger');
+                }
+            };
+
+            // Render Accordion
+            const renderReportsList = () => {
+                const accordion = document.getElementById('reportsAccordion');
+                accordion.innerHTML = '';
+
+                if (reportsList.length === 0) {
+                    accordion.innerHTML = '<div class="text-center text-muted py-4">No progress reports found matching your selection.</div>';
+                    return;
+                }
+
+                reportsList.forEach((r, idx) => {
+                    const idStr = `reportCollapse_${r.id}`;
+                    
+                    // Status Badge
+                    let badgeClass = 'bg-secondary';
+                    if (r.status === 'draft') badgeClass = 'bg-secondary';
+                    else if (r.status === 'submitted') badgeClass = 'bg-primary';
+                    else if (r.status === 'approved') badgeClass = 'bg-success';
+                    else if (r.status === 'rejected') badgeClass = 'bg-danger';
+
+                    const item = document.createElement('div');
+                    item.className = 'accordion-item border rounded-3 overflow-hidden mb-3';
+                    
+                    // Header Date Range Formatting
+                    const datesStr = r.date_range ? ` (${r.date_range})` : '';
+
+                    item.innerHTML = `
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-bold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#${idStr}" aria-expanded="false" aria-controls="${idStr}">
+                                <div class="d-flex w-100 justify-content-between align-items-center pe-3 flex-wrap gap-2">
+                                    <span>Week ${r.week_number}${datesStr}</span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-light text-dark border py-1 px-2.5 small">${r.hours_worked} hrs</span>
+                                        <span class="badge ${badgeClass} text-uppercase font-monospace small" style="font-size: 10px; padding: 4px 8px;">${r.status}</span>
+                                    </div>
+                                </div>
+                            </button>
+                        </h2>
+                        <div id="${idStr}" class="accordion-collapse collapse" data-bs-parent="#reportsAccordion">
+                            <div class="accordion-body bg-white small text-start">
+                                
+                                <div class="mb-2"><strong><i class="bi bi-check-circle text-primary me-1"></i>Tasks Completed:</strong><div class="text-muted p-1 border-start ms-2">${r.report_content.replace(/\n/g, '<br>')}</div></div>
+                                ${r.skills_learned ? `<div class="mb-2"><strong><i class="bi bi-lightbulb text-success me-1"></i>Skills Learned:</strong><div class="text-muted p-1 border-start ms-2">${r.skills_learned.replace(/\n/g, '<br>')}</div></div>` : ''}
+                                ${r.problems_faced ? `<div class="mb-2"><strong><i class="bi bi-exclamation-triangle text-danger me-1"></i>Blockers Face:</strong><div class="text-muted p-1 border-start ms-2">${r.problems_faced.replace(/\n/g, '<br>')}</div></div>` : ''}
+                                ${r.achievements ? `<div class="mb-2"><strong><i class="bi bi-award text-warning me-1"></i>Achievements:</strong><div class="text-muted p-1 border-start ms-2">${r.achievements.replace(/\n/g, '<br>')}</div></div>` : ''}
+                                ${r.future_plan ? `<div class="mb-2"><strong><i class="bi bi-arrow-right-circle text-info me-1"></i>Next Week's Goals:</strong><div class="text-muted p-1 border-start ms-2">${r.future_plan.replace(/\n/g, '<br>')}</div></div>` : ''}
+                                
+                                ${r.mentor_remarks ? `
+                                <div class="remarks-box mentor">
+                                    <div class="fw-bold text-dark mb-1"><i class="bi bi-chat-left-text-fill text-purple me-1"></i>Industry Mentor Remarks</div>
+                                    <div class="text-muted italic">${r.mentor_remarks}</div>
+                                </div>` : ''}
+
+                                ${r.faculty_remarks ? `
+                                <div class="remarks-box faculty">
+                                    <div class="fw-bold text-dark mb-1"><i class="bi bi-chat-left-text-fill text-teal me-1"></i>Academic Coordinator Remarks</div>
+                                    <div class="text-muted">${r.faculty_remarks}</div>
+                                </div>` : ''}
+
+                                ${r.status === 'draft' ? `
+                                <hr class="my-3 text-muted opacity-25">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-danger btn-sm rounded-3 py-1.5 px-3 btn-delete" data-id="${r.id}"><i class="bi bi-trash"></i> Delete</button>
+                                    <button class="btn btn-outline-primary btn-sm rounded-3 py-1.5 px-3 btn-edit" data-id="${idx}"><i class="bi bi-pencil"></i> Edit Draft</button>
+                                    <button class="btn btn-primary btn-sm rounded-3 py-1.5 px-3 btn-submit" data-id="${r.id}"><i class="bi bi-send"></i> Submit Report</button>
+                                </div>` : ''}
+
+                            </div>
+                        </div>
+                    `;
+                    accordion.appendChild(item);
+                });
+
+                // Attach event listeners on action buttons
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const id = btn.getAttribute('data-id');
+                        const confirm = await window.PortalUtils.confirmAction('Are you sure you want to delete this report draft? This cannot be undone.');
+                        if (!confirm) return;
+
+                        try {
+                            const response = await fetch(`/api/student/reports/${id}`, { method: 'DELETE' });
+                            const data = await response.json();
+                            if (response.ok && data.success) {
+                                window.PortalUtils.showAlert('Draft deleted successfully.', 'success');
+                                loadReports();
+                            } else {
+                                window.PortalUtils.showAlert(data.message || 'Failed to delete draft.', 'danger');
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            window.PortalUtils.showAlert('An error occurred during deletion.', 'danger');
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.btn-edit').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const idx = parseInt(btn.getAttribute('data-id'), 10);
+                        loadReportIntoForm(reportsList[idx]);
+                    });
+                });
+
+                document.querySelectorAll('.btn-submit').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const id = btn.getAttribute('data-id');
+                        const confirm = await window.PortalUtils.confirmAction('Are you sure you want to submit this weekly report? You will not be able to edit or delete it after submission.');
+                        if (!confirm) return;
+
+                        try {
+                            const response = await fetch(`/api/student/reports/${id}/submit`, { method: 'POST' });
+                            const data = await response.json();
+                            if (response.ok && data.success) {
+                                window.PortalUtils.showAlert('Weekly report submitted successfully to Faculty Coordinator.', 'success');
+                                loadReports();
+                            } else {
+                                window.PortalUtils.showAlert(data.message || 'Failed to submit report.', 'danger');
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            window.PortalUtils.showAlert('An error occurred during submission.', 'danger');
+                        }
+                    });
+                });
+            };
+
+            // Load draft values into left form for editing
+            const loadReportIntoForm = (report) => {
+                editMode = true;
+                document.getElementById('reportId').value = report.id;
+                document.getElementById('weekNumber').value = report.week_number;
+                document.getElementById('weekNumber').disabled = true; // Cannot change week number of existing draft
+                document.getElementById('hoursWorked').value = report.hours_worked;
+                document.getElementById('dateRange').value = report.date_range || '';
+                document.getElementById('tasksCompleted').value = report.report_content;
+                document.getElementById('skillsLearned').value = report.skills_learned || '';
+                document.getElementById('problemsFaced').value = report.problems_faced || '';
+                document.getElementById('achievements').value = report.achievements || '';
+                document.getElementById('futurePlan').value = report.future_plan || '';
+
+                document.getElementById('formHeaderTitle').innerHTML = `<i class="bi bi-pencil-square text-primary me-2"></i>Edit Draft (Week ${report.week_number})`;
+                document.getElementById('saveDraftBtn').textContent = 'Update Draft';
+                document.getElementById('cancelEditBtn').classList.remove('d-none');
+            };
+
+            // Cancel Edit Mode
+            const resetForm = () => {
+                editMode = false;
+                document.getElementById('reportId').value = '';
+                document.getElementById('weekNumber').value = '1';
+                document.getElementById('weekNumber').disabled = false;
+                document.getElementById('reportForm').reset();
+                document.getElementById('reportForm').classList.remove('was-validated');
+
+                document.getElementById('formHeaderTitle').innerHTML = '<i class="bi bi-plus-circle text-primary me-2"></i>Draft New Report';
+                document.getElementById('saveDraftBtn').textContent = 'Save Draft';
+                document.getElementById('cancelEditBtn').classList.add('d-none');
+            };
+            document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+            // Save / Update Report Form Submit
+            document.getElementById('reportForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const form = e.target;
+
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                const payload = {
+                    week_number: document.getElementById('weekNumber').value,
+                    hours_worked: document.getElementById('hoursWorked').value,
+                    date_range: document.getElementById('dateRange').value.trim(),
+                    report_content: document.getElementById('tasksCompleted').value.trim(),
+                    skills_learned: document.getElementById('skillsLearned').value.trim(),
+                    problems_faced: document.getElementById('problemsFaced').value.trim(),
+                    achievements: document.getElementById('achievements').value.trim(),
+                    future_plan: document.getElementById('futurePlan').value.trim()
+                };
+
+                const method = editMode ? 'PUT' : 'POST';
+                const url = editMode 
+                    ? `/api/student/reports/${document.getElementById('reportId').value}` 
+                    : '/api/student/reports';
+
+                try {
+                    const response = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        window.PortalUtils.showAlert(
+                            editMode ? 'Report draft updated successfully.' : 'New weekly report draft saved.',
+                            'success'
+                        );
+                        resetForm();
+                        loadReports();
+                    } else {
+                        window.PortalUtils.showAlert(data.message || 'Failed to save report.', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error saving report:', error);
+                    window.PortalUtils.showAlert('An error occurred while saving report.', 'danger');
+                }
+            });
+
+            // Workflow visualizer state updater based on latest report status
+            const updateWorkflowVisualizer = () => {
+                const stepDraft = document.getElementById('stepDraft');
+                const stepSub = document.getElementById('stepSubmitted');
+                const stepRev = document.getElementById('stepReview');
+                const stepApp = document.getElementById('stepApproved');
+
+                // Clear classes
+                [stepDraft, stepSub, stepRev, stepApp].forEach(el => {
+                    el.className = 'workflow-step';
+                });
+
+                // Set draft step completed as a base
+                stepDraft.classList.add('completed');
+
+                if (reportsList.length === 0) {
+                    stepDraft.classList.add('active');
+                    return;
+                }
+
+                // Check the status of the newest report
+                const latest = reportsList[0];
+                if (latest.status === 'draft') {
+                    stepDraft.classList.add('active');
+                } else if (latest.status === 'submitted') {
+                    stepDraft.classList.add('completed');
+                    stepSub.classList.add('active');
+                } else if (latest.status === 'reviewed') {
+                    stepDraft.classList.add('completed');
+                    stepSub.classList.add('completed');
+                    stepRev.classList.add('active');
+                } else if (latest.status === 'approved') {
+                    stepDraft.classList.add('completed');
+                    stepSub.classList.add('completed');
+                    stepRev.classList.add('completed');
+                    stepApp.classList.add('completed');
+                } else if (latest.status === 'rejected') {
+                    stepDraft.classList.add('completed');
+                    stepSub.classList.add('completed');
+                    stepRev.classList.add('completed');
+                    stepApp.className = 'workflow-step rejected';
+                    stepApp.querySelector('.workflow-circle').innerHTML = '<i class="bi bi-x-lg"></i>';
+                    stepApp.querySelector('.workflow-label').textContent = 'Rejected / Needs Revision';
+                }
+            };
+
+            // Trigger Search & Filters
+            const reportSearch = document.getElementById('reportSearchInput');
+            const reportStatus = document.getElementById('reportStatusFilter');
+
+            reportSearch.addEventListener('input', window.PortalUtils.debounce(loadReports, 400));
+            reportStatus.addEventListener('change', loadReports);
+
+            // Run Initial Loads
+            loadProfileHeader();
+            loadReports();
+        });
+    </script>
+</body>
+</html>
